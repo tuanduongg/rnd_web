@@ -7,7 +7,7 @@ import { ConfigRouter } from './ConfigRouter';
 
 // dashboard routing
 const HomePage = Loadable(lazy(() => import('views/homepage/HomePage.jsx')));
-const SamplePage = Loadable(lazy(() => import('views/sample-page')));
+const AccountPage = Loadable(lazy(() => import('views/account/AccountPage')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -20,8 +20,8 @@ const MainRoutes = {
             element: <HomePage />
         },
         {
-            path: ConfigRouter.samplePage,
-            element: <SamplePage />
+            path: ConfigRouter.accPage,
+            element: <AccountPage />
         }
     ]
 };

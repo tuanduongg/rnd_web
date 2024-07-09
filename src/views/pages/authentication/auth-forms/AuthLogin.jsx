@@ -1,23 +1,17 @@
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
-import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
 
 // third party
 import * as Yup from 'yup';
@@ -30,35 +24,47 @@ import AnimateButton from 'ui-component/extended/AnimateButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-import Google from 'assets/images/icons/social-google.svg';
-import { TextField } from '@mui/material';
-import Cookies from 'js-cookie';
+import { Alert, Snackbar, TextField } from '@mui/material';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
+import { useNavigate } from 'react-router-dom';
+import { SET_DATA_USER, SET_TOKEN } from 'store/authAction';
+import { ConfigRouter } from 'routes/ConfigRouter';
+import { setCookie } from 'utils/helper';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
 const AuthLogin = ({ ...others }) => {
     const theme = useTheme();
     const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
-    const customization = useSelector((state) => state.customization);
-    const [checked, setChecked] = useState(true);
+    const auth = useSelector((state) => state.auth);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
+    const [snackBar, setSnackBar] = useState({
+        open: false,
+        message: ''
+    });
     const [showPassword, setShowPassword] = useState(false);
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
     };
-
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
     const handleFormSubmit = async (values, { setSubmitting }) => {
-        // Xử lý sự kiện submit form ở đây
-        console.log('values',values);
-        const response = await restApi.post(RouterApi.login,values);
-        console.log('res',response);
-        console.log(values);
+        const response = await restApi.post(RouterApi.login, values);
         setSubmitting(false); // Ngừng trạng thái submitting sau khi xử lý xong
+        if (response?.status === 200) {
+            const { token, user } = response.data.data;
+            setCookie('AUTH',token,1);
+            dispatch({ type: SET_DATA_USER, dataUser: user });
+            location.href = ConfigRouter.homePage;
+            // navigate(ConfigRouter.homePage);
+
+        } else {
+            setSnackBar({ open: true, message: response?.data?.message || 'Check your Username or Password!' });
+        }
     };
     return (
         <>
@@ -147,6 +153,24 @@ const AuthLogin = ({ ...others }) => {
                     </form>
                 )}
             </Formik>
+            <Snackbar
+             anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                open={snackBar?.open}
+                onClose={() => {
+                    setSnackBar({ open: false, message: '' });
+                }}
+            >
+                <Alert
+                    onClose={() => {
+                        setSnackBar({ open: false, message: '' });
+                    }}
+                    severity="error"
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {snackBar?.message}
+                </Alert>
+            </Snackbar>
         </>
     );
 };

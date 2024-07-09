@@ -49,7 +49,7 @@ const MainCard = React.forwardRef(
         }}
       >
         {/* card header and action */}
-        {!darkTitle && title && <CardHeader sx={headerSX} title={title} action={secondary} />}
+        {!darkTitle && title && <CardHeader sx={headerSX} style={{padding:'10px'}} title={title} action={secondary} />}
         {darkTitle && title && <CardHeader sx={headerSX} title={<Typography variant="h3">{title}</Typography>} action={secondary} />}
 
         {/* content & header divider */}

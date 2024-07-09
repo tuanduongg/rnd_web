@@ -18,7 +18,7 @@ const account = {
             type: 'item',
             url: ConfigRouter.accPage,
             icon: icons.IconUser,
-            breadcrumbs: true
+            breadcrumbs: false
         }
     ]
 };

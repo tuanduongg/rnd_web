@@ -10,7 +10,8 @@
     "plugin:jsx-a11y/recommended",
     "plugin:react-hooks/recommended",
     "eslint:recommended",
-    "plugin:react/recommended"
+    "plugin:react/recommended",
+    "react"
   ],
   "settings": {
     "react": {
@@ -84,6 +85,6 @@
         "useTabs": false,
         "endOfLine": "auto"
       }
-    ]
+    ],
   }
 }
