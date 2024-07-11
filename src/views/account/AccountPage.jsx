@@ -18,6 +18,7 @@ import {
   OutlinedInput,
   Paper,
   Select,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -28,7 +29,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  TextField
+  Alert
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
@@ -43,21 +44,23 @@ import { RouterApi } from 'utils/router-api';
 import { styled } from '@mui/material/styles';
 import { IconPlus, IconEdit, IconCheck, IconFilter, IconSearch, IconCircleCheck } from '@tabler/icons-react';
 import SubCard from 'ui-component/cards/SubCard';
-import { IconX } from '@tabler/icons-react';
-import { maxHeight } from '@mui/system';
-import { DatePicker } from '@mui/x-date-pickers';
-import ModalConcept from 'ui-component/modals/ModalConcept/ModalConcept';
+import ModalAccount from 'ui-component/modals/ModalAccount/ModalAccount';
 // ==============================|| SAMPLE PAGE ||============================== //
 const names = ['ACC', 'RUBBER', 'CONVERTING', 'INJECTION', 'METAL KEY 5개중 택'];
 const AccountPage = () => {
   const auth = useSelector((state) => state.auth);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [openModalConcept, setOpenModalConcept] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const [users, setUsers] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [typeModal, setTypeModal] = useState('ADD');
   const theme = useTheme();
-
+  const [snackBar, setSnackBar] = useState({
+    open: false,
+    message: '',
+    type: true
+  });
   const getUsers = async () => {
     const res = await restApi.get(RouterApi.userAll);
     if (res?.status === 200) {
@@ -95,7 +98,8 @@ const AccountPage = () => {
             <Stack direction="row" justifyContent="flex-end" spacing={1}>
               <Button
                 onClick={() => {
-                  setOpenModalConcept(true);
+                  setTypeModal('ADD');
+                  setOpenModal(true);
                 }}
                 size="small"
                 startIcon={<IconPlus />}
@@ -103,7 +107,17 @@ const AccountPage = () => {
               >
                 New
               </Button>
-              <Button disabled={!selectedRow} size="small" startIcon={<IconEdit />} variant="outlined">
+              <Button
+                onClick={() => {
+                  setTypeModal('EDIT');
+
+                  setOpenModal(true);
+                }}
+                disabled={!selectedRow || auth?.dataUser?.userId === selectedRow?.userId}
+                size="small"
+                startIcon={<IconEdit />}
+                variant="outlined"
+              >
                 Edit
               </Button>
             </Stack>
@@ -119,8 +133,8 @@ const AccountPage = () => {
                     <StyledTableCell align="center">#</StyledTableCell>
                     <StyledTableCell align="left">Full Name</StyledTableCell>
                     <StyledTableCell align="left">User Name</StyledTableCell>
-                    <StyledTableCell align="left">Role</StyledTableCell>
-                    <StyledTableCell align="left">Root</StyledTableCell>
+                    <StyledTableCell align="center">Role</StyledTableCell>
+                    <StyledTableCell align="right">Root</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody
@@ -136,8 +150,8 @@ const AccountPage = () => {
                         {row?.fullName}
                       </StyledTableCell>
                       <StyledTableCell align="left">{row?.userName}</StyledTableCell>
-                      <StyledTableCell align="left">{row?.role?.roleName}</StyledTableCell>
-                      <StyledTableCell align="left">{row?.isRoot}</StyledTableCell>
+                      <StyledTableCell align="center">{row?.role?.roleName}</StyledTableCell>
+                      <StyledTableCell align="right">{row?.isRoot && <IconCheck />}</StyledTableCell>
                     </StyledTableRow>
                   ))}
                 </TableBody>
@@ -146,10 +160,35 @@ const AccountPage = () => {
           </MainCard>
         </Grid>
       </Grid>
-      <ModalConcept
-        open={openModalConcept}
+      <Snackbar
+        autoHideDuration={6000}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        open={snackBar?.open}
         onClose={() => {
-          setOpenModalConcept(false);
+          setSnackBar({ open: false, message: '' });
+        }}
+      >
+        <Alert
+          onClose={() => {
+            setSnackBar({ open: false, message: '' });
+          }}
+          severity={snackBar?.type ? 'success' : 'error'}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackBar?.message}
+        </Alert>
+      </Snackbar>
+      <ModalAccount
+        typeModal={typeModal}
+        selected={selectedRow}
+        setSnackBar={setSnackBar}
+        afterSave={() => {
+          getUsers();
+        }}
+        open={openModal}
+        onClose={() => {
+          setOpenModal(false);
         }}
       />
     </>

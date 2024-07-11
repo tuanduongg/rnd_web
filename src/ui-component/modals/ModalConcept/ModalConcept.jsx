@@ -6,10 +6,41 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { styled } from '@mui/material/styles';
-import { FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  Divider,
+  FormControl,
+  FormHelperText,
+  Grid,
+  IconButton,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
 import { DatePicker } from '@mui/x-date-pickers';
+import { useSelector } from 'react-redux';
+import { IconCloud } from '@tabler/icons-react';
+import { border, height } from '@mui/system';
+import { IconFolder } from '@tabler/icons-react';
+import { IconX } from '@tabler/icons-react';
+import { IconFile } from '@tabler/icons-react';
+import { formatBytes } from 'utils/helper';
+import dayjs from 'dayjs';
+import { ShowConfirm } from 'ui-component/ShowDialog';
+import restApi from 'utils/restAPI';
+import { RouterApi } from 'utils/router-api';
+import Loading from 'ui-component/Loading';
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2)
@@ -18,14 +49,156 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: theme.spacing(1)
   }
 }));
-const names = ['ACC', 'RUBBER', 'CONVERTING', 'INJECTION', 'METAL KEY 5개중 택'];
-
-export default function ModalConcept({ open, onClose }) {
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1
+});
+const initValidate = { error: false, msg: '' };
+const currentDate = dayjs(new Date());
+export default function ModalConcept({ open, onClose, categories, setSnackBar,afterSave }) {
   const [personName, setPersonName] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [fileList, setFileList] = useState([]);
+  const [category, setCategory] = useState('');
+  const [validateCategory, setValidateCategory] = useState(initValidate);
+  const [modelName, setModelName] = useState('');
+  const [validateModelName, setValidateModelName] = useState(initValidate);
+
+  const [plName, setplName] = useState('');
+  const [validatePlName, setValidatePlName] = useState(initValidate);
+
+  const [code, setCode] = useState('');
+  const [validateCode, setValidateCode] = useState(initValidate);
+
+  const [productName, setProductName] = useState('');
+  const [validateProductName, setValidateProductName] = useState(initValidate);
+
+  const [regisDate, setRegisDate] = useState(currentDate);
+  const [validateRegisDate, setValidateResisDate] = useState(initValidate);
+
+  const auth = useSelector((state) => state.auth);
 
   const handleClose = (event, reason) => {
     if (reason && reason == 'backdropClick' && 'escapeKeyDown') return;
     onClose();
+    setFileList([]);
+    setCategory('');
+    setValidateCategory(initValidate);
+    setValidateModelName(initValidate);
+    setplName('');
+    setValidatePlName(initValidate);
+    setCode('');
+    setRegisDate(currentDate);
+    setValidateCode(initValidate);
+    setValidateProductName(initValidate);
+    setValidateResisDate(initValidate);
+  };
+  const onChangeFileInput = (e) => {
+    const files = e.target.files;
+    setFileList((prevState) => [...prevState, ...Array.from(files)]);
+    e.target.value = null;
+  };
+  const onClickSave = () => {
+    let check = false;
+    if (!regisDate?.isValid()) {
+      check = true;
+      setValidateResisDate({ error: true, msg: 'This field is requird!' });
+    }
+    if (!category) {
+      check = true;
+      setValidateCategory({ error: true, msg: 'This field is requird!' });
+    }
+    if (modelName?.trim() === '') {
+      check = true;
+      setValidateModelName({ error: true, msg: 'This field is requird!' });
+    }
+    if (productName?.trim() === '') {
+      check = true;
+      setValidateProductName({ error: true, msg: 'This field is requird!' });
+    }
+    if (code?.trim() === '') {
+      check = true;
+      setValidateCode({ error: true, msg: 'This field is requird!' });
+    }
+    if (plName?.trim() === '') {
+      check = true;
+      setValidatePlName({ error: true, msg: 'This field is requird!' });
+    }
+    if (!check) {
+      ShowConfirm({
+        title: 'Create New',
+        message: 'Do you want to save changes?',
+        onOK: async () => {
+          let formData = new FormData();
+          const data = JSON.stringify({
+            fileList,
+            category,
+            modelName,
+            code,
+            productName,
+            regisDate,
+            plName
+          });
+          fileList.map((file) => {
+            formData.append('files', file);
+          });
+          formData.append('data', data);
+          setLoading(true);
+          const res = await restApi.post(RouterApi.conceptAdd, formData);
+          setLoading(false);
+          if (res?.status === 200) {
+            setSnackBar({ open: true, message: 'Saved changes successful!', type: true });
+            handleClose();
+            afterSave();
+          } else {
+            setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
+          }
+        }
+      });
+    }
+  };
+  const onClickDelete = (index) => {
+    const newF = fileList.filter((item, i) => i !== index);
+    setFileList(newF);
+  };
+  const onChangeInput = (e) => {
+    const { name, value } = e.target;
+    switch (name) {
+      case 'code':
+        if (validateCode?.error) {
+          setValidateCode(initValidate);
+        }
+        setCode(value);
+        break;
+      case 'modelName':
+        if (validateModelName?.error) {
+          setValidateModelName(initValidate);
+        }
+        setModelName(value);
+        break;
+      case 'productName':
+        if (validateProductName?.error) {
+          setValidateProductName(initValidate);
+        }
+        setProductName(value);
+        break;
+      case 'plName':
+        if (validatePlName?.error) {
+          setValidatePlName(initValidate);
+        }
+        setplName(value);
+        break;
+
+      default:
+        break;
+    }
   };
 
   return (
@@ -49,61 +222,182 @@ export default function ModalConcept({ open, onClose }) {
         <DialogContent dividers>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth error={validateCategory.error} size="small">
                 <InputLabel id="demo-simple-select-label">카테고리</InputLabel>
-                <Select labelId="demo-simple-select-label" id="demo-simple-select" onChange={() => {}}>
-                  <MenuItem value={10}>Ten</MenuItem>
-                  <MenuItem value={20}>Twenty</MenuItem>
-                  <MenuItem value={30}>Thirty</MenuItem>
+                <Select
+                  labelId="demo-simple-select-label"
+                  label="카테고리"
+                  id="demo-simple-select"
+                  value={category}
+                  onChange={(e) => {
+                    if (validateCategory?.error) setValidateCategory(initValidate);
+                    setCategory(e.target.value);
+                  }}
+                >
+                  {categories?.map((item) => (
+                    <MenuItem key={item?.categoryId} value={item?.categoryId}>
+                      {item?.categoryName}
+                    </MenuItem>
+                  ))}
                 </Select>
+                <FormHelperText>{validateCategory?.msg}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
-                <TextField id="standard-basic" label="코드" size="small" variant="outlined" />
+                <TextField
+                  onChange={onChangeInput}
+                  id="standard-basic"
+                  value={code}
+                  name="code"
+                  error={validateCode.error}
+                  helperText={validateCode.msg}
+                  label="코드"
+                  size="small"
+                  variant="outlined"
+                />
               </FormControl>
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
-                <TextField id="standard-basic" label="모델명" size="small" variant="outlined" />
+                <TextField
+                  onChange={onChangeInput}
+                  error={validateModelName.error}
+                  helperText={validateModelName.msg}
+                  value={modelName}
+                  name="modelName"
+                  id="standard-validateModelName"
+                  label="모델명"
+                  size="small"
+                  variant="outlined"
+                />
               </FormControl>
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
-                <TextField id="standard-basic" label="품명" size="small" variant="outlined" />
+                <TextField
+                  onChange={onChangeInput}
+                  error={validateProductName.error}
+                  helperText={validateProductName.msg}
+                  value={productName}
+                  name="productName"
+                  id="standard-validateProductName"
+                  label="품명"
+                  size="small"
+                  variant="outlined"
+                />
               </FormControl>
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
-                <TextField id="standard-basic" label="P/L NAME" size="small" variant="outlined" />
+                <TextField
+                  onChange={onChangeInput}
+                  error={validatePlName.error}
+                  helperText={validatePlName.msg}
+                  id="standard-validatePlName"
+                  value={plName}
+                  name="plName"
+                  label="P/L NAME"
+                  size="small"
+                  variant="outlined"
+                />
               </FormControl>
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
-                <DatePicker slotProps={{ textField: { size: 'small' } }} label="등록일자" size="small" />
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  value={regisDate}
+                  views={['year', 'month', 'day']}
+                  slotProps={{
+                    textField: { size: 'small', helperText: validateRegisDate.msg, error: validateRegisDate.error },
+                    popper: { placement: 'right-end' }
+                  }}
+                  onChange={(newValue) => {
+                    if (validateRegisDate?.error) setValidateResisDate(initValidate);
+                    setRegisDate(newValue);
+                  }}
+                  label="등록일자"
+                  size="small"
+                />
               </FormControl>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
+              <Stack>
+                <Typography variant="h5" gutterBottom>
+                  첨부자료
+                </Typography>
+                <Button component="label" role={undefined} variant="outlined" size="medium" tabIndex={-1} startIcon={<IconCloud />}>
+                  Upload file
+                  <VisuallyHiddenInput multiple type="file" onChange={onChangeFileInput} />
+                </Button>
+              </Stack>
+              <Box sx={{ width: '100%', height: 'auto', padding: '5px' }}>
+                <Grid container>
+                  <Grid item xs={12}>
+                    <List dense={false}>
+                      {fileList?.length > 0
+                        ? fileList.map((file, index) => (
+                            <>
+                              <Divider />
+                              <ListItem
+                                primaryTypographyProps={{
+                                  style: {
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                  }
+                                }}
+                                disableGutters
+                                secondaryAction={
+                                  <IconButton
+                                    onClick={(e) => {
+                                      onClickDelete(index);
+                                    }}
+                                    size="small"
+                                    edge="end"
+                                    aria-label="delete"
+                                  >
+                                    <IconX />
+                                  </IconButton>
+                                }
+                              >
+                                <Typography sx={{ marginRight: '15px' }} component={'h6'}>
+                                  {index + 1}
+                                </Typography>
+                                <ListItemAvatar>
+                                  <Avatar>
+                                    <IconFile />
+                                  </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText primary={file?.name} secondary={formatBytes(file?.size)} />
+                              </ListItem>
+                            </>
+                          ))
+                        : null}
+                      <Divider />
+                    </List>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Grid>
+            {/* <Grid item xs={6}>
               <FormControl fullWidth size="small">
-                <TextField id="standard-basic" label="첨부자료" size="small" variant="outlined" />
+                <TextField value={auth?.dataUser?.userName} disabled id="standard-basic" label="등록자" size="small" variant="outlined" />
               </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <TextField id="standard-basic" label="등록자" size="small" variant="outlined" />
-              </FormControl>
-            </Grid>
+            </Grid> */}
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button variant="text" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="contained" autoFocus onClick={handleClose}>
+          <Button variant="contained" autoFocus onClick={onClickSave}>
             Save changes
           </Button>
         </DialogActions>
       </BootstrapDialog>
+      <Loading open={loading} />
     </>
   );
 }

@@ -62,3 +62,40 @@ export function logout() {
     location.href = ConfigRouter.login;
   }
 }
+export function formatBytes(bytes, decimals = 2) {
+  if (!+bytes) return '0 Bytes'
+
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
+export function addZero(num) {
+  return (num < 10 ? '0' : '') + num;
+}
+
+export const formatDateFromDB = (dateString, showTime = true) => {
+  if(!dateString) {
+    return '';
+  }
+  // Tạo một đối tượng Date từ chuỗi
+  var date = new Date(dateString);
+  // Lấy các thành phần ngày
+  var day = date.getDate();
+  var month = date.getMonth() + 1; // Lưu ý: Tháng bắt đầu từ 0 nên cần cộng thêm 1
+  var year = date.getFullYear();
+  if (!showTime) {
+    return addZero(day) + '/' + addZero(month) + '/' + year;
+  }
+  // Lấy các thành phần thời gian
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+
+  // Hàm để thêm số 0 trước các giá trị nhỏ hơn 10
+  // Tạo chuỗi định dạng
+  return addZero(hours) + ':' + addZero(minutes) + ' ' + addZero(day) + '/' + addZero(month) + '/' + year;
+};
