@@ -11,6 +11,7 @@ export const RouterApi = {
   cateConceptAll: '/category-concept/all',
   conceptAdd: '/concept/add',
   conceptUpdate: '/concept/update',
+  conceptHistory: '/concept/history',
   conceptAll: '/concept/all',
   conceptDetail: '/concept/detail',
   conceptAccept: '/concept/accept'

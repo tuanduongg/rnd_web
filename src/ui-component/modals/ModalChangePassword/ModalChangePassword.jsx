@@ -13,6 +13,8 @@ import { RouterApi } from 'utils/router-api';
 import Loading from 'ui-component/Loading';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import { logout } from 'utils/helper';
+import { IconDeviceFloppy } from '@tabler/icons-react';
+import { isMobile } from 'react-device-detect';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2)
@@ -35,7 +37,7 @@ export default function ModalChangePassword({ open, onClose }) {
     type: true
   });
   const handleClose = (event, reason) => {
-    if (reason && reason == 'backdropClick' && 'escapeKeyDown') return;
+    if (reason && (reason == 'backdropClick' || reason === 'escapeKeyDown')) return;
     setCurrenPassword('');
     setNewPassword('');
     setConfirmPassword('');
@@ -132,7 +134,7 @@ export default function ModalChangePassword({ open, onClose }) {
         </Snackbar>
       </Portal>
 
-      <BootstrapDialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+      <BootstrapDialog fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
           Change your password
         </DialogTitle>
@@ -198,7 +200,7 @@ export default function ModalChangePassword({ open, onClose }) {
           <Button variant="text" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="contained" autoFocus onClick={onClickSave}>
+          <Button variant="contained" startIcon={<IconDeviceFloppy />} autoFocus onClick={onClickSave}>
             Save changes
           </Button>
         </DialogActions>

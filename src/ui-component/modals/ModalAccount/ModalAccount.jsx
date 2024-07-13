@@ -26,6 +26,8 @@ import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import Loading from 'ui-component/Loading';
 import { ShowConfirm } from 'ui-component/ShowDialog';
+import { IconDeviceFloppy } from '@tabler/icons-react';
+import { isMobile } from 'react-device-detect';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2)
@@ -51,7 +53,7 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
   const [loading, setLoading] = useState(false);
 
   const handleClose = (event, reason) => {
-    if (reason && reason == 'backdropClick' && 'escapeKeyDown') return;
+    if (reason && (reason == 'backdropClick' || reason === 'escapeKeyDown')) return;
     setFullName('');
     setUsername('');
     setPassword('');
@@ -163,7 +165,7 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
   };
   return (
     <>
-      <BootstrapDialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+      <BootstrapDialog fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
           Create New User
         </DialogTitle>
@@ -266,7 +268,7 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
           <Button variant="text" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="contained" autoFocus onClick={onClickSave}>
+          <Button variant="contained" startIcon={<IconDeviceFloppy />} autoFocus onClick={onClickSave}>
             Save changes
           </Button>
         </DialogActions>

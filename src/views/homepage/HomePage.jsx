@@ -55,6 +55,7 @@ import { useTheme } from '@mui/material/styles';
 import config from 'config';
 import './homepage.css';
 import { ShowConfirm } from 'ui-component/ShowDialog';
+import ModalHistory from 'ui-component/modals/ModalHistory/ModalHistory';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const currentDate = dayjs();
@@ -75,6 +76,7 @@ const HomePage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [openModalHistory, setOpenModalHistory] = useState(false);
   const [personName, setPersonName] = useState([]);
   const [categoryFilter, setCategoryFiler] = useState([]);
   const [arrChipFilter, setArrChipFilter] = useState([]);
@@ -325,6 +327,7 @@ const HomePage = () => {
     if (res?.status === 200) {
       afterSave();
       setSnackBar({ open: true, message: 'Saved changes successful!', type: true });
+      setSelectedRow(null);
     } else {
       setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
     }
@@ -366,10 +369,12 @@ const HomePage = () => {
   };
 
   const handleChangePage = (event, newPage) => {
+    setSelectedRow(null)
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
+    setSelectedRow(null)
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -441,14 +446,14 @@ const HomePage = () => {
                 </Button>
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                      <Chip
-                        key={index}
-                        sx={{ marginRight: '5px', marginTop: '5px' }}
-                        variant="outlined"
-                        label={chip?.label}
-                        onDelete={chip?.onDelete}
-                      />
-                    ))
+                    <Chip
+                      key={index}
+                      sx={{ marginRight: '5px', marginTop: '5px' }}
+                      variant="outlined"
+                      label={chip?.label}
+                      onDelete={chip?.onDelete}
+                    />
+                  ))
                   : null}
               </Grid>
             </Grid>
@@ -487,7 +492,7 @@ const HomePage = () => {
                       <p className="name-colum">승인원</p>
                       <p className="name-colum">(Approval)</p>
                     </StyledTableCell>
-                    <StyledTableCell sx={{width:'20px'}} align="right"></StyledTableCell>
+                    <StyledTableCell sx={{ width: '20px' }} align="right"></StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody
@@ -502,7 +507,7 @@ const HomePage = () => {
                       onClick={() => setSelectedRow(row)}
                       key={row.conceptId}
                     >
-                      <StyledTableCell align="center">{index + 1}</StyledTableCell>
+                      <StyledTableCell align="center">{page * rowsPerPage + index + 1}</StyledTableCell>
                       <StyledTableCell align="center" component="th" scope="row">
                         {row?.category?.categoryName}
                       </StyledTableCell>
@@ -517,7 +522,11 @@ const HomePage = () => {
                       <StyledTableCell align="center">{row?.approval}</StyledTableCell>
                       <StyledTableCell align="right">
                         <Tooltip title="Detail">
-                          <IconButton color="primary" onClick={() => {}} size="small" aria-label="Detail">
+                          <IconButton color="primary" onClick={() => {
+                            setSelectedRow(row)
+                            setTypeModal('VIEW');
+                            setOpenModalConcept(true);
+                          }} size="small" aria-label="Detail">
                             <IconEye />
                           </IconButton>
                         </Tooltip>
@@ -529,7 +538,8 @@ const HomePage = () => {
                   <TableRow>
                     <TablePagination
                       color="primary"
-                      rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                       colSpan={10}
                       count={total}
                       rowsPerPage={rowsPerPage}
@@ -551,7 +561,7 @@ const HomePage = () => {
             </TableContainer>
           </MainCard>
         </Grid>
-      </Grid>
+      </Grid >
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
@@ -562,7 +572,7 @@ const HomePage = () => {
         MenuListProps={{
           'aria-labelledby': 'basic-button'
         }}
-        // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+      // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         <Paper sx={{ width: { xs: 340, sm: 400 }, padding: '10px' }}>
           {/* <Grid container spacing={2}>
@@ -576,7 +586,7 @@ const HomePage = () => {
             </IconButton>
           </Stack>
           <Divider />
-          <Box sx={{ margin: '10px 0px 0px 0px', height: '350px', overflowY: 'auto' }}>
+          <Box sx={{ margin: '10px 0px 0px 0px', height: '430px', overflowY: 'auto' }}>
             <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
               <InputLabel id="demo-multiple-checkbox-label">카테고리(Category)</InputLabel>
               <Select
@@ -756,7 +766,9 @@ const HomePage = () => {
           </Alert>
         </Snackbar>
       </Portal>
+      <ModalHistory selected={selectedRow} open={openModalHistory} onClose={()=>{setOpenModalHistory(false)}}/>
       <ModalConcept
+      showModalHistory={()=>{setOpenModalHistory(true)}}
         setLoading={setLoading}
         selected={selectedRow}
         typeModal={typeModal}

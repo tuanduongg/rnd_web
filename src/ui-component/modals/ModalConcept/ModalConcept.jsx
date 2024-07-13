@@ -29,7 +29,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
 import { DatePicker } from '@mui/x-date-pickers';
 import { useSelector } from 'react-redux';
-import { IconCloud } from '@tabler/icons-react';
+import { IconCloud, IconDownload } from '@tabler/icons-react';
 import { border, height } from '@mui/system';
 import { IconFolder } from '@tabler/icons-react';
 import { IconX } from '@tabler/icons-react';
@@ -41,6 +41,10 @@ import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import Loading from 'ui-component/Loading';
 import { useEffect } from 'react';
+import { IconDeviceFloppy } from '@tabler/icons-react';
+import ListFile from './component/ListFile';
+import { isMobile } from 'react-device-detect';
+import { IconHistory } from '@tabler/icons-react';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -63,7 +67,7 @@ const VisuallyHiddenInput = styled('input')({
 });
 const initValidate = { error: false, msg: '' };
 const currentDate = dayjs(new Date());
-export default function ModalConcept({ open, onClose, categories, setSnackBar, afterSave, typeModal, selected, setLoading }) {
+export default function ModalConcept({ open, onClose, categories, setSnackBar, afterSave, typeModal, selected, setLoading,showModalHistory }) {
   const [personName, setPersonName] = useState([]);
   const [fileList, setFileList] = useState([]);
   const [category, setCategory] = useState('');
@@ -81,12 +85,14 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
   const [validateProductName, setValidateProductName] = useState(initValidate);
 
   const [regisDate, setRegisDate] = useState(currentDate);
+  const [checkedFile, setCheckedFile] = useState([]);
+
   const [validateRegisDate, setValidateResisDate] = useState(initValidate);
 
   const auth = useSelector((state) => state.auth);
 
   const handleClose = (event, reason) => {
-    if (reason && reason == 'backdropClick' && 'escapeKeyDown') return;
+    if (reason && (reason == 'backdropClick' || reason === 'escapeKeyDown')) return;
     onClose();
     setFileList([]);
     setCategory('');
@@ -101,6 +107,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
     setValidateResisDate(initValidate);
     setModelName('');
     setProductName('');
+    setCheckedFile([])
   };
   const getDetail = async () => {
     setLoading(true);
@@ -116,7 +123,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
     setFileList(files?.map((file) => ({ ...file, isShow: true })));
   };
   useEffect(() => {
-    if (selected?.conceptId && open && typeModal === 'EDIT') {
+    if (selected?.conceptId && open && (typeModal === 'EDIT' || typeModal === 'VIEW')) {
       getDetail();
     }
   }, [open]);
@@ -245,7 +252,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
 
   return (
     <>
-      <BootstrapDialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+      <BootstrapDialog fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
           {typeModal === 'ADD' ? 'Create New' : 'Edit Infomation'}
         </DialogTitle>
@@ -267,6 +274,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
               <FormControl fullWidth error={validateCategory.error} size="small">
                 <InputLabel id="demo-simple-select-label">카테고리(Category)</InputLabel>
                 <Select
+                  inputProps={{ readOnly: typeModal === 'VIEW' }}
                   labelId="demo-simple-select-label"
                   label="카테고리(Category)"
                   placeholder="카테고리(Category)"
@@ -289,6 +297,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
                 <TextField
+                  inputProps={{ readOnly: typeModal === 'VIEW' }}
                   onChange={onChangeInput}
                   id="standard-basic"
                   value={code}
@@ -305,6 +314,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
                 <TextField
+                  inputProps={{ readOnly: typeModal === 'VIEW' }}
                   onChange={onChangeInput}
                   error={validateModelName.error}
                   helperText={validateModelName.msg}
@@ -321,6 +331,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
                 <TextField
+                  inputProps={{ readOnly: typeModal === 'VIEW' }}
                   onChange={onChangeInput}
                   error={validateProductName.error}
                   helperText={validateProductName.msg}
@@ -337,6 +348,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
                 <TextField
+                  inputProps={{ readOnly: typeModal === 'VIEW' }}
                   onChange={onChangeInput}
                   error={validatePlName.error}
                   helperText={validatePlName.msg}
@@ -353,6 +365,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
                 <DatePicker
+                  readOnly={typeModal === 'VIEW'}
                   format="DD/MM/YYYY"
                   value={regisDate}
                   views={['year', 'month', 'day']}
@@ -370,7 +383,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
+            {typeModal !== 'VIEW' && (<Grid item xs={12}>
               <Stack>
                 <Typography variant="h5" gutterBottom>
                   첨부자료(File)
@@ -423,6 +436,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
                                   primary={file?.name ? file?.name : file?.fileName ? file?.fileName : ''}
                                   secondary={formatBytes(file?.size ? file?.size : file?.fileSize ? file?.fileSize : '')}
                                 />
+
                               </ListItem>
                             </React.Fragment>
                           )
@@ -432,16 +446,28 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
                   </Grid>
                 </Grid>
               </Box>
-            </Grid>
+            </Grid>)}
+            {typeModal === 'VIEW' && (<Grid item xs={12}>
+              <Typography variant="h5" gutterBottom>
+                  첨부자료(File)
+                </Typography>
+              <ListFile listFile={fileList} checked={checkedFile} setChecked={setCheckedFile} />
+            </Grid>)}
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button variant="text" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="contained" autoFocus onClick={onClickSave}>
+          {typeModal !== 'VIEW' && (<Button variant="contained" startIcon={<IconDeviceFloppy />} autoFocus onClick={onClickSave}>
             Save changes
-          </Button>
+          </Button>)}
+          {typeModal === 'VIEW' && (<Button variant="outlined" startIcon={<IconHistory />} onClick={() => { showModalHistory() }}>
+            History
+          </Button>)}
+          {typeModal === 'VIEW' && (<Button variant="contained" startIcon={<IconDownload />} disabled={checkedFile?.length === 0} autoFocus onClick={() => { console.log(checkedFile); }}>
+            Download All
+          </Button>)}
         </DialogActions>
       </BootstrapDialog>
     </>
