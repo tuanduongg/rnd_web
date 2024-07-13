@@ -9,12 +9,12 @@ const icons = { IconDashboard, IconUser };
 
 const account = {
     id: 'acc',
-    title: 'Account',
+    title: 'Account page',
     type: 'group',
     children: [
         {
-            id: 'accpage',
-            title: 'Account Page',
+            id: ConfigRouter.accPage,
+            title: 'Account',
             type: 'item',
             url: ConfigRouter.accPage,
             icon: icons.IconUser,

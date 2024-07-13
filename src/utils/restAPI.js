@@ -2,6 +2,8 @@
 // import { ASSET_TOKEN } from './constant';
 import axios from 'axios';
 import { getCookie, logout } from './helper';
+import { ShowMessage } from 'ui-component/ShowDialog';
+import { ConfigRouter } from 'routes/ConfigRouter';
 
 const urlAPI = import.meta.env.VITE_APP_API_URL || 'http://localhost:5005/api';
 let token = await getCookie('AUTH');
@@ -32,6 +34,11 @@ restApi.interceptors.response.use(
     async function (error) {
         if (error?.response?.status === 401) {
             logout();
+        }
+        if (error?.response?.status === 403) {
+            ShowMessage({title:'403',message:'Unauthorized',labelYes:'Close',onOK:()=>{
+                location.href = ConfigRouter.homePage
+            }})
         }
         return error.response;
     }

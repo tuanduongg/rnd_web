@@ -9,12 +9,12 @@ const icons = { IconDashboard, IconHome };
 
 const home = {
     id: 'home',
-    title: 'Homepage',
+    title: 'Home page',
     type: 'group',
     children: [
         {
             id: ConfigRouter.homePage,
-            title: 'Homepage',
+            title: 'Home',
             type: 'item',
             url: ConfigRouter.homePage,
             icon: icons.IconHome,

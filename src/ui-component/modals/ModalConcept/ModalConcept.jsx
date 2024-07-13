@@ -40,6 +40,7 @@ import { ShowConfirm } from 'ui-component/ShowDialog';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import Loading from 'ui-component/Loading';
+import { useEffect } from 'react';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -62,9 +63,8 @@ const VisuallyHiddenInput = styled('input')({
 });
 const initValidate = { error: false, msg: '' };
 const currentDate = dayjs(new Date());
-export default function ModalConcept({ open, onClose, categories, setSnackBar,afterSave }) {
+export default function ModalConcept({ open, onClose, categories, setSnackBar, afterSave, typeModal, selected, setLoading }) {
   const [personName, setPersonName] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
   const [category, setCategory] = useState('');
   const [validateCategory, setValidateCategory] = useState(initValidate);
@@ -99,10 +99,35 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
     setValidateCode(initValidate);
     setValidateProductName(initValidate);
     setValidateResisDate(initValidate);
+    setModelName('');
+    setProductName('');
   };
+  const getDetail = async () => {
+    setLoading(true);
+    const res = await restApi.post(RouterApi.conceptDetail, { conceptId: selected?.conceptId });
+    setLoading(false);
+    const { conceptId, modelName, plName, code, productName, regisDate, status, category, files } = res?.data;
+    setCategory(category?.categoryId);
+    setModelName(modelName);
+    setplName(plName);
+    setCode(code);
+    setProductName(productName);
+    setRegisDate(dayjs(regisDate));
+    setFileList(files?.map((file) => ({ ...file, isShow: true })));
+  };
+  useEffect(() => {
+    if (selected?.conceptId && open && typeModal === 'EDIT') {
+      getDetail();
+    }
+  }, [open]);
   const onChangeFileInput = (e) => {
     const files = e.target.files;
-    setFileList((prevState) => [...prevState, ...Array.from(files)]);
+    const newArrFile = [];
+    for (const file of files) {
+      file.isShow = true;
+      newArrFile.push(file);
+    }
+    setFileList((prevState) => prevState.concat(newArrFile));
     e.target.value = null;
   };
   const onClickSave = () => {
@@ -133,25 +158,31 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
     }
     if (!check) {
       ShowConfirm({
-        title: 'Create New',
+        title: typeModal === 'EDIT' ? 'Update' : 'Create New',
         message: 'Do you want to save changes?',
         onOK: async () => {
           let formData = new FormData();
-          const data = JSON.stringify({
-            fileList,
+          const data = {
+            conceptId: selected?.conceptId,
             category,
             modelName,
             code,
             productName,
             regisDate,
-            plName
-          });
+            plName,
+            fileList
+          };
           fileList.map((file) => {
-            formData.append('files', file);
+            if (!file?.fileId) {
+              formData.append('files', file);
+            }
           });
-          formData.append('data', data);
+          formData.append('data', JSON.stringify(data));
           setLoading(true);
-          const res = await restApi.post(RouterApi.conceptAdd, formData);
+          let url = typeModal === 'EDIT' ? RouterApi.conceptUpdate : RouterApi.conceptAdd;
+          const res = await restApi.post(url, formData, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+          });
           setLoading(false);
           if (res?.status === 200) {
             setSnackBar({ open: true, message: 'Saved changes successful!', type: true });
@@ -165,8 +196,19 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
     }
   };
   const onClickDelete = (index) => {
-    const newF = fileList.filter((item, i) => i !== index);
-    setFileList(newF);
+    const newFile = fileList;
+    if (fileList[index]['fileId']) {
+      const newFileArr = newFile.map((item, i) => {
+        if (index === i) {
+          return { ...item, isShow: false };
+        }
+        return item;
+      });
+      setFileList(newFileArr);
+    } else {
+      const newF = fileList.filter((item, i) => i !== index);
+      setFileList(newF);
+    }
   };
   const onChangeInput = (e) => {
     const { name, value } = e.target;
@@ -205,7 +247,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
     <>
       <BootstrapDialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
-          Create New
+          {typeModal === 'ADD' ? 'Create New' : 'Edit Infomation'}
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -223,10 +265,11 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <FormControl fullWidth error={validateCategory.error} size="small">
-                <InputLabel id="demo-simple-select-label">카테고리</InputLabel>
+                <InputLabel id="demo-simple-select-label">카테고리(Category)</InputLabel>
                 <Select
                   labelId="demo-simple-select-label"
-                  label="카테고리"
+                  label="카테고리(Category)"
+                  placeholder="카테고리(Category)"
                   id="demo-simple-select"
                   value={category}
                   onChange={(e) => {
@@ -252,7 +295,8 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
                   name="code"
                   error={validateCode.error}
                   helperText={validateCode.msg}
-                  label="코드"
+                  label="코드(Code)"
+                  placeholder="코드(Code)..."
                   size="small"
                   variant="outlined"
                 />
@@ -267,7 +311,8 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
                   value={modelName}
                   name="modelName"
                   id="standard-validateModelName"
-                  label="모델명"
+                  label="모델명(Model)"
+                  placeholder="모델명(Model)..."
                   size="small"
                   variant="outlined"
                 />
@@ -282,7 +327,8 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
                   value={productName}
                   name="productName"
                   id="standard-validateProductName"
-                  label="품명"
+                  label="품명(Product Name)"
+                  placeholder="품명(Product Name)..."
                   size="small"
                   variant="outlined"
                 />
@@ -298,6 +344,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
                   value={plName}
                   name="plName"
                   label="P/L NAME"
+                  placeholder="P/L NAME..."
                   size="small"
                   variant="outlined"
                 />
@@ -317,7 +364,8 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
                     if (validateRegisDate?.error) setValidateResisDate(initValidate);
                     setRegisDate(newValue);
                   }}
-                  label="등록일자"
+                  label="등록일자(Registration Date)"
+                  placeholder="등록일자(Registration Date)..."
                   size="small"
                 />
               </FormControl>
@@ -325,7 +373,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
             <Grid item xs={12}>
               <Stack>
                 <Typography variant="h5" gutterBottom>
-                  첨부자료
+                  첨부자료(File)
                 </Typography>
                 <Button component="label" role={undefined} variant="outlined" size="medium" tabIndex={-1} startIcon={<IconCloud />}>
                   Upload file
@@ -336,18 +384,19 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
                 <Grid container>
                   <Grid item xs={12}>
                     <List dense={false}>
-                      {fileList?.length > 0
-                        ? fileList.map((file, index) => (
-                            <>
+                      {fileList.map(
+                        (file, index) =>
+                          file?.isShow && (
+                            <React.Fragment key={index}>
                               <Divider />
                               <ListItem
-                                primaryTypographyProps={{
-                                  style: {
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis'
-                                  }
-                                }}
+                                // primaryTypographyProps={{
+                                //   style: {
+                                //     whiteSpace: 'nowrap',
+                                //     overflow: 'hidden',
+                                //     textOverflow: 'ellipsis'
+                                //   }
+                                // }}
                                 disableGutters
                                 secondaryAction={
                                   <IconButton
@@ -370,22 +419,20 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
                                     <IconFile />
                                   </Avatar>
                                 </ListItemAvatar>
-                                <ListItemText primary={file?.name} secondary={formatBytes(file?.size)} />
+                                <ListItemText
+                                  primary={file?.name ? file?.name : file?.fileName ? file?.fileName : ''}
+                                  secondary={formatBytes(file?.size ? file?.size : file?.fileSize ? file?.fileSize : '')}
+                                />
                               </ListItem>
-                            </>
-                          ))
-                        : null}
+                            </React.Fragment>
+                          )
+                      )}
                       <Divider />
                     </List>
                   </Grid>
                 </Grid>
               </Box>
             </Grid>
-            {/* <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <TextField value={auth?.dataUser?.userName} disabled id="standard-basic" label="등록자" size="small" variant="outlined" />
-              </FormControl>
-            </Grid> */}
           </Grid>
         </DialogContent>
         <DialogActions>
@@ -397,7 +444,6 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar,af
           </Button>
         </DialogActions>
       </BootstrapDialog>
-      <Loading open={loading} />
     </>
   );
 }

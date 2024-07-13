@@ -15,9 +15,9 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  MenuList,
   OutlinedInput,
   Paper,
+  Portal,
   Select,
   Snackbar,
   Stack,
@@ -36,13 +36,13 @@ import {
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-
+import DoneIcon from '@mui/icons-material/Done';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import { styled } from '@mui/material/styles';
-import { IconPlus, IconEdit, IconCheck, IconFilter, IconSearch, IconCircleCheck, IconUser } from '@tabler/icons-react';
+import { IconPlus, IconEdit, IconCheck, IconFilter, IconCircleCheckFilled, IconCircleCheck, IconUser, IconEye } from '@tabler/icons-react';
 import SubCard from 'ui-component/cards/SubCard';
 import { IconX } from '@tabler/icons-react';
 import { maxHeight } from '@mui/system';
@@ -51,6 +51,10 @@ import ModalConcept from 'ui-component/modals/ModalConcept/ModalConcept';
 import { formatDateFromDB } from 'utils/helper';
 import dayjs from 'dayjs';
 import Loading from 'ui-component/Loading';
+import { useTheme } from '@mui/material/styles';
+import config from 'config';
+import './homepage.css';
+import { ShowConfirm } from 'ui-component/ShowDialog';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const currentDate = dayjs();
@@ -67,7 +71,7 @@ const initFilter = {
   productNameFilter: ''
 };
 const HomePage = () => {
-  const auth = useSelector((state) => state.auth);
+  const theme = useTheme();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -84,14 +88,29 @@ const HomePage = () => {
   const [productNameFilter, setProductNameFilter] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentFilter, setCurrentFilter] = useState(initFilter);
+  const [typeModal, setTypeModal] = useState('');
+  const [total, setTotal] = useState(0);
+  const [role, setRole] = useState({});
   const [snackBar, setSnackBar] = useState({
     open: false,
     message: '',
     type: true
   });
+  const [selectedRow, setSelectedRow] = useState(null);
+
   const [users, setUsers] = useState([]);
   const [openModalConcept, setOpenModalConcept] = useState(false);
 
+  const checkRole = async () => {
+    setLoading(true);
+    const res = await restApi.get(RouterApi.checkRole);
+    setLoading(false);
+    if (res?.status === 200) {
+      setRole(res?.data);
+      getCategories();
+      getUsers();
+    }
+  };
   const getCategories = async () => {
     setLoading(true);
     const res = await restApi.get(RouterApi.cateConceptAll);
@@ -102,7 +121,7 @@ const HomePage = () => {
   };
   const getUsers = async () => {
     setLoading(true);
-    const res = await restApi.get(RouterApi.userAll);
+    const res = await restApi.get(RouterApi.userPublic);
     setLoading(false);
     if (res?.status === 200) {
       setUsers(res?.data);
@@ -142,10 +161,11 @@ const HomePage = () => {
   };
   const getAllConcept = async (data) => {
     setLoading(true);
-    const res = await restApi.post(RouterApi.conceptAll, data);
+    const res = await restApi.post(RouterApi.conceptAll, { ...data, page, rowsPerPage });
     setLoading(false);
     if (res?.status === 200) {
-      setConcepts(res?.data);
+      setConcepts(res?.data?.data);
+      setTotal(res?.data?.total);
     }
   };
   useEffect(() => {
@@ -185,7 +205,7 @@ const HomePage = () => {
     if (currentFilter?.startDate && currentFilter?.endDate) {
       if (currentFilter?.startDate?.isValid() && currentFilter?.endDate?.isValid()) {
         arrChip.push({
-          label: `Date: ${currentFilter?.startDate.format('DD/MM/YYYY')} ~ ${currentFilter?.endDate.format('DD/MM/YYYY')}`,
+          label: `Registration Date: ${currentFilter?.startDate.format('DD/MM/YYYY')} ~ ${currentFilter?.endDate.format('DD/MM/YYYY')}`,
           onDelete: false
         });
       }
@@ -227,9 +247,11 @@ const HomePage = () => {
   }, [currentFilter]);
 
   useEffect(() => {
+    getAllConcept(currentFilter);
+  }, [page, rowsPerPage]);
+  useEffect(() => {
     // getAllConcept();
-    getCategories();
-    getUsers();
+    checkRole();
   }, []);
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -298,6 +320,24 @@ const HomePage = () => {
     setModelFilter('');
     setProductNameFilter('');
   };
+  const handleAccept = async () => {
+    const res = await restApi.post(RouterApi.conceptAccept, { conceptId: selectedRow?.conceptId });
+    if (res?.status === 200) {
+      afterSave();
+      setSnackBar({ open: true, message: 'Saved changes successful!', type: true });
+    } else {
+      setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
+    }
+  };
+  const onClickAccept = async () => {
+    ShowConfirm({
+      title: 'Accept',
+      message: 'Do you want to accept it?',
+      onOK: () => {
+        handleAccept();
+      }
+    });
+  };
   const afterSave = () => {
     getAllConcept(currentFilter);
   };
@@ -305,8 +345,16 @@ const HomePage = () => {
     setAnchorEl(null);
   };
   const onCloseMenuFilter = () => {
-    setPersonName(currentFilter?.personName ?? []);
-    setCategoryFiler(currentFilter?.categoryFilter ?? []);
+    if (currentFilter?.personName || Array.isArray(currentFilter?.personName)) {
+      setPersonName(currentFilter?.personName || []);
+    } else {
+      setPersonName([]);
+    }
+    if (currentFilter?.categoryFilter || Array.isArray(currentFilter?.categoryFilter)) {
+      setCategoryFiler(currentFilter?.categoryFilter || []);
+    } else {
+      setPersonName([]);
+    }
     setStartDate(currentFilter?.startDate);
     setEndDate(currentFilter?.endDate);
     setCodeFilter(currentFilter?.codeFilter);
@@ -316,32 +364,65 @@ const HomePage = () => {
 
     setAnchorEl(null);
   };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   return (
     <>
       <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <SubCard contentSX={{ padding: '13px !important' }}>
-            <Stack direction="row" justifyContent="flex-end" spacing={1}>
-              <Button
-                onClick={() => {
-                  setOpenModalConcept(true);
-                }}
-                size="small"
-                startIcon={<IconPlus />}
-                variant="contained"
-              >
-                New
-              </Button>
-              <Button size="small" startIcon={<IconCheck />} variant="outlined">
-                Check
-              </Button>
-              <Button size="small" startIcon={<IconEdit />} variant="outlined">
-                Edit
-              </Button>
-            </Stack>
-            {/* </Stack> */}
-          </SubCard>
-        </Grid>
+        {(role?.create || role?.accept || role?.update) && (
+          <Grid item xs={12}>
+            <SubCard contentSX={{ padding: '13px !important' }}>
+              <Stack direction="row" justifyContent="flex-end" spacing={1}>
+                {role?.create && (
+                  <Button
+                    onClick={() => {
+                      setTypeModal('ADD');
+                      setOpenModalConcept(true);
+                    }}
+                    size="small"
+                    startIcon={<IconPlus />}
+                    variant="contained"
+                  >
+                    New
+                  </Button>
+                )}
+                {role?.accept && (
+                  <Button
+                    size="small"
+                    disabled={selectedRow?.approval}
+                    onClick={onClickAccept}
+                    startIcon={<IconCheck />}
+                    variant="outlined"
+                  >
+                    Accept
+                  </Button>
+                )}
+                {role?.update && (
+                  <Button
+                    onClick={() => {
+                      setTypeModal('EDIT');
+                      setOpenModalConcept(true);
+                    }}
+                    disabled={!selectedRow?.isMe}
+                    size="small"
+                    startIcon={<IconEdit />}
+                    variant="outlined"
+                  >
+                    Edit
+                  </Button>
+                )}
+              </Stack>
+              {/* </Stack> */}
+            </SubCard>
+          </Grid>
+        )}
         <Grid item xs={12}>
           <MainCard contentSX={{ padding: '10px' }}>
             <Grid container spacing={1}>
@@ -377,21 +458,52 @@ const HomePage = () => {
                 <TableHead>
                   <TableRow>
                     <StyledTableCell align="center">#</StyledTableCell>
-                    <StyledTableCell>카테고리</StyledTableCell>
-                    <StyledTableCell>모델명</StyledTableCell>
+                    <StyledTableCell>
+                      <p className="name-colum">카테고리</p>
+                      <p className="name-colum">(Category)</p>
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <p className="name-colum">모델명</p>
+                      <p className="name-colum">(Model)</p>
+                    </StyledTableCell>
                     <StyledTableCell>P/L NAME</StyledTableCell>
-                    <StyledTableCell>코드</StyledTableCell>
-                    <StyledTableCell>품명</StyledTableCell>
-                    <StyledTableCell align="center">등록일자</StyledTableCell>
-                    <StyledTableCell align="center">등록자</StyledTableCell>
-                    <StyledTableCell align="right">승인원</StyledTableCell>
+                    <StyledTableCell>
+                      <p className="name-colum">코드</p>
+                      <p className="name-colum">(Code)</p>
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <p className="name-colum">품명</p>
+                      <p className="name-colum">(Product Name)</p>
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      <p className="name-colum">등록일자</p>
+                      <p className="name-colum">(Regis Date)</p>
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      <p className="name-colum">등록자</p>
+                      <p className="name-colum"> (Registrant)</p>
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      <p className="name-colum">승인원</p>
+                      <p className="name-colum">(Approval)</p>
+                    </StyledTableCell>
+                    <StyledTableCell sx={{width:'20px'}} align="right"></StyledTableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody
+                  sx={{
+                    '.MuiTableRow-root.Mui-selected': { backgroundColor: config.colorSelected },
+                    '.MuiTableRow-root.Mui-selected:hover': { backgroundColor: config.colorSelected }
+                  }}
+                >
                   {concepts?.map((row, index) => (
-                    <StyledTableRow key={row.conceptId}>
+                    <StyledTableRow
+                      selected={selectedRow?.conceptId === row?.conceptId}
+                      onClick={() => setSelectedRow(row)}
+                      key={row.conceptId}
+                    >
                       <StyledTableCell align="center">{index + 1}</StyledTableCell>
-                      <StyledTableCell component="th" scope="row">
+                      <StyledTableCell align="center" component="th" scope="row">
                         {row?.category?.categoryName}
                       </StyledTableCell>
                       <StyledTableCell>{row?.modelName}</StyledTableCell>
@@ -400,20 +512,26 @@ const HomePage = () => {
                       <StyledTableCell>{row?.productName}</StyledTableCell>
                       <StyledTableCell align="center">{row?.regisDate ? formatDateFromDB(row?.regisDate, false) : null}</StyledTableCell>
                       <StyledTableCell align="center">
-                        <Tooltip title={row?.user?.fullName}>
-                          {row?.isMe ? <IconUser />: row?.user?.userName}
+                        <Tooltip title={row?.user?.fullName}>{row?.isMe ? <IconUser /> : row?.user?.userName}</Tooltip>
+                      </StyledTableCell>
+                      <StyledTableCell align="center">{row?.approval}</StyledTableCell>
+                      <StyledTableCell align="right">
+                        <Tooltip title="Detail">
+                          <IconButton color="primary" onClick={() => {}} size="small" aria-label="Detail">
+                            <IconEye />
+                          </IconButton>
                         </Tooltip>
                       </StyledTableCell>
-                      <StyledTableCell align="right">{row?.status}</StyledTableCell>
                     </StyledTableRow>
                   ))}
                 </TableBody>
                 <TableFooter>
                   <TableRow>
                     <TablePagination
+                      color="primary"
                       rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                      colSpan={9}
-                      count={15}
+                      colSpan={10}
+                      count={total}
                       rowsPerPage={rowsPerPage}
                       page={page}
                       slotProps={{
@@ -424,8 +542,8 @@ const HomePage = () => {
                           native: true
                         }
                       }}
-                      onPageChange={() => {}}
-                      onRowsPerPageChange={() => {}}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
                     />
                   </TableRow>
                 </TableFooter>
@@ -450,7 +568,7 @@ const HomePage = () => {
           {/* <Grid container spacing={2}>
             <Grid item xs={12}> */}
           <Stack direction="row" alignItems={'center'} justifyContent="space-between">
-            <Typography variant="h5" component="h5">
+            <Typography color={'primary'} variant="h4" component="h4">
               Filter
             </Typography>
             <IconButton onClick={onCloseMenuFilter} size="small" aria-label="close">
@@ -460,8 +578,9 @@ const HomePage = () => {
           <Divider />
           <Box sx={{ margin: '10px 0px 0px 0px', height: '350px', overflowY: 'auto' }}>
             <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
-              <InputLabel id="demo-multiple-checkbox-label">카테고리</InputLabel>
+              <InputLabel id="demo-multiple-checkbox-label">카테고리(Category)</InputLabel>
               <Select
+                label="카테고리(Category)"
                 labelId="demo-multiple-checkbox-label"
                 id="demo-multiple-checkbox"
                 multiple
@@ -500,7 +619,7 @@ const HomePage = () => {
                 name="modelFilter"
                 value={modelFilter}
                 id="standard-basic"
-                label="모델명"
+                label="모델명(Model)"
                 size="small"
                 variant="outlined"
               />
@@ -522,7 +641,7 @@ const HomePage = () => {
                 name="codeFilter"
                 id="standard-basic"
                 value={codeFilter}
-                label="코드"
+                label="코드(Code)"
                 size="small"
                 variant="outlined"
               />
@@ -533,14 +652,17 @@ const HomePage = () => {
                 name="productNameFilter"
                 value={productNameFilter}
                 id="standard-basic"
-                label="품명"
+                label="품명(Product Name)"
                 size="small"
                 variant="outlined"
               />
             </FormControl>
             <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
-              <InputLabel id="demo-multiple-checkbox-label">카테고리</InputLabel>
+              <InputLabel id="demo-simple-select-label">카테고리(Registrant)</InputLabel>
               <Select
+                id="demo-simple-select"
+                labelId="demo-simple-select-label"
+                label="카테고리(Registrant)"
                 multiple
                 value={personName}
                 onChange={(event) => {
@@ -581,7 +703,7 @@ const HomePage = () => {
                   views={['year', 'month', 'day']}
                   format="DD/MM/YYYY"
                   slotProps={{ textField: { size: 'small' } }}
-                  label="Start Date Registration"
+                  label="Start Registration Date"
                   size="small"
                 />
                 <DatePicker
@@ -593,7 +715,7 @@ const HomePage = () => {
                   views={['year', 'month', 'day']}
                   format="DD/MM/YYYY"
                   slotProps={{ textField: { size: 'small' } }}
-                  label="End Date Registration"
+                  label="End Registration Date"
                   size="small"
                 />
               </Stack>
@@ -613,26 +735,31 @@ const HomePage = () => {
         </Paper>
       </Menu>
       {loading && <Loading open={loading} />}
-      <Snackbar
-        autoHideDuration={6000}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        open={snackBar?.open}
-        onClose={() => {
-          setSnackBar({ open: false, message: '' });
-        }}
-      >
-        <Alert
+      <Portal>
+        <Snackbar
+          autoHideDuration={6000}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          open={snackBar?.open}
           onClose={() => {
             setSnackBar({ open: false, message: '' });
           }}
-          severity={snackBar?.type ? 'success' : 'error'}
-          variant="filled"
-          sx={{ width: '100%' }}
         >
-          {snackBar?.message}
-        </Alert>
-      </Snackbar>
+          <Alert
+            onClose={() => {
+              setSnackBar({ open: false, message: '' });
+            }}
+            severity={snackBar?.type ? 'success' : 'error'}
+            variant="filled"
+            sx={{ width: '100%' }}
+          >
+            {snackBar?.message}
+          </Alert>
+        </Snackbar>
+      </Portal>
       <ModalConcept
+        setLoading={setLoading}
+        selected={selectedRow}
+        typeModal={typeModal}
         afterSave={afterSave}
         setSnackBar={setSnackBar}
         categories={categories}

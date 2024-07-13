@@ -36,7 +36,7 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-
+import config from 'config';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import restApi from 'utils/restAPI';
@@ -62,7 +62,7 @@ const AccountPage = () => {
     type: true
   });
   const getUsers = async () => {
-    const res = await restApi.get(RouterApi.userAll);
+    const res = await restApi.get(RouterApi.userAll + '?screen=account');
     if (res?.status === 200) {
       setUsers(res?.data);
     }
@@ -139,8 +139,8 @@ const AccountPage = () => {
                 </TableHead>
                 <TableBody
                   sx={{
-                    '.MuiTableRow-root.Mui-selected': { backgroundColor: theme?.palette.action.selected },
-                    '.MuiTableRow-root.Mui-selected:hover': { backgroundColor: theme?.palette.action.selected }
+                    '.MuiTableRow-root.Mui-selected': { backgroundColor: config.colorSelected },
+                    '.MuiTableRow-root.Mui-selected:hover': { backgroundColor: config.colorSelected }
                   }}
                 >
                   {users?.map((row, index) => (

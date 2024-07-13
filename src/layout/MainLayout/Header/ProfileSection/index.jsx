@@ -37,6 +37,8 @@ import { IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons-re
 import { SET_OPEN_DRAWE_RIGHT } from 'store/actions';
 import { logout, stringAvatar } from 'utils/helper';
 import { ShowConfirm, ShowMessage } from 'ui-component/ShowDialog';
+import { IconBrandSamsungpass } from '@tabler/icons-react';
+import ModalChangePassword from 'ui-component/modals/ModalChangePassword/ModalChangePassword';
 
 // ==============================|| PROFILE MENU ||============================== //
 
@@ -47,6 +49,7 @@ const ProfileSection = () => {
   const navigate = useNavigate();
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [open, setOpen] = useState(false);
+  const [openModalChangePassword, setOpenModalChangePassword] = useState(false);
   const dispatch = useDispatch();
   /**
    * anchorRef is used on different componets and specifying one type leads to other components throwing an error
@@ -73,14 +76,18 @@ const ProfileSection = () => {
   const handleListItemClick = (event, index, route = '') => {
     if (index === 0) {
       dispatch({ type: SET_OPEN_DRAWE_RIGHT, openRightDrawer: !customization?.openRightDrawer });
-      return;
+      // return;
+    }
+    if (index === 1) {
+      setOpenModalChangePassword(true);
+      // return;
     }
     setSelectedIndex(index);
     handleClose(event);
 
-    if (route && route !== '') {
-      navigate(route);
-    }
+    // if (route && route !== '') {
+    //   navigate(route);
+    // }
   };
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -169,7 +176,7 @@ const ProfileSection = () => {
                           {auth?.dataUser?.fullName}
                         </Typography>
                       </Stack>
-                      <Typography variant="subtitle2">R&D</Typography>
+                      <Typography variant="subtitle2">{auth?.dataUser?.userName}</Typography>
                     </Stack>
                     {/* <Divider /> */}
                   </Box>
@@ -207,13 +214,13 @@ const ProfileSection = () => {
                           onClick={(event) => handleListItemClick(event, 1, '#')}
                         >
                           <ListItemIcon>
-                            <IconUser stroke={1.5} size="1.3rem" />
+                            <IconBrandSamsungpass stroke={1.5} size="1.3rem" />
                           </ListItemIcon>
                           <ListItemText
                             primary={
                               <Grid container spacing={1} justifyContent="space-between">
                                 <Grid item>
-                                  <Typography variant="body2">Profile</Typography>
+                                  <Typography variant="body2">Change password</Typography>
                                 </Grid>
                                 {/* <Grid item>
                                   <Chip
@@ -248,6 +255,12 @@ const ProfileSection = () => {
           </Transitions>
         )}
       </Popper>
+      <ModalChangePassword
+        open={openModalChangePassword}
+        onClose={() => {
+          setOpenModalChangePassword(false);
+        }}
+      />
     </>
   );
 };

@@ -34,6 +34,9 @@ export const theme = (customization) => {
   const themeOptions = {
     direction: 'ltr',
     palette: themePalette(themeOption),
+    zIndex: {
+      snackbar: 5000,
+    },
     mixins: {
       toolbar: {
         minHeight: '48px',

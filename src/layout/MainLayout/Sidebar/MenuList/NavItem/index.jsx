@@ -64,6 +64,7 @@ const NavItem = ({ item, level }) => {
     // active menu item on page load
     useEffect(() => {
         const find = Object.values(ConfigRouter).find(item => item === pathname);
+        console.log('find',find);
         if (find) {
             dispatch({ type: MENU_OPEN, id: find });
         }
