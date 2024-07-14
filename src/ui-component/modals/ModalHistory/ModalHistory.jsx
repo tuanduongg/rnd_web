@@ -15,7 +15,17 @@ import { useEffect } from 'react';
 import config from 'config';
 import { formatDateFromDB } from 'utils/helper';
 import { IconEye, IconUser } from '@tabler/icons-react';
+const renderHistoryText = (str) => {
+  if (!str) return '';
+  // Xoá ' - ' nếu nó đứng đầu
+  if (str.startsWith(" - ")) {
+    str = str.substring(3);
+  }
 
+  // Thay thế tất cả các ' - ' khác thành <br>
+  let replacedStr = str.replace(/ - /g, "<br>");
+  return replacedStr
+}
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2)
@@ -54,7 +64,6 @@ export default function ModalHistory({ open, onClose, selected }) {
   };
   const getHistory = async () => {
     const res = await restApi.post(RouterApi.conceptHistory, { conceptId: selected?.conceptId });
-    console.log('res', res);
     if (res?.status === 200) {
       setHistories(res?.data)
     }
@@ -67,7 +76,7 @@ export default function ModalHistory({ open, onClose, selected }) {
   return (
     <>
 
-      <BootstrapDialog fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+      <BootstrapDialog maxWidth={'lg'} fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
           History
         </DialogTitle>
@@ -87,7 +96,7 @@ export default function ModalHistory({ open, onClose, selected }) {
           <Grid container spacing={2}>
             <Grid item xs={24}>
               <TableContainer sx={{ marginTop: '15px' }} component={Paper}>
-                <Table  aria-label="customized table">
+                <Table aria-label="customized table">
                   <TableHead>
                     <TableRow>
                       <StyledTableCell align="center">#</StyledTableCell>
@@ -113,9 +122,11 @@ export default function ModalHistory({ open, onClose, selected }) {
                           {row?.historyUsername}
                         </StyledTableCell>
                         <StyledTableCell align="center" component="th" scope="row">
-                          {row?.historyTime?  formatDateFromDB(row?.historyTime) : null}
+                          {row?.historyTime ? formatDateFromDB(row?.historyTime) : null}
                         </StyledTableCell>
-                        <StyledTableCell>{row?.historyRemark}</StyledTableCell>
+                        <StyledTableCell>
+                          <span dangerouslySetInnerHTML={{ __html: renderHistoryText(row?.historyRemark) }}></span>
+                        </StyledTableCell>
                       </StyledTableRow>
                     ))}
                   </TableBody>

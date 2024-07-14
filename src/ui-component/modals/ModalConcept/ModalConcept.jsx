@@ -254,7 +254,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
     <>
       <BootstrapDialog fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
-          {typeModal === 'ADD' ? 'Create New' : 'Edit Infomation'}
+          {typeModal === 'ADD' ? 'Create New' : typeModal === 'VIEW'? 'Infomation' : 'Edit Infomation'}
         </DialogTitle>
         <IconButton
           aria-label="close"
