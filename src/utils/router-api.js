@@ -14,5 +14,7 @@ export const RouterApi = {
   conceptHistory: '/concept/history',
   conceptAll: '/concept/all',
   conceptDetail: '/concept/detail',
-  conceptAccept: '/concept/accept'
+  conceptAccept: '/concept/accept',
+  conceptDownload: '/concept/download',
+  conceptDownloadMultiple: '/concept/download-multiple',
 };

@@ -369,12 +369,12 @@ const HomePage = () => {
   };
 
   const handleChangePage = (event, newPage) => {
-    setSelectedRow(null)
+    setSelectedRow(null);
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setSelectedRow(null)
+    setSelectedRow(null);
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -446,14 +446,14 @@ const HomePage = () => {
                 </Button>
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                    <Chip
-                      key={index}
-                      sx={{ marginRight: '5px', marginTop: '5px' }}
-                      variant="outlined"
-                      label={chip?.label}
-                      onDelete={chip?.onDelete}
-                    />
-                  ))
+                      <Chip
+                        key={index}
+                        sx={{ marginRight: '5px', marginTop: '5px' }}
+                        variant="outlined"
+                        label={chip?.label}
+                        onDelete={chip?.onDelete}
+                      />
+                    ))
                   : null}
               </Grid>
             </Grid>
@@ -522,11 +522,16 @@ const HomePage = () => {
                       <StyledTableCell align="center">{row?.approval}</StyledTableCell>
                       <StyledTableCell align="right">
                         <Tooltip title="Detail">
-                          <IconButton color="primary" onClick={() => {
-                            setSelectedRow(row)
-                            setTypeModal('VIEW');
-                            setOpenModalConcept(true);
-                          }} size="small" aria-label="Detail">
+                          <IconButton
+                            color="primary"
+                            onClick={() => {
+                              setSelectedRow(row);
+                              setTypeModal('VIEW');
+                              setOpenModalConcept(true);
+                            }}
+                            size="small"
+                            aria-label="Detail"
+                          >
                             <IconEye />
                           </IconButton>
                         </Tooltip>
@@ -561,7 +566,7 @@ const HomePage = () => {
             </TableContainer>
           </MainCard>
         </Grid>
-      </Grid >
+      </Grid>
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
@@ -572,7 +577,7 @@ const HomePage = () => {
         MenuListProps={{
           'aria-labelledby': 'basic-button'
         }}
-      // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+        // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         <Paper sx={{ width: { xs: 340, sm: 400 }, padding: '10px' }}>
           {/* <Grid container spacing={2}>
@@ -586,7 +591,7 @@ const HomePage = () => {
             </IconButton>
           </Stack>
           <Divider />
-          <Box sx={{ margin: '10px 0px 0px 0px', height: '430px', overflowY: 'auto' }}>
+          <Box sx={{ margin: '10px 0px 0px 0px', height: { xs: '380px' }, overflowY: 'auto' }}>
             <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
               <InputLabel id="demo-multiple-checkbox-label">카테고리(Category)</InputLabel>
               <Select
@@ -766,9 +771,17 @@ const HomePage = () => {
           </Alert>
         </Snackbar>
       </Portal>
-      <ModalHistory selected={selectedRow} open={openModalHistory} onClose={()=>{setOpenModalHistory(false)}}/>
+      <ModalHistory
+        selected={selectedRow}
+        open={openModalHistory}
+        onClose={() => {
+          setOpenModalHistory(false);
+        }}
+      />
       <ModalConcept
-      showModalHistory={()=>{setOpenModalHistory(true)}}
+        showModalHistory={() => {
+          setOpenModalHistory(true);
+        }}
         setLoading={setLoading}
         selected={selectedRow}
         typeModal={typeModal}

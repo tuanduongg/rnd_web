@@ -35,7 +35,7 @@ export function stringAvatar(name) {
   if (name.includes(' ')) {
     return {
       sx: {
-        bgcolor: stringToColor(name)
+        bgcolor: '#fafafa',
       },
       children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`
     };
@@ -76,7 +76,8 @@ export function formatBytes(bytes, decimals = 2) {
 }
 
 export function addZero(num) {
-  return (num < 10 ? '0' : '') + num;
+  const numInt = parseInt(num);
+  return (numInt < 10 ? '0' : '') + numInt;
 }
 
 export const formatDateFromDB = (dateString, showTime = true) => {

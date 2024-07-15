@@ -23,6 +23,7 @@ import {
   Select,
   Stack,
   TextField,
+  Tooltip,
   Typography
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -34,7 +35,7 @@ import { border, height } from '@mui/system';
 import { IconFolder } from '@tabler/icons-react';
 import { IconX } from '@tabler/icons-react';
 import { IconFile } from '@tabler/icons-react';
-import { formatBytes } from 'utils/helper';
+import { formatBytes, formatDateFromDB } from 'utils/helper';
 import dayjs from 'dayjs';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import restApi from 'utils/restAPI';
@@ -45,6 +46,7 @@ import { IconDeviceFloppy } from '@tabler/icons-react';
 import ListFile from './component/ListFile';
 import { isMobile } from 'react-device-detect';
 import { IconHistory } from '@tabler/icons-react';
+import { showNameFile } from './modal_concept.service';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -65,9 +67,20 @@ const VisuallyHiddenInput = styled('input')({
   whiteSpace: 'nowrap',
   width: 1
 });
+
 const initValidate = { error: false, msg: '' };
 const currentDate = dayjs(new Date());
-export default function ModalConcept({ open, onClose, categories, setSnackBar, afterSave, typeModal, selected, setLoading,showModalHistory }) {
+export default function ModalConcept({
+  open,
+  onClose,
+  categories,
+  setSnackBar,
+  afterSave,
+  typeModal,
+  selected,
+  setLoading,
+  showModalHistory
+}) {
   const [personName, setPersonName] = useState([]);
   const [fileList, setFileList] = useState([]);
   const [category, setCategory] = useState('');
@@ -107,7 +120,7 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
     setValidateResisDate(initValidate);
     setModelName('');
     setProductName('');
-    setCheckedFile([])
+    setCheckedFile([]);
   };
   const getDetail = async () => {
     setLoading(true);
@@ -249,12 +262,35 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
         break;
     }
   };
+  const onClickDownLoadAll = async () => {
+    setLoading(true)
+    const response = await restApi.post(
+      RouterApi.conceptDownloadMultiple,
+      { fileIds: checkedFile },
+      {
+        responseType: 'blob'
+      }
+    );
+    setLoading(false)
+    if (response?.status === 200) {
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `files.zip`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      setSnackBar({ open: true, message: response?.data?.message || 'Server Error!', type: false });
+    }
+  };
 
   return (
     <>
       <BootstrapDialog fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
-          {typeModal === 'ADD' ? 'Create New' : typeModal === 'VIEW'? 'Infomation' : 'Edit Infomation'}
+          {typeModal === 'ADD' ? 'Create New' : typeModal === 'VIEW' ? 'Infomation' : 'Edit Infomation'}
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -383,91 +419,120 @@ export default function ModalConcept({ open, onClose, categories, setSnackBar, a
                 />
               </FormControl>
             </Grid>
-            {typeModal !== 'VIEW' && (<Grid item xs={12}>
-              <Stack>
-                <Typography variant="h5" gutterBottom>
-                  첨부자료(File)
-                </Typography>
-                <Button component="label" role={undefined} variant="outlined" size="medium" tabIndex={-1} startIcon={<IconCloud />}>
-                  Upload file
-                  <VisuallyHiddenInput multiple type="file" onChange={onChangeFileInput} />
-                </Button>
-              </Stack>
-              <Box sx={{ width: '100%', height: 'auto', padding: '5px' }}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    <List dense={false}>
-                      {fileList.map(
-                        (file, index) =>
-                          file?.isShow && (
-                            <React.Fragment key={index}>
-                              <Divider />
-                              <ListItem
-                                // primaryTypographyProps={{
-                                //   style: {
-                                //     whiteSpace: 'nowrap',
-                                //     overflow: 'hidden',
-                                //     textOverflow: 'ellipsis'
-                                //   }
-                                // }}
-                                disableGutters
-                                secondaryAction={
-                                  <IconButton
-                                    onClick={(e) => {
-                                      onClickDelete(index);
-                                    }}
-                                    size="small"
-                                    edge="end"
-                                    aria-label="delete"
-                                  >
-                                    <IconX />
-                                  </IconButton>
-                                }
-                              >
-                                <Typography sx={{ marginRight: '15px' }} component={'h6'}>
-                                  {index + 1}
-                                </Typography>
-                                <ListItemAvatar>
-                                  <Avatar>
-                                    <IconFile />
-                                  </Avatar>
-                                </ListItemAvatar>
-                                <ListItemText
-                                  primary={file?.name ? file?.name : file?.fileName ? file?.fileName : ''}
-                                  secondary={formatBytes(file?.size ? file?.size : file?.fileSize ? file?.fileSize : '')}
-                                />
-
-                              </ListItem>
-                            </React.Fragment>
-                          )
-                      )}
-                      <Divider />
-                    </List>
+            {typeModal !== 'VIEW' && (
+              <Grid item xs={12}>
+                <Stack>
+                  <Typography variant="h5" gutterBottom>
+                    첨부자료(File)
+                  </Typography>
+                  <Button component="label" role={undefined} variant="outlined" size="medium" tabIndex={-1} startIcon={<IconCloud />}>
+                    Upload file
+                    <VisuallyHiddenInput multiple type="file" onChange={onChangeFileInput} />
+                  </Button>
+                </Stack>
+                <Box sx={{ width: '100%', height: 'auto', padding: '5px' }}>
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <List dense={false}>
+                        {fileList.map(
+                          (file, index) =>
+                            file?.isShow && (
+                              <React.Fragment key={index}>
+                                <Divider />
+                                <ListItem
+                                  // primaryTypographyProps={{
+                                  //   style: {
+                                  //     whiteSpace: 'nowrap',
+                                  //     overflow: 'hidden',
+                                  //     textOverflow: 'ellipsis'
+                                  //   }
+                                  // }}
+                                  disableGutters
+                                  secondaryAction={
+                                    <Tooltip title="Delete">
+                                      <IconButton
+                                        onClick={(e) => {
+                                          onClickDelete(index);
+                                        }}
+                                        size="small"
+                                        edge="end"
+                                        aria-label="delete"
+                                      >
+                                        <IconX />
+                                      </IconButton>
+                                    </Tooltip>
+                                  }
+                                >
+                                  <Typography sx={{ marginRight: '15px' }} component={'h6'}>
+                                    {index + 1}
+                                  </Typography>
+                                  <ListItemAvatar>
+                                    <Avatar>
+                                      <IconFile />
+                                    </Avatar>
+                                  </ListItemAvatar>
+                                  <ListItemText
+                                    primary={file?.name ? file?.name : showNameFile(file?.fileName, file?.fileExtenstion)}
+                                    secondary={
+                                      <Stack direction={'row'}>
+                                        <span style={{ minWidth: '75px' }}>
+                                          {formatBytes(file?.size ? file?.size : file?.fileSize ? file?.fileSize : '')}
+                                        </span>
+                                        <span>
+                                          <Tooltip title="Upload at">{formatDateFromDB(file?.uploadAt)}</Tooltip>
+                                        </span>
+                                      </Stack>
+                                    }
+                                  />
+                                </ListItem>
+                              </React.Fragment>
+                            )
+                        )}
+                        <Divider />
+                      </List>
+                    </Grid>
                   </Grid>
-                </Grid>
-              </Box>
-            </Grid>)}
-            {typeModal === 'VIEW' && (<Grid item xs={12}>
-              <Typography variant="h5" gutterBottom>
-                  첨부자료(File)
-                </Typography>
-              <ListFile listFile={fileList} checked={checkedFile} setChecked={setCheckedFile} />
-            </Grid>)}
+                </Box>
+              </Grid>
+            )}
+            {typeModal === 'VIEW' && (
+              <Grid item xs={12}>
+                <ListFile setLoading={setLoading} listFile={fileList} checked={checkedFile} setChecked={setCheckedFile} />
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button variant="text" onClick={handleClose}>
             Close
           </Button>
-          {typeModal !== 'VIEW' && (<Button variant="contained" startIcon={<IconDeviceFloppy />} autoFocus onClick={onClickSave}>
-            Save changes
-          </Button>)}
-          {typeModal === 'VIEW' && (<Button variant="outlined" startIcon={<IconHistory />} onClick={() => { showModalHistory() }}>
-            History
-          </Button>)}
-          {typeModal === 'VIEW' && (<Button variant="contained" startIcon={<IconDownload />} disabled={checkedFile?.length === 0} autoFocus onClick={() => { console.log(checkedFile); }}>
-            Download All
-          </Button>)}
+          {typeModal !== 'VIEW' && (
+            <Button variant="contained" startIcon={<IconDeviceFloppy />} autoFocus onClick={onClickSave}>
+              Save changes
+            </Button>
+          )}
+          {typeModal === 'VIEW' && (
+            <Button
+              variant="contained"
+              startIcon={<IconHistory />}
+              onClick={() => {
+                showModalHistory();
+              }}
+            >
+              History
+            </Button>
+          )}
+          {/* {typeModal === 'VIEW' && (
+            <Button
+              variant="contained"
+              startIcon={<IconDownload />}
+              disabled={checkedFile?.length === 0}
+              autoFocus
+              onClick={onClickDownLoadAll}
+            >
+              Download All
+            </Button>
+          )} */}
         </DialogActions>
       </BootstrapDialog>
     </>

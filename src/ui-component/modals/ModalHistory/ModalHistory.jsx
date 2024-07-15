@@ -20,8 +20,9 @@ const renderHistoryText = (str) => {
   // Xoá ' - ' nếu nó đứng đầu
   if (str.startsWith(" - ")) {
     str = str.substring(3);
+  }else if(str.startsWith("  - ")) {
+    str = str.substring(4);
   }
-
   // Thay thế tất cả các ' - ' khác thành <br>
   let replacedStr = str.replace(/ - /g, "<br>");
   return replacedStr
@@ -117,11 +118,11 @@ export default function ModalHistory({ open, onClose, selected }) {
                         key={row.conceptId}
                       >
                         <StyledTableCell align="center">{index + 1}</StyledTableCell>
-                        <StyledTableCell align="center">{row?.historyType}</StyledTableCell>
-                        <StyledTableCell align="center" component="th" scope="row">
+                        <StyledTableCell >{row?.historyType}</StyledTableCell>
+                        <StyledTableCell scope="row">
                           {row?.historyUsername}
                         </StyledTableCell>
-                        <StyledTableCell align="center" component="th" scope="row">
+                        <StyledTableCell align="center" scope="row">
                           {row?.historyTime ? formatDateFromDB(row?.historyTime) : null}
                         </StyledTableCell>
                         <StyledTableCell>
