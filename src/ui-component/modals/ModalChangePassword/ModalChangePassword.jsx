@@ -5,7 +5,18 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { styled } from '@mui/material/styles';
-import { Alert, FormControl, Grid, IconButton, Portal, Snackbar, TextField } from '@mui/material';
+import {
+  Alert,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  Portal,
+  Snackbar,
+  TextField
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
 import restApi from 'utils/restAPI';
@@ -15,6 +26,9 @@ import { ShowConfirm } from 'ui-component/ShowDialog';
 import { logout } from 'utils/helper';
 import { IconDeviceFloppy } from '@tabler/icons-react';
 import { isMobile } from 'react-device-detect';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2)
@@ -31,6 +45,7 @@ export default function ModalChangePassword({ open, onClose }) {
   const [validateCurrentPasword, setValidateCurrentPasword] = useState(initvalidate);
   const [validateNewPassword, setValidateNewPassword] = useState(initvalidate);
   const [validateConfirmPassword, setValidateConfirmPassword] = useState(initvalidate);
+  const [showPassword, setShowPassword] = useState(false);
   const [snackBar, setSnackBar] = useState({
     open: false,
     message: '',
@@ -155,6 +170,7 @@ export default function ModalChangePassword({ open, onClose }) {
             <Grid item xs={24}>
               <FormControl fullWidth size="small">
                 <TextField
+                  type={'password'}
                   helperText={validateCurrentPasword.msg}
                   error={validateCurrentPasword.error}
                   onChange={onChangeInput}
@@ -169,6 +185,7 @@ export default function ModalChangePassword({ open, onClose }) {
             <Grid item xs={24}>
               <FormControl fullWidth size="small">
                 <TextField
+                  type={'password'}
                   helperText={validateNewPassword.msg}
                   error={validateNewPassword.error}
                   onChange={onChangeInput}
@@ -183,6 +200,7 @@ export default function ModalChangePassword({ open, onClose }) {
             <Grid item xs={24}>
               <FormControl fullWidth size="small">
                 <TextField
+                  type={'password'}
                   helperText={validateConfirmPassword.msg}
                   error={validateConfirmPassword.error}
                   onChange={onChangeInput}

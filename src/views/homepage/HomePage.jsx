@@ -53,13 +53,14 @@ import dayjs from 'dayjs';
 import Loading from 'ui-component/Loading';
 import { useTheme } from '@mui/material/styles';
 import config from 'config';
+import IMAGE_EMPTYDATA from '../../assets/images/backgrounds/empty-box.png';
 import './homepage.css';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import ModalHistory from 'ui-component/modals/ModalHistory/ModalHistory';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const currentDate = dayjs();
-const tomorrow = currentDate.add(1, 'day');
+const tomorrow = currentDate.add(10, 'day');
 const dayBefore20Days = currentDate.subtract(20, 'day');
 const initFilter = {
   personName: [],
@@ -89,6 +90,7 @@ const HomePage = () => {
   const [modelFilter, setModelFilter] = useState('');
   const [productNameFilter, setProductNameFilter] = useState('');
   const [loading, setLoading] = useState(false);
+  const auth = useSelector((state) => state.auth);
   const [currentFilter, setCurrentFilter] = useState(initFilter);
   const [typeModal, setTypeModal] = useState('');
   const [total, setTotal] = useState(0);
@@ -109,8 +111,18 @@ const HomePage = () => {
     setLoading(false);
     if (res?.status === 200) {
       setRole(res?.data);
-      getCategories();
-      getUsers();
+      const is_create = res?.data?.create;
+      const is_update = res?.data?.update;
+      const is_delete = res?.data?.delete;
+      const is_import = res?.data?.import;
+      const is_export = res?.data?.export;
+      const is_accept = res?.data?.accept;
+
+      if (is_create && is_update && !is_delete && !is_import && !is_export && !is_accept) {
+        const currentUser = auth?.dataUser?.userId;
+        setCurrentFilter({ ...initFilter, personName: [currentUser] });
+        setPersonName([currentUser]);
+      }
     }
   };
   const getCategories = async () => {
@@ -245,13 +257,16 @@ const HomePage = () => {
       });
     }
     setArrChipFilter(arrChip);
-    getAllConcept(currentFilter);
+    setPage(0);
   }, [currentFilter]);
 
   useEffect(() => {
     getAllConcept(currentFilter);
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, arrChipFilter]);
+
   useEffect(() => {
+    getUsers();
+    getCategories();
     // getAllConcept();
     checkRole();
   }, []);
@@ -325,9 +340,9 @@ const HomePage = () => {
   const handleAccept = async () => {
     const res = await restApi.post(RouterApi.conceptAccept, { conceptId: selectedRow?.conceptId });
     if (res?.status === 200) {
+      setSelectedRow(null);
       afterSave();
       setSnackBar({ open: true, message: 'Saved changes successful!', type: true });
-      setSelectedRow(null);
     } else {
       setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
     }
@@ -342,6 +357,7 @@ const HomePage = () => {
     });
   };
   const afterSave = () => {
+    setSelectedRow(null);
     getAllConcept(currentFilter);
   };
   const handleCloseMenu = () => {
@@ -401,7 +417,7 @@ const HomePage = () => {
                 {role?.accept && (
                   <Button
                     size="small"
-                    disabled={selectedRow?.approval}
+                    disabled={!selectedRow || selectedRow?.approval || selectedRow?.isMe}
                     onClick={onClickAccept}
                     startIcon={<IconCheck />}
                     variant="outlined"
@@ -472,7 +488,7 @@ const HomePage = () => {
                       <p className="name-colum">(Model)</p>
                     </StyledTableCell>
                     <StyledTableCell>P/L NAME</StyledTableCell>
-                    <StyledTableCell>
+                    <StyledTableCell sx={{ minWidth: '130px' }}>
                       <p className="name-colum">코드</p>
                       <p className="name-colum">(Code)</p>
                     </StyledTableCell>
@@ -501,43 +517,52 @@ const HomePage = () => {
                     '.MuiTableRow-root.Mui-selected:hover': { backgroundColor: config.colorSelected }
                   }}
                 >
-                  {concepts?.map((row, index) => (
-                    <StyledTableRow
-                      selected={selectedRow?.conceptId === row?.conceptId}
-                      onClick={() => setSelectedRow(row)}
-                      key={row.conceptId}
-                    >
-                      <StyledTableCell align="center">{page * rowsPerPage + index + 1}</StyledTableCell>
-                      <StyledTableCell align="center" component="th" scope="row">
-                        {row?.category?.categoryName}
+                  {concepts?.length > 0 ? (
+                    concepts?.map((row, index) => (
+                      <StyledTableRow
+                        selected={selectedRow?.conceptId === row?.conceptId}
+                        onClick={() => setSelectedRow(row)}
+                        key={row.conceptId}
+                      >
+                        <StyledTableCell align="center">{page * rowsPerPage + index + 1}</StyledTableCell>
+                        <StyledTableCell align="center" component="th" scope="row">
+                          {row?.category?.categoryName}
+                        </StyledTableCell>
+                        <StyledTableCell align="center">{row?.modelName}</StyledTableCell>
+                        <StyledTableCell>{row?.plName}</StyledTableCell>
+                        <StyledTableCell align="center">{row?.code}</StyledTableCell>
+                        <StyledTableCell>{row?.productName}</StyledTableCell>
+                        <StyledTableCell align="center">{row?.regisDate ? formatDateFromDB(row?.regisDate, false) : null}</StyledTableCell>
+                        <StyledTableCell align="center">
+                          <Tooltip title={row?.user?.fullName}>{row?.isMe ? <IconUser /> : row?.user?.userName}</Tooltip>
+                        </StyledTableCell>
+                        <StyledTableCell align="center">{row?.approval}</StyledTableCell>
+                        <StyledTableCell align="right">
+                          <Tooltip title="Detail">
+                            <IconButton
+                              color="primary"
+                              onClick={() => {
+                                setSelectedRow(row);
+                                setTypeModal('VIEW');
+                                setOpenModalConcept(true);
+                              }}
+                              size="small"
+                              aria-label="Detail"
+                            >
+                              <IconEye />
+                            </IconButton>
+                          </Tooltip>
+                        </StyledTableCell>
+                      </StyledTableRow>
+                    ))
+                  ) : (
+                    <TableRow sx={{ textAlign: 'center' }}>
+                      <StyledTableCell colSpan={10} align="center">
+                        <img src={IMAGE_EMPTYDATA} width={70} height={70} alt="image" />
+                        <div>NO DATA</div>
                       </StyledTableCell>
-                      <StyledTableCell>{row?.modelName}</StyledTableCell>
-                      <StyledTableCell>{row?.plName}</StyledTableCell>
-                      <StyledTableCell>{row?.code}</StyledTableCell>
-                      <StyledTableCell>{row?.productName}</StyledTableCell>
-                      <StyledTableCell align="center">{row?.regisDate ? formatDateFromDB(row?.regisDate, false) : null}</StyledTableCell>
-                      <StyledTableCell align="center">
-                        <Tooltip title={row?.user?.fullName}>{row?.isMe ? <IconUser /> : row?.user?.userName}</Tooltip>
-                      </StyledTableCell>
-                      <StyledTableCell align="center">{row?.approval}</StyledTableCell>
-                      <StyledTableCell align="right">
-                        <Tooltip title="Detail">
-                          <IconButton
-                            color="primary"
-                            onClick={() => {
-                              setSelectedRow(row);
-                              setTypeModal('VIEW');
-                              setOpenModalConcept(true);
-                            }}
-                            size="small"
-                            aria-label="Detail"
-                          >
-                            <IconEye />
-                          </IconButton>
-                        </Tooltip>
-                      </StyledTableCell>
-                    </StyledTableRow>
-                  ))}
+                    </TableRow>
+                  )}
                 </TableBody>
                 <TableFooter>
                   <TableRow>

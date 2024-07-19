@@ -2,7 +2,7 @@
   "name": "SW APP",
   "version": "1.0.0",
   "private": true,
-  "homepage": "/",
+  "homepage": ".",
   "scripts": {
     "start": "env-cmd -f .env vite",
     "build": "vite build",

@@ -6,7 +6,7 @@ import { ShowMessage } from 'ui-component/ShowDialog';
 import { ConfigRouter } from 'routes/ConfigRouter';
 
 const urlAPI = import.meta.env.VITE_APP_API_URL || 'http://localhost:5005/api';
-let token = await getCookie('AUTH');
+let token = getCookie('AUTH');
 
 const restApi = axios.create({
     baseURL: urlAPI // Thay thế bằng URL API thực tế của bạn,

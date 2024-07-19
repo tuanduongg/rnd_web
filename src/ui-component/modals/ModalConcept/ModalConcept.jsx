@@ -30,7 +30,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
 import { DatePicker } from '@mui/x-date-pickers';
 import { useSelector } from 'react-redux';
-import { IconCloud, IconDownload } from '@tabler/icons-react';
+import { IconCloud, IconDownload, IconInfoCircle } from '@tabler/icons-react';
 import { border, height } from '@mui/system';
 import { IconFolder } from '@tabler/icons-react';
 import { IconX } from '@tabler/icons-react';
@@ -263,7 +263,7 @@ export default function ModalConcept({
     }
   };
   const onClickDownLoadAll = async () => {
-    setLoading(true)
+    setLoading(true);
     const response = await restApi.post(
       RouterApi.conceptDownloadMultiple,
       { fileIds: checkedFile },
@@ -271,9 +271,8 @@ export default function ModalConcept({
         responseType: 'blob'
       }
     );
-    setLoading(false)
+    setLoading(false);
     if (response?.status === 200) {
-
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -423,7 +422,12 @@ export default function ModalConcept({
               <Grid item xs={12}>
                 <Stack>
                   <Typography variant="h5" gutterBottom>
-                    첨부자료(File)
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{marginRight:'5px'}}>첨부자료</span>
+                      <Tooltip title="Tip: You should compressed file to .zip before upload" placement="right">
+                        <IconInfoCircle />
+                      </Tooltip>
+                    </div>
                   </Typography>
                   <Button component="label" role={undefined} variant="outlined" size="medium" tabIndex={-1} startIcon={<IconCloud />}>
                     Upload file

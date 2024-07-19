@@ -45,6 +45,8 @@ import { styled } from '@mui/material/styles';
 import { IconPlus, IconEdit, IconCheck, IconFilter, IconSearch, IconCircleCheck } from '@tabler/icons-react';
 import SubCard from 'ui-component/cards/SubCard';
 import ModalAccount from 'ui-component/modals/ModalAccount/ModalAccount';
+import IMAGE_EMPTYDATA from '../../assets/images/backgrounds/empty-box.png';
+
 // ==============================|| SAMPLE PAGE ||============================== //
 const names = ['ACC', 'RUBBER', 'CONVERTING', 'INJECTION', 'METAL KEY 5개중 택'];
 const AccountPage = () => {
@@ -143,17 +145,26 @@ const AccountPage = () => {
                     '.MuiTableRow-root.Mui-selected:hover': { backgroundColor: config.colorSelected }
                   }}
                 >
-                  {users?.map((row, index) => (
-                    <StyledTableRow selected={selectedRow?.userId === row?.userId} onClick={() => setSelectedRow(row)} key={index}>
-                      <StyledTableCell align="center">{index + 1}</StyledTableCell>
-                      <StyledTableCell align="left" component="th" scope="row">
-                        {row?.fullName}
+                  {users?.length > 0 ? (
+                    users?.map((row, index) => (
+                      <StyledTableRow selected={selectedRow?.userId === row?.userId} onClick={() => setSelectedRow(row)} key={index}>
+                        <StyledTableCell align="center">{index + 1}</StyledTableCell>
+                        <StyledTableCell align="left" component="th" scope="row">
+                          {row?.fullName}
+                        </StyledTableCell>
+                        <StyledTableCell align="left">{row?.userName}</StyledTableCell>
+                        <StyledTableCell align="center">{row?.role?.roleName}</StyledTableCell>
+                        <StyledTableCell align="right">{row?.isRoot && <IconCheck />}</StyledTableCell>
+                      </StyledTableRow>
+                    ))
+                  ) : (
+                    <TableRow sx={{ textAlign: 'center' }}>
+                      <StyledTableCell colSpan={10} align="center">
+                        <img src={IMAGE_EMPTYDATA} width={70} height={70} alt="image" />
+                        <div>NO DATA</div>
                       </StyledTableCell>
-                      <StyledTableCell align="left">{row?.userName}</StyledTableCell>
-                      <StyledTableCell align="center">{row?.role?.roleName}</StyledTableCell>
-                      <StyledTableCell align="right">{row?.isRoot && <IconCheck />}</StyledTableCell>
-                    </StyledTableRow>
-                  ))}
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
