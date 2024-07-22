@@ -136,7 +136,7 @@ const AccountPage = () => {
                     <StyledTableCell align="left">Full Name</StyledTableCell>
                     <StyledTableCell align="left">User Name</StyledTableCell>
                     <StyledTableCell align="center">Role</StyledTableCell>
-                    <StyledTableCell align="right">Root</StyledTableCell>
+                    <StyledTableCell align="right">Admin</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody

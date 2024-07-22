@@ -101,6 +101,7 @@ const ProfileSection = () => {
 
     prevOpen.current = open;
   }, [open]);
+  console.log(auth);
   return (
     <>
       <Chip
@@ -176,7 +177,7 @@ const ProfileSection = () => {
                           {auth?.dataUser?.fullName}
                         </Typography>
                       </Stack>
-                      <Typography variant="subtitle2">{auth?.dataUser?.userName}</Typography>
+                      <Typography variant="subtitle2">{auth?.dataUser?.userName + ` - ${auth?.dataUser?.role?.roleName}`}</Typography>
                     </Stack>
                     {/* <Divider /> */}
                   </Box>

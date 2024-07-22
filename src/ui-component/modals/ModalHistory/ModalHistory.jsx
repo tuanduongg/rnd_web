@@ -15,12 +15,15 @@ import { useEffect } from 'react';
 import config from 'config';
 import { formatDateFromDB } from 'utils/helper';
 import { IconEye, IconUser } from '@tabler/icons-react';
+import IMAGE_EMPTYDATA from '../../../assets/images/backgrounds/empty-box.png';
+
+
 const renderHistoryText = (str) => {
   if (!str) return '';
   // Xoá ' - ' nếu nó đứng đầu
   if (str.startsWith(" - ")) {
     str = str.substring(3);
-  }else if(str.startsWith("  - ")) {
+  } else if (str.startsWith("  - ")) {
     str = str.substring(4);
   }
   // Thay thế tất cả các ' - ' khác thành <br>
@@ -113,7 +116,7 @@ export default function ModalHistory({ open, onClose, selected }) {
                       '.MuiTableRow-root.Mui-selected:hover': { backgroundColor: config.colorSelected }
                     }}
                   >
-                    {histories?.map((row, index) => (
+                    {histories?.length > 0 ? histories?.map((row, index) => (
                       <StyledTableRow
                         key={row.conceptId}
                       >
@@ -129,31 +132,15 @@ export default function ModalHistory({ open, onClose, selected }) {
                           <span dangerouslySetInnerHTML={{ __html: renderHistoryText(row?.historyRemark) }}></span>
                         </StyledTableCell>
                       </StyledTableRow>
-                    ))}
+                    )) : (
+                      <TableRow sx={{ textAlign: 'center' }}>
+                        <StyledTableCell colSpan={10} align="center">
+                          <img src={IMAGE_EMPTYDATA} width={70} height={70} alt="image" />
+                          <div>NO DATA</div>
+                        </StyledTableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
-                  {/* <TableFooter>
-                    <TableRow>
-                      <TablePagination
-                        color="primary"
-                        rowsPerPageOptions={[5, 10, 25, 100]}
-                        // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                        colSpan={10}
-                        count={total}
-                        rowsPerPage={rowsPerPage}
-                        page={page}
-                        slotProps={{
-                          select: {
-                            inputProps: {
-                              'aria-label': 'rows per page'
-                            },
-                            native: true
-                          }
-                        }}
-                        onPageChange={handleChangePage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                      />
-                    </TableRow>
-                  </TableFooter> */}
                 </Table>
               </TableContainer>
             </Grid>

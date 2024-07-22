@@ -1,0 +1,15 @@
+{
+  "name": "R&D Hanoi Seowonintech",
+  "short_name": "RND Hanoi-Seowonintech",
+  "icons": [
+    { "src": "/src/assets/images/backgrounds/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/src/assets/images/backgrounds/favicon-16x16.png", "sizes": "16x16", "type": "image/png" },
+    { "src": "/src/assets/images/backgrounds/favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/src/assets/images/backgrounds/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#005595",
+  "background_color": "#ffff",
+  "display": "minimal-ui",
+  "start_url": ".",
+  "screenshots": []
+}
