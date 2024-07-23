@@ -566,9 +566,6 @@ const HomePage = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-            {/* <Table>
-
-              <TableRow> */}
             <Stack direction={'row'} justifyContent={'flex-end'}>
 
               <TablePagination
@@ -595,8 +592,6 @@ const HomePage = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
             </Stack>
-            {/* </TableRow>
-            </Table> */}
           </MainCard>
         </Grid>
       </Grid>
