@@ -45,7 +45,7 @@ import { styled } from '@mui/material/styles';
 import { IconPlus, IconEdit, IconCheck, IconFilter, IconCircleCheckFilled, IconCircleCheck, IconUser, IconEye } from '@tabler/icons-react';
 import SubCard from 'ui-component/cards/SubCard';
 import { IconX } from '@tabler/icons-react';
-import { maxHeight } from '@mui/system';
+import { maxHeight, padding } from '@mui/system';
 import { DatePicker } from '@mui/x-date-pickers';
 import ModalConcept from 'ui-component/modals/ModalConcept/ModalConcept';
 import { formatDateFromDB } from 'utils/helper';
@@ -57,6 +57,8 @@ import IMAGE_EMPTYDATA from '../../assets/images/backgrounds/empty-box.png';
 import './homepage.css';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import ModalHistory from 'ui-component/modals/ModalHistory/ModalHistory';
+import { IconTrash } from '@tabler/icons-react';
+import { isMobile } from 'react-device-detect';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const currentDate = dayjs();
@@ -117,8 +119,7 @@ const HomePage = () => {
       const is_import = res?.data?.import;
       const is_export = res?.data?.export;
       const is_accept = res?.data?.accept;
-
-      if (is_create && is_update && !is_delete && !is_import && !is_export && !is_accept) {
+      if (is_create && is_update && !is_delete && !is_import && !is_export && !is_accept || is_create && is_update && is_delete && !is_import && !is_export && !is_accept) {
         const currentUser = auth?.dataUser?.userId;
         setCurrentFilter({ ...initFilter, personName: [currentUser] });
         setPersonName([currentUser]);
@@ -274,10 +275,12 @@ const HomePage = () => {
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: theme.palette.primary.main,
-      color: theme.palette.common.white
+      color: theme.palette.common.white,
+      padding:'12px'
     },
     [`&.${tableCellClasses.body}`]: {
-      fontSize: 14
+      fontSize: 14,
+      padding: '10px'
     }
   }));
 
@@ -384,6 +387,24 @@ const HomePage = () => {
     setAnchorEl(null);
   };
 
+  const onClickDelete = () => {
+    ShowConfirm({
+      title: 'Delete', message: 'Do you want to delete it ?', onOK: () => {
+        onDelete();
+      }
+    })
+  };
+  const onDelete = async () => {
+    if (selectedRow && selectedRow?.conceptId) {
+      const res = await restApi.post(RouterApi.conceptDelete, { conceptId: selectedRow?.conceptId });
+      if (res?.status === 200) {
+        afterSave();
+        setSnackBar({ open: true, message: res?.data?.message || 'Delete successful !', type: true });
+      } else {
+        setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
+      }
+    }
+  }
   const handleChangePage = (event, newPage) => {
     setSelectedRow(null);
     setPage(newPage);
@@ -396,7 +417,7 @@ const HomePage = () => {
   };
   return (
     <>
-      <Grid container spacing={2}>
+      <Grid container spacing={1}>
         {(role?.create || role?.accept || role?.update) && (
           <Grid item xs={12}>
             <SubCard contentSX={{ padding: '13px !important' }}>
@@ -439,6 +460,17 @@ const HomePage = () => {
                     Edit
                   </Button>
                 )}
+
+                {role?.delete && (<Button
+                  onClick={onClickDelete}
+                  disabled={!selectedRow}
+                  size="small"
+                  startIcon={<IconTrash />}
+                  variant="outlined"
+                  color="error"
+                >
+                  Delete
+                </Button>)}
               </Stack>
               {/* </Stack> */}
             </SubCard>
@@ -474,7 +506,7 @@ const HomePage = () => {
               </Grid>
             </Grid>
             <Divider sx={{ margin: '10px 0px' }} />
-            <TableContainer sx={{ marginTop: '15px', maxHeight: `calc(100vh - 320px)` }} component={Paper}>
+            <TableContainer sx={{ marginTop: '15px', maxHeight: `calc(100vh - 315px)` }} component={Paper}>
               <Table stickyHeader sx={{ minWidth: 700 }} aria-label="customized table">
                 <TableHead>
                   <TableRow>
@@ -585,7 +617,7 @@ const HomePage = () => {
                     inputProps: {
                       'aria-label': 'rows per page'
                     },
-                    native: true
+                    // native: true
                   }
                 }}
                 onPageChange={handleChangePage}
@@ -780,7 +812,7 @@ const HomePage = () => {
       {loading && <Loading open={loading} />}
       <Portal>
         <Snackbar
-          autoHideDuration={6000}
+          autoHideDuration={5000}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           open={snackBar?.open}
           onClose={() => {

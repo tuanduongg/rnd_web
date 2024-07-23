@@ -259,7 +259,7 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
                     }}
                   />
                 }
-                label="Root (Have All Role)"
+                label="Admin"
               />
             </Grid>
           </Grid>

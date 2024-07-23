@@ -13,6 +13,7 @@ export const RouterApi = {
   conceptUpdate: '/concept/update',
   conceptHistory: '/concept/history',
   conceptAll: '/concept/all',
+  conceptDelete: '/concept/delete',
   conceptDetail: '/concept/detail',
   conceptAccept: '/concept/accept',
   conceptDownload: '/concept/download',

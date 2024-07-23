@@ -172,10 +172,10 @@ export default function ModalConcept({
       check = true;
       setValidateCode({ error: true, msg: 'This field is requird!' });
     }
-    if (plName?.trim() === '') {
-      check = true;
-      setValidatePlName({ error: true, msg: 'This field is requird!' });
-    }
+    // if (plName?.trim() === '') {
+    //   check = true;
+    //   setValidatePlName({ error: true, msg: 'This field is requird!' });
+    // }
     if (!check) {
       ShowConfirm({
         title: typeModal === 'EDIT' ? 'Update' : 'Create New',
