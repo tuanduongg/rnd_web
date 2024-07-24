@@ -276,7 +276,7 @@ const HomePage = () => {
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.common.white,
-      padding:'12px'
+      padding: '12px'
     },
     [`&.${tableCellClasses.body}`]: {
       fontSize: 14,
@@ -506,7 +506,7 @@ const HomePage = () => {
               </Grid>
             </Grid>
             <Divider sx={{ margin: '10px 0px' }} />
-            <TableContainer sx={{ marginTop: '15px', maxHeight: `calc(100vh - 315px)` }} component={Paper}>
+            <TableContainer sx={{ marginTop: '15px', maxHeight: !role || (!role?.create && !role?.update && !role?.accept && !role?.delete) ? `calc(100vh - 250px)` : `calc(100vh - 315px)` }} component={Paper}>
               <Table stickyHeader sx={{ minWidth: 700 }} aria-label="customized table">
                 <TableHead>
                   <TableRow>
@@ -566,11 +566,16 @@ const HomePage = () => {
                         <StyledTableCell>{row?.productName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.regisDate ? formatDateFromDB(row?.regisDate, false) : null}</StyledTableCell>
                         <StyledTableCell align="center">
-                          <Tooltip title={row?.user?.fullName}>{row?.isMe ? <IconUser /> : row?.user?.userName}</Tooltip>
+                          <Tooltip arrow title={row?.user?.fullName}>{row?.isMe ? <IconUser /> : row?.user?.userName}</Tooltip>
                         </StyledTableCell>
-                        <StyledTableCell align="center">{row?.approval}</StyledTableCell>
+                        <StyledTableCell align="center">
+                          <span style={{ fontWeight: '500' }}>
+
+                            {row?.approval}
+                          </span>
+                        </StyledTableCell>
                         <StyledTableCell align="right">
-                          <Tooltip title="Detail">
+                          <Tooltip arrow placement='left' title="Detail">
                             <IconButton
                               color="primary"
                               onClick={() => {
@@ -639,7 +644,7 @@ const HomePage = () => {
         }}
       // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
-        <Paper sx={{ width: { xs: 340, sm: 400 }, padding: '10px' }}>
+        <Paper sx={{ width: '100%', maxWidth: { xs: 340, sm: 400 }, padding: '10px' }}>
           {/* <Grid container spacing={2}>
             <Grid item xs={12}> */}
           <Stack direction="row" alignItems={'center'} justifyContent="space-between">

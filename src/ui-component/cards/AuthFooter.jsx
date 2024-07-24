@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 const AuthFooter = () => (
     <Stack direction="row" justifyContent="center">
         <Typography variant="subtitle2" color={'#a1a1a1'}>
-            &copy; {new Date().getFullYear()} TuanIT - Ha Noi Seowonintech
+            &copy; {new Date().getFullYear()} Ha Noi Seowonintech - {import.meta.env.VITE_APP_VERSION}
         </Typography>
     </Stack>
 );

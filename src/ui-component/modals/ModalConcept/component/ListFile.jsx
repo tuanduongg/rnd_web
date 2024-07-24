@@ -21,8 +21,14 @@ import { showNameFile } from '../modal_concept.service';
 import { useTheme } from '@mui/material/styles';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
+import { IconFileFilled } from '@tabler/icons-react';
+import { Box } from '@mui/system';
+import { getClassWithColor } from 'file-icons-js';
+import 'file-icons-js/css/style.css';
+import './listfile.css';
 
-const ListFile = ({ checked, setChecked, listFile, setLoading }) => {
+
+const ListFile = ({ checked, setChecked, listFile, typeModal }) => {
   const theme = useTheme();
   const onClickCheckedAll = () => {
     if (checked?.length === listFile.length) {
@@ -60,14 +66,14 @@ const ListFile = ({ checked, setChecked, listFile, setLoading }) => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }else {
+    } else {
       alert('Download File Fail!')
     }
   };
   return (
     <>
       <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-        {listFile?.length > 0 && (
+        {(listFile?.length > 0) && (
           <>
             <Divider />
             <ListItem key={0} disablePadding sx={{ padding: '0px 05px' }}>
@@ -85,17 +91,17 @@ const ListFile = ({ checked, setChecked, listFile, setLoading }) => {
               </ListItemIcon> */}
               <ListItemText
                 id={0}
-                sx={{ '.MuiListItemText-primary': { color: theme?.palette?.primary?.main, fontWeight: 'bold' }, maxWidth: '40px' }}
+                sx={{ '.MuiListItemText-primary': { fontWeight: 'bold',color: theme?.palette?.primary?.main }, maxWidth: '40px' }}
                 primary={'#'}
               />
               <ListItemText
                 id={0}
-                sx={{ '.MuiListItemText-primary': { color: theme?.palette?.primary?.main, fontWeight: 'bold' } }}
+                sx={{ '.MuiListItemText-primary': { fontWeight: 'bold',color: theme?.palette?.primary?.main } }}
                 primary={'File Name'}
               />
               <ListItemText
                 id={0}
-                sx={{ textAlign: 'right', '.MuiListItemText-primary': { color: theme?.palette?.primary?.main, fontWeight: 'bold' } }}
+                sx={{ textAlign: 'right', '.MuiListItemText-primary': { fontWeight: 'bold',color: theme?.palette?.primary?.main } }}
                 primary={'Download'}
               />
             </ListItem>
@@ -111,8 +117,9 @@ const ListFile = ({ checked, setChecked, listFile, setLoading }) => {
                 <ListItem
                   key={value?.fileId}
                   secondaryAction={
-                    <Tooltip title="Download">
+                    <Tooltip arrow placement='left' title="Download">
                       <IconButton
+                        
                         onClick={() => {
                           onClickDownLoad(value);
                         }}
@@ -120,44 +127,40 @@ const ListFile = ({ checked, setChecked, listFile, setLoading }) => {
                         edge="end"
                         aria-label="comments"
                       >
-                        <IconFileDownload />
+                        <IconDownload />
                       </IconButton>
                     </Tooltip>
                   }
                   disablePadding
                 >
                   <ListItemButton disableGutters sx={{ padding: '5px' }} role={undefined} onClick={handleToggle(value?.fileId)} dense>
-                    {/* <ListItemIcon>
-                      <Checkbox
-                        edge="start"
-                        checked={checked.includes(value?.fileId)}
-                        tabIndex={-1}
-                        disableRipple
-                        inputProps={{ 'aria-labelledby': labelId }}
-                      />
-                    </ListItemIcon> */}
                     <Typography sx={{ marginRight: '15px', textAlign: 'center' }} component={'h6'}>
                       {index + 1}
                     </Typography>
-                    <ListItemAvatar>
-                      <Avatar>
-                        <IconFile />
-                      </Avatar>
-                    </ListItemAvatar>
+                    <span
+                      className={getClassWithColor(showNameFile(value?.fileName, value?.fileExtenstion)) + ' iconcustom'}
+                      style={{ fontSize: '33px' }}
+                    />
+                    {/* <Box sx={{width:'26px',marginRight:'5px'}}>
+
+                      <FileIcon extension={value?.fileExtenstion} {...defaultStyles[value?.fileExtenstion]} />
+                    </Box> */}
+                    {/* <IconFileFilled size={33} /> */}
                     <ListItemText
+                      sx={{ margin: '0px' }}
                       primary={value?.name ? value?.name : showNameFile(value?.fileName, value?.fileExtenstion)}
                       secondary={
-                        <Stack direction={'row'}>
+                        <Stack direction={'row'} sx={{ fontSize: '12px' }}>
                           <span style={{ minWidth: '75px' }}>
                             {formatBytes(value?.size ? value?.size : value?.fileSize ? value?.fileSize : '')}
                           </span>
                           <span>
-                            <Tooltip title="Upload at">{formatDateFromDB(value?.uploadAt)}</Tooltip>
+                            <Tooltip arrow title="Upload at">{formatDateFromDB(value?.uploadAt)}</Tooltip>
                           </span>
                         </Stack>
                       }
                     />
-                    {/* <ListItemText id={labelId} secondary={formatBytes(value?.fileSize)} primary={`${value?.fileName}${value?.fileExtenstion ? '.' + value?.fileExtenstion : ''}`} /> */}
+                    {/* <ListItemText secondary={formatBytes(value?.size ? value?.size : value?.fileSize ? value?.fileSize : '')}/> */}
                   </ListItemButton>
                 </ListItem>
                 <Divider />

@@ -24,3 +24,7 @@
 .react-confirm-alert-button-group > button {
     font-size: 14px !important;
 }
+.react-confirm-alert-body {
+    width: 100% !important;
+    max-width: 400px;
+}

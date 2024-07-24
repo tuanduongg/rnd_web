@@ -5,7 +5,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { styled } from '@mui/material/styles';
-import { Alert, FormControl, Grid, IconButton, Paper, Portal, Snackbar, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, TextField, Tooltip } from '@mui/material';
+import { Alert, FormControl, Grid, IconButton, Paper, Portal, Snackbar, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, TextField, Tooltip, useTheme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
 import restApi from 'utils/restAPI';
@@ -60,7 +60,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 const initvalidate = { error: false, msg: '' };
 export default function ModalHistory({ open, onClose, selected }) {
   const [histories, setHistories] = useState([]);
-
+  const theme = useTheme();
 
   const handleClose = (event, reason) => {
     if (reason && (reason == 'backdropClick' || reason === 'escapeKeyDown')) return;

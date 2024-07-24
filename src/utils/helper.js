@@ -1,5 +1,6 @@
 import { ConfigRouter } from 'routes/ConfigRouter';
 import authReducer from 'store/authReducer';
+import { initialState } from 'store/customizationReducer';
 
 function stringToColor(string) {
   let hash = 0;
@@ -40,7 +41,12 @@ export function stringAvatar(name) {
       children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`
     };
   }
-  return name;
+  return {
+    sx: {
+      bgcolor: '#fafafa',
+    },
+    children: `${name.at(0)}`
+  };;
 }
 export function getCookie(name) {
   var nameEQ = name + '=';
@@ -57,6 +63,7 @@ export const delete_cookie = (name) => {
 };
 export function logout() {
   localStorage.setItem('DATA_USER', null);
+  localStorage.setItem('theme', JSON.stringify(initialState));
   setCookie('AUTH', '', 1);
   delete_cookie('AUTH');
   if (location.pathname !== ConfigRouter.login) {
@@ -101,3 +108,8 @@ export const formatDateFromDB = (dateString, showTime = true) => {
   // Tạo chuỗi định dạng
   return addZero(hours) + ':' + addZero(minutes) + ' ' + addZero(day) + '/' + addZero(month) + '/' + year;
 };
+export function getExtenstionFromOriginalName(originalname) {
+  return originalname?.includes('.')
+  ? originalname.split('.').pop()
+  : '';
+}

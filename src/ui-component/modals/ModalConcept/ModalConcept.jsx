@@ -9,6 +9,7 @@ import { styled } from '@mui/material/styles';
 import {
   Avatar,
   Box,
+  Chip,
   Divider,
   FormControl,
   FormHelperText,
@@ -35,7 +36,7 @@ import { border, height } from '@mui/system';
 import { IconFolder } from '@tabler/icons-react';
 import { IconX } from '@tabler/icons-react';
 import { IconFile } from '@tabler/icons-react';
-import { formatBytes, formatDateFromDB } from 'utils/helper';
+import { formatBytes, formatDateFromDB, getExtenstionFromOriginalName } from 'utils/helper';
 import dayjs from 'dayjs';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import restApi from 'utils/restAPI';
@@ -47,6 +48,17 @@ import ListFile from './component/ListFile';
 import { isMobile } from 'react-device-detect';
 import { IconHistory } from '@tabler/icons-react';
 import { showNameFile } from './modal_concept.service';
+import { IconCircleCheck } from '@tabler/icons-react';
+import { IconChecks } from '@tabler/icons-react';
+import { useTheme } from '@mui/material/styles';
+import { IconPointFilled } from '@tabler/icons-react';
+import { IconCheck } from '@tabler/icons-react';
+import { IconUserCheck } from '@tabler/icons-react';
+import { getClassWithColor } from 'file-icons-js';
+import 'file-icons-js/css/style.css';
+import './modal_concept.css';
+import { IconCloudUpload } from '@tabler/icons-react';
+
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -81,6 +93,8 @@ export default function ModalConcept({
   setLoading,
   showModalHistory
 }) {
+  const theme = useTheme();
+
   const [personName, setPersonName] = useState([]);
   const [fileList, setFileList] = useState([]);
   const [category, setCategory] = useState('');
@@ -98,6 +112,9 @@ export default function ModalConcept({
   const [validateProductName, setValidateProductName] = useState(initValidate);
 
   const [regisDate, setRegisDate] = useState(currentDate);
+
+  const [approval, setApproval] = useState('');
+
   const [checkedFile, setCheckedFile] = useState([]);
 
   const [validateRegisDate, setValidateResisDate] = useState(initValidate);
@@ -120,13 +137,15 @@ export default function ModalConcept({
     setValidateResisDate(initValidate);
     setModelName('');
     setProductName('');
+    setApproval('');
     setCheckedFile([]);
   };
   const getDetail = async () => {
     setLoading(true);
     const res = await restApi.post(RouterApi.conceptDetail, { conceptId: selected?.conceptId });
     setLoading(false);
-    const { conceptId, modelName, plName, code, productName, regisDate, status, category, files } = res?.data;
+    const { conceptId, modelName, plName, code, productName, regisDate, approval, category, files } = res?.data;
+    setApproval(approval);
     setCategory(category?.categoryId);
     setModelName(modelName);
     setplName(plName);
@@ -284,28 +303,34 @@ export default function ModalConcept({
       setSnackBar({ open: true, message: response?.data?.message || 'Server Error!', type: false });
     }
   };
+  console.log('fileList', fileList);
 
   return (
     <>
       <BootstrapDialog fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
-          {typeModal === 'ADD' ? 'Create New' : typeModal === 'VIEW' ? 'Infomation' : 'Edit Infomation'}
+          <Stack direction={'row'} alignItems={'center'}>
+            {typeModal === 'ADD' ? 'Create New' : typeModal === 'VIEW' ? 'Detail' : 'Edit Infomation'}
+            {typeModal === 'VIEW' && approval && (<Tooltip title={"Approval: " + approval} arrow placement='right'>
+              <IconUserCheck color='green' style={{ marginLeft: '5px' }} />
+            </Tooltip>)}
+          </Stack>
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 6,
+              color: (theme) => theme.palette.grey[500]
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={handleClose}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500]
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
         <DialogContent dividers>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
+          <Grid container spacing={typeModal === 'VIEW' ? 1 : 2}>
+            {typeModal !== 'VIEW' && (<><Grid item xs={6}>
               <FormControl fullWidth error={validateCategory.error} size="small">
                 <InputLabel id="demo-simple-select-label">카테고리(Category)</InputLabel>
                 <Select
@@ -329,107 +354,171 @@ export default function ModalConcept({
                 <FormHelperText>{validateCategory?.msg}</FormHelperText>
               </FormControl>
             </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <TextField
-                  inputProps={{ readOnly: typeModal === 'VIEW' }}
-                  onChange={onChangeInput}
-                  id="standard-basic"
-                  value={code}
-                  name="code"
-                  error={validateCode.error}
-                  helperText={validateCode.msg}
-                  label="코드(Code)"
-                  placeholder="코드(Code)..."
-                  size="small"
-                  variant="outlined"
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <TextField
-                  inputProps={{ readOnly: typeModal === 'VIEW' }}
-                  onChange={onChangeInput}
-                  error={validateModelName.error}
-                  helperText={validateModelName.msg}
-                  value={modelName}
-                  name="modelName"
-                  id="standard-validateModelName"
-                  label="모델명(Model)"
-                  placeholder="모델명(Model)..."
-                  size="small"
-                  variant="outlined"
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <TextField
-                  inputProps={{ readOnly: typeModal === 'VIEW' }}
-                  onChange={onChangeInput}
-                  error={validateProductName.error}
-                  helperText={validateProductName.msg}
-                  value={productName}
-                  name="productName"
-                  id="standard-validateProductName"
-                  label="품명(Product Name)"
-                  placeholder="품명(Product Name)..."
-                  size="small"
-                  variant="outlined"
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <TextField
-                  inputProps={{ readOnly: typeModal === 'VIEW' }}
-                  onChange={onChangeInput}
-                  error={validatePlName.error}
-                  helperText={validatePlName.msg}
-                  id="standard-validatePlName"
-                  value={plName}
-                  name="plName"
-                  label="P/L NAME"
-                  placeholder="P/L NAME..."
-                  size="small"
-                  variant="outlined"
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth size="small">
-                <DatePicker
-                  readOnly={typeModal === 'VIEW'}
-                  format="DD/MM/YYYY"
-                  value={regisDate}
-                  views={['year', 'month', 'day']}
-                  slotProps={{
-                    textField: { size: 'small', helperText: validateRegisDate.msg, error: validateRegisDate.error },
-                    popper: { placement: 'right-end' }
-                  }}
-                  onChange={(newValue) => {
-                    if (validateRegisDate?.error) setValidateResisDate(initValidate);
-                    setRegisDate(newValue);
-                  }}
-                  label="등록일자(Registration Date)"
-                  placeholder="등록일자(Registration Date)..."
-                  size="small"
-                />
-              </FormControl>
-            </Grid>
+              <Grid item xs={6}>
+                <FormControl fullWidth size="small">
+                  <TextField
+                    inputProps={{ readOnly: typeModal === 'VIEW' }}
+                    onChange={onChangeInput}
+                    id="standard-basic"
+                    value={code}
+                    name="code"
+                    error={validateCode.error}
+                    helperText={validateCode.msg}
+                    label="코드(Code)"
+                    placeholder="코드(Code)..."
+                    size="small"
+                    variant="outlined"
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={6}>
+                <FormControl fullWidth size="small">
+                  <TextField
+                    inputProps={{ readOnly: typeModal === 'VIEW' }}
+                    onChange={onChangeInput}
+                    error={validateModelName.error}
+                    helperText={validateModelName.msg}
+                    value={modelName}
+                    name="modelName"
+                    id="standard-validateModelName"
+                    label="모델명(Model)"
+                    placeholder="모델명(Model)..."
+                    size="small"
+                    variant="outlined"
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={6}>
+                <FormControl fullWidth size="small">
+                  <TextField
+                    inputProps={{ readOnly: typeModal === 'VIEW' }}
+                    onChange={onChangeInput}
+                    error={validateProductName.error}
+                    helperText={validateProductName.msg}
+                    value={productName}
+                    name="productName"
+                    id="standard-validateProductName"
+                    label="품명(Product Name)"
+                    placeholder="품명(Product Name)..."
+                    size="small"
+                    variant="outlined"
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={6}>
+                <FormControl fullWidth size="small">
+                  <TextField
+                    inputProps={{ readOnly: typeModal === 'VIEW' }}
+                    onChange={onChangeInput}
+                    error={validatePlName.error}
+                    helperText={validatePlName.msg}
+                    id="standard-validatePlName"
+                    value={plName}
+                    name="plName"
+                    label="P/L NAME"
+                    placeholder="P/L NAME..."
+                    size="small"
+                    variant="outlined"
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={6}>
+                <FormControl fullWidth size="small">
+                  <DatePicker
+                    readOnly={typeModal === 'VIEW'}
+                    format="DD/MM/YYYY"
+                    value={regisDate}
+                    views={['year', 'month', 'day']}
+                    slotProps={{
+                      textField: { size: 'small', helperText: validateRegisDate.msg, error: validateRegisDate.error },
+                      popper: { placement: 'right-end' }
+                    }}
+                    onChange={(newValue) => {
+                      if (validateRegisDate?.error) setValidateResisDate(initValidate);
+                      setRegisDate(newValue);
+                    }}
+                    label="등록일자(Registration Date)"
+                    placeholder="등록일자(Registration Date)..."
+                    size="small"
+                  />
+                </FormControl>
+              </Grid></>)}
+            {typeModal === 'VIEW' && (<>
+              <Grid item xs={6}>
+                <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                  &bull; 카테고리(Category)
+                </Typography>
+                <Typography ml={1} variant="subtitle1">
+                  {category ?  categories?.find((categoryItem) => categoryItem?.categoryId === category).categoryName ?? '' : ''}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                  &bull; 코드(Code)
+                </Typography>
+                <Typography ml={1} variant="subtitle1">
+                  {code}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                  &bull; 모델명(Model)
+                </Typography>
+                <Typography ml={1} variant="subtitle1">
+                  {modelName}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                  &bull; 품명(Product Name)
+                </Typography>
+                <Typography ml={1} sx={{wordBreak:'break-word'}} variant="subtitle1">
+                  {productName}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                  &bull; P/L Name
+                </Typography>
+                <Typography ml={1} variant="subtitle1">
+                  {plName}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                  &bull; 등록일자(Registration Date)
+                </Typography>
+                <Typography ml={1} variant="subtitle1">
+                  {regisDate?.format('DD/MM/YYYY')}
+                </Typography>
+              </Grid>
+              {approval && (<Grid item xs={12}>
+                <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                  &bull; Approval
+                </Typography>
+                <Typography ml={1} variant="subtitle1">
+                  {approval}
+                </Typography>
+              </Grid>)}
+              {/* <Grid item xs={12}>
+                <Typography variant='h4' color={theme?.palette?.primary?.main}>
+                  Files
+                </Typography>
+                <Divider />
+              </Grid> */}
+            </>)}
             {typeModal !== 'VIEW' && (
               <Grid item xs={12}>
                 <Stack>
                   <Typography variant="h5" gutterBottom>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <span style={{marginRight:'5px'}}>첨부자료</span>
-                      <Tooltip title="Tip: You should compressed file to .zip before upload" placement="right">
+                      <span style={{ marginRight: '5px' }}>첨부자료</span>
+                      <Tooltip arrow title="Tip: You should compressed file to .zip before upload" placement="right">
                         <IconInfoCircle />
                       </Tooltip>
                     </div>
                   </Typography>
-                  <Button component="label" role={undefined} variant="outlined" size="medium" tabIndex={-1} startIcon={<IconCloud />}>
+                  <Button component="label" role={undefined} variant="outlined" size="medium" tabIndex={-1} startIcon={<IconCloudUpload />}>
                     Upload file
                     <VisuallyHiddenInput multiple type="file" onChange={onChangeFileInput} />
                   </Button>
@@ -444,16 +533,10 @@ export default function ModalConcept({
                               <React.Fragment key={index}>
                                 <Divider />
                                 <ListItem
-                                  // primaryTypographyProps={{
-                                  //   style: {
-                                  //     whiteSpace: 'nowrap',
-                                  //     overflow: 'hidden',
-                                  //     textOverflow: 'ellipsis'
-                                  //   }
-                                  // }}
+                                  sx={{ padding: '5px' }}
                                   disableGutters
                                   secondaryAction={
-                                    <Tooltip title="Delete">
+                                    <Tooltip arrow placement='left' title="Delete">
                                       <IconButton
                                         onClick={(e) => {
                                           onClickDelete(index);
@@ -470,20 +553,22 @@ export default function ModalConcept({
                                   <Typography sx={{ marginRight: '15px' }} component={'h6'}>
                                     {index + 1}
                                   </Typography>
-                                  <ListItemAvatar>
-                                    <Avatar>
-                                      <IconFile />
-                                    </Avatar>
-                                  </ListItemAvatar>
+                                  <span
+                                    className={getClassWithColor(!file?.fileName ? file?.name : showNameFile(file?.fileName, file?.fileExtenstion)) + ' iconcustom_modal'}
+                                  />
+                                  {/* <Box sx={{ width: '25px', marginRight: '5px' }}>
+                                    <FileIcon extension={!file?.fileExtenstion ? file?.name ? `${getExtenstionFromOriginalName(file.name)}`.toLocaleLowerCase() : '' : file?.fileExtenstion} {...defaultStyles[!file?.fileExtenstion ? file?.name ? `${getExtenstionFromOriginalName(file.name)}`.toLocaleLowerCase() : '' : file?.fileExtenstion]} />
+                                  </Box> */}
                                   <ListItemText
+                                    sx={{ margin: '0px' }}
                                     primary={file?.name ? file?.name : showNameFile(file?.fileName, file?.fileExtenstion)}
                                     secondary={
-                                      <Stack direction={'row'}>
-                                        <span style={{ minWidth: '75px' }}>
+                                      <Stack direction={'row'} sx={{ fontSize: '12px' }}>
+                                        <span style={{ minWidth: '75px' }} >
                                           {formatBytes(file?.size ? file?.size : file?.fileSize ? file?.fileSize : '')}
                                         </span>
                                         <span>
-                                          <Tooltip title="Upload at">{formatDateFromDB(file?.uploadAt)}</Tooltip>
+                                          <Tooltip arrow title="Upload at">{formatDateFromDB(file?.uploadAt)}</Tooltip>
                                         </span>
                                       </Stack>
                                     }
@@ -501,12 +586,13 @@ export default function ModalConcept({
             )}
             {typeModal === 'VIEW' && (
               <Grid item xs={12}>
-                <ListFile setLoading={setLoading} listFile={fileList} checked={checkedFile} setChecked={setCheckedFile} />
+                <ListFile typeModal={typeModal} setLoading={setLoading} listFile={fileList} checked={checkedFile} setChecked={setCheckedFile} />
               </Grid>
             )}
           </Grid>
         </DialogContent>
         <DialogActions>
+
           <Button variant="text" onClick={handleClose}>
             Close
           </Button>
@@ -517,7 +603,7 @@ export default function ModalConcept({
           )}
           {typeModal === 'VIEW' && (
             <Button
-              variant="contained"
+              variant="text"
               startIcon={<IconHistory />}
               onClick={() => {
                 showModalHistory();
@@ -538,7 +624,7 @@ export default function ModalConcept({
             </Button>
           )} */}
         </DialogActions>
-      </BootstrapDialog>
+      </BootstrapDialog >
     </>
   );
 }

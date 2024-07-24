@@ -101,7 +101,6 @@ const ProfileSection = () => {
 
     prevOpen.current = open;
   }, [open]);
-  console.log(auth);
   return (
     <>
       <Chip
