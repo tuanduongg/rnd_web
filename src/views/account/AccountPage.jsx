@@ -253,12 +253,12 @@ const AccountPage = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         open={snackBar?.open}
         onClose={() => {
-          setSnackBar({ open: false, message: '' });
+          setSnackBar({ open: false, message: '', type: snackBar?.type });
         }}
       >
         <Alert
           onClose={() => {
-            setSnackBar({ open: false, message: '' });
+            setSnackBar({ open: false, message: '', type: snackBar?.type });
           }}
           severity={snackBar?.type ? 'success' : 'error'}
           variant="filled"

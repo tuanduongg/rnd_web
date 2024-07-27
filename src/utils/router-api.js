@@ -4,6 +4,7 @@ export const RouterApi = {
   updateUser: '/user/update',
   userAll: '/user/all',
   userPublic: '/user/public',
+  userGetStorage: '/user/get-storage',
   findUser: '/user/find',
   changePasswordUser: '/user/changePassword',
   checkRole: '/user/checkRole',

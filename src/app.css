@@ -25,6 +25,7 @@
     font-size: 14px !important;
 }
 .react-confirm-alert-body {
+    min-width: 300px;
     width: 100% !important;
     max-width: 400px;
 }

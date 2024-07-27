@@ -59,16 +59,26 @@ import { ShowConfirm } from 'ui-component/ShowDialog';
 import ModalHistory from 'ui-component/modals/ModalHistory/ModalHistory';
 import { IconTrash } from '@tabler/icons-react';
 import { isMobile } from 'react-device-detect';
+import { IconFileDownload } from '@tabler/icons-react';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const currentDate = dayjs();
-const tomorrow = currentDate.add(10, 'day');
-const dayBefore20Days = currentDate.subtract(20, 'day');
+// Lấy ngày đầu tiên của tháng hiện tại
+const firstDayOfCurrentMonth = currentDate.startOf('month');
+
+// Lấy ngày đầu tiên của tháng trước
+const firstDayOfLastMonth = firstDayOfCurrentMonth.subtract(1, 'month');
+
+// Lấy ngày đầu tiên của tháng sau
+const firstDayOfNextMonth = firstDayOfCurrentMonth.add(1, 'month');
+
+// const firstDayOfNextMonth = currentDate.add(10, 'day');
+// const firstDayOfLastMonth = currentDate.subtract(20, 'day');
 const initFilter = {
   personName: [],
   categoryFilter: [],
-  startDate: dayBefore20Days,
-  endDate: tomorrow,
+  startDate: firstDayOfLastMonth,
+  endDate: firstDayOfNextMonth,
   codeFilter: '',
   plNameFilter: '',
   modelFilter: '',
@@ -85,8 +95,8 @@ const HomePage = () => {
   const [arrChipFilter, setArrChipFilter] = useState([]);
   const [categories, setCategories] = useState([]);
   const [concepts, setConcepts] = useState([]);
-  const [startDate, setStartDate] = useState(dayBefore20Days);
-  const [endDate, setEndDate] = useState(tomorrow);
+  const [startDate, setStartDate] = useState(firstDayOfLastMonth);
+  const [endDate, setEndDate] = useState(firstDayOfNextMonth);
   const [codeFilter, setCodeFilter] = useState('');
   const [plNameFilter, setPlNameFilter] = useState('');
   const [modelFilter, setModelFilter] = useState('');
@@ -220,7 +230,7 @@ const HomePage = () => {
     if (currentFilter?.startDate && currentFilter?.endDate) {
       if (currentFilter?.startDate?.isValid() && currentFilter?.endDate?.isValid()) {
         arrChip.push({
-          label: `Registration Date: ${currentFilter?.startDate.format('DD/MM/YYYY')} ~ ${currentFilter?.endDate.format('DD/MM/YYYY')}`,
+          label: `Registration Date: ${currentFilter?.startDate.format('YYYY/MM/DD')} ~ ${currentFilter?.endDate.format('YYYY/MM/DD')}`,
           onDelete: false
         });
       }
@@ -333,8 +343,8 @@ const HomePage = () => {
   const onClickResetAll = () => {
     setPersonName([]);
     setCategoryFiler([]);
-    setStartDate(dayBefore20Days);
-    setEndDate(tomorrow);
+    setStartDate(firstDayOfLastMonth);
+    setEndDate(firstDayOfNextMonth);
     setCodeFilter('');
     setPlNameFilter('');
     setModelFilter('');
@@ -398,6 +408,7 @@ const HomePage = () => {
     if (selectedRow && selectedRow?.conceptId) {
       const res = await restApi.post(RouterApi.conceptDelete, { conceptId: selectedRow?.conceptId });
       if (res?.status === 200) {
+        
         afterSave();
         setSnackBar({ open: true, message: res?.data?.message || 'Delete successful !', type: true });
       } else {
@@ -575,20 +586,20 @@ const HomePage = () => {
                           </span>
                         </StyledTableCell>
                         <StyledTableCell align="right">
-                          <Tooltip arrow placement='left' title="Detail">
-                            <IconButton
-                              color="primary"
-                              onClick={() => {
-                                setSelectedRow(row);
-                                setTypeModal('VIEW');
-                                setOpenModalConcept(true);
-                              }}
-                              size="small"
-                              aria-label="Detail"
-                            >
-                              <IconEye />
-                            </IconButton>
-                          </Tooltip>
+                          {/* <Tooltip arrow placement='left' title="Download"> */}
+                          <IconButton
+                            color="primary"
+                            onClick={() => {
+                              setSelectedRow(row);
+                              setTypeModal('VIEW');
+                              setOpenModalConcept(true);
+                            }}
+                            size="small"
+                            aria-label="Download"
+                          >
+                            <IconFileDownload />
+                          </IconButton>
+                          {/* </Tooltip> */}
                         </StyledTableCell>
                       </StyledTableRow>
                     ))
@@ -603,7 +614,7 @@ const HomePage = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-            <Stack direction={'row'} justifyContent={'flex-end'}>
+            {concepts?.length > 0 && (<Stack direction={'row'} sx={{ borderTop: '1px solid rgba(224, 224, 224, 1)' }} justifyContent={'flex-end'}>
 
               <TablePagination
                 sx={{
@@ -628,7 +639,7 @@ const HomePage = () => {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
-            </Stack>
+            </Stack>)}
           </MainCard>
         </Grid>
       </Grid>
@@ -781,7 +792,7 @@ const HomePage = () => {
                   }}
                   value={startDate}
                   views={['year', 'month', 'day']}
-                  format="DD/MM/YYYY"
+                  format="YYYY/MM/DD"
                   slotProps={{ textField: { size: 'small' } }}
                   label="Start Registration Date"
                   size="small"
@@ -793,7 +804,7 @@ const HomePage = () => {
                   }}
                   value={endDate}
                   views={['year', 'month', 'day']}
-                  format="DD/MM/YYYY"
+                  format="YYYY/MM/DD"
                   slotProps={{ textField: { size: 'small' } }}
                   label="End Registration Date"
                   size="small"
@@ -803,7 +814,7 @@ const HomePage = () => {
           </Box>
           <Divider />
           <Stack direction="row" alignItems={'center'} sx={{ marginTop: '10px' }} justifyContent="space-between">
-            <Button onClick={onClickResetAll} size="small">
+            <Button onClick={onClickResetAll} variant='custom' size="small">
               Reset all
             </Button>
             <Button startIcon={<IconCircleCheck />} onClick={handleClickApplyFiler} variant="contained" size="small">
@@ -817,16 +828,16 @@ const HomePage = () => {
       {loading && <Loading open={loading} />}
       <Portal>
         <Snackbar
-          autoHideDuration={5000}
+          autoHideDuration={2000}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           open={snackBar?.open}
           onClose={() => {
-            setSnackBar({ open: false, message: '' });
+            setSnackBar({ open: false, message: '', type: snackBar?.type });
           }}
         >
           <Alert
             onClose={() => {
-              setSnackBar({ open: false, message: '' });
+              setSnackBar({ open: false, message: '', type: snackBar?.type });
             }}
             severity={snackBar?.type ? 'success' : 'error'}
             variant="filled"

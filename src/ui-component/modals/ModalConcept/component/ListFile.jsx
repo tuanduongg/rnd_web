@@ -17,7 +17,7 @@ import { IconFileDownload } from '@tabler/icons-react';
 import { IconDownload, IconFile } from '@tabler/icons-react';
 import React, { Fragment } from 'react';
 import { formatBytes, formatDateFromDB } from 'utils/helper';
-import { showNameFile } from '../modal_concept.service';
+import { getIcon, showNameFile } from '../modal_concept.service';
 import { useTheme } from '@mui/material/styles';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
@@ -28,7 +28,7 @@ import 'file-icons-js/css/style.css';
 import './listfile.css';
 
 
-const ListFile = ({ checked, setChecked, listFile, typeModal }) => {
+const ListFile = ({ checked, setChecked, listFile, typeModal, setLoading }) => {
   const theme = useTheme();
   const onClickCheckedAll = () => {
     if (checked?.length === listFile.length) {
@@ -51,6 +51,7 @@ const ListFile = ({ checked, setChecked, listFile, typeModal }) => {
   };
   const onClickDownLoad = async (value) => {
     const { fileId, fileName, fileExtenstion, fileUrl } = value;
+    setLoading(true);
     const response = await restApi.post(
       RouterApi.conceptDownload,
       { fileId: fileId },
@@ -58,6 +59,7 @@ const ListFile = ({ checked, setChecked, listFile, typeModal }) => {
         responseType: 'blob'
       }
     );
+    setLoading(false);
     if (response?.status === 200) {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -76,7 +78,7 @@ const ListFile = ({ checked, setChecked, listFile, typeModal }) => {
         {(listFile?.length > 0) && (
           <>
             <Divider />
-            <ListItem key={0} disablePadding sx={{ padding: '0px 05px' }}>
+            <ListItem key={0} disablePadding sx={{ padding: '5px 5px' }}>
               {/* <ListItemIcon>
                 <Checkbox
                   onClick={() => {
@@ -91,17 +93,17 @@ const ListFile = ({ checked, setChecked, listFile, typeModal }) => {
               </ListItemIcon> */}
               <ListItemText
                 id={0}
-                sx={{ '.MuiListItemText-primary': { fontWeight: 'bold',color: theme?.palette?.primary?.main }, maxWidth: '40px' }}
-                primary={'#'}
-              />
-              <ListItemText
-                id={0}
-                sx={{ '.MuiListItemText-primary': { fontWeight: 'bold',color: theme?.palette?.primary?.main } }}
+                sx={{ '.MuiListItemText-primary': { fontWeight: 'bold', color: theme?.palette?.primary?.main }, minWidth: { xs: '68%', sm: '83%' } }}
                 primary={'File Name'}
               />
               <ListItemText
                 id={0}
-                sx={{ textAlign: 'right', '.MuiListItemText-primary': { fontWeight: 'bold',color: theme?.palette?.primary?.main } }}
+                sx={{ '.MuiListItemText-primary': { fontWeight: 'bold', color: theme?.palette?.primary?.main }, maxWidth: '50px' }}
+                primary={'ECN'}
+              />
+              <ListItemText
+                id={0}
+                sx={{ textAlign: 'right', '.MuiListItemText-primary': { fontWeight: 'bold', color: theme?.palette?.primary?.main } }}
                 primary={'Download'}
               />
             </ListItem>
@@ -119,7 +121,7 @@ const ListFile = ({ checked, setChecked, listFile, typeModal }) => {
                   secondaryAction={
                     <Tooltip arrow placement='left' title="Download">
                       <IconButton
-                        
+
                         onClick={() => {
                           onClickDownLoad(value);
                         }}
@@ -134,17 +136,14 @@ const ListFile = ({ checked, setChecked, listFile, typeModal }) => {
                   disablePadding
                 >
                   <ListItemButton disableGutters sx={{ padding: '5px' }} role={undefined} onClick={handleToggle(value?.fileId)} dense>
-                    <Typography sx={{ marginRight: '15px', textAlign: 'center' }} component={'h6'}>
-                      {index + 1}
-                    </Typography>
                     <span
-                      className={getClassWithColor(showNameFile(value?.fileName, value?.fileExtenstion)) + ' iconcustom'}
-                      style={{ fontSize: '33px' }}
+                      className={getIcon(value)}
+                      style={{ fontSize: '33px', minWidth: '40px' }}
                     />
                     {/* <Box sx={{width:'26px',marginRight:'5px'}}>
 
-                      <FileIcon extension={value?.fileExtenstion} {...defaultStyles[value?.fileExtenstion]} />
-                    </Box> */}
+<FileIcon extension={value?.fileExtenstion} {...defaultStyles[value?.fileExtenstion]} />
+</Box> */}
                     {/* <IconFileFilled size={33} /> */}
                     <ListItemText
                       sx={{ margin: '0px' }}
@@ -160,13 +159,16 @@ const ListFile = ({ checked, setChecked, listFile, typeModal }) => {
                         </Stack>
                       }
                     />
+                    <Typography sx={{ marginRight: '50px', textAlign: 'center' }} component={'h6'}>
+                      {value?.ECN}
+                    </Typography>
                     {/* <ListItemText secondary={formatBytes(value?.size ? value?.size : value?.fileSize ? value?.fileSize : '')}/> */}
                   </ListItemButton>
                 </ListItem>
-                <Divider />
               </Fragment>
             );
           })}
+        {listFile?.length > 0 && (<Divider />)}
       </List>
     </>
   );

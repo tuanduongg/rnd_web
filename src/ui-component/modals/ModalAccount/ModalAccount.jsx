@@ -31,10 +31,14 @@ import { IconDeviceFloppy } from '@tabler/icons-react';
 import { isMobile } from 'react-device-detect';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
-    padding: theme.spacing(2)
+    padding: theme.spacing(2),
+    borderBottom:'none',
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1)
+  },
+  '& .MuiDialogTitle-root': {
+    padding: '10px 15px'
   }
 }));
 const regexNoDiacritics = /^[a-zA-Z0-9-_]+$/;
@@ -292,7 +296,7 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar, se
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button variant="text" onClick={handleClose}>
+          <Button variant="custom" onClick={handleClose}>
             Close
           </Button>
           <Button variant="contained" startIcon={<IconDeviceFloppy />} autoFocus onClick={onClickSave}>

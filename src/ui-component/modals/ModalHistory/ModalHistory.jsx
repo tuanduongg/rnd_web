@@ -32,11 +32,15 @@ const renderHistoryText = (str) => {
 }
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
+    borderBottom:'none',
     padding: theme.spacing(2)
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1)
-  }
+  },
+  '& .MuiDialogTitle-root': {
+    padding: '10px 15px'
+  },
 }));
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -99,8 +103,8 @@ export default function ModalHistory({ open, onClose, selected }) {
         <DialogContent dividers>
           <Grid container spacing={2}>
             <Grid item xs={24}>
-              <TableContainer sx={{ marginTop: '15px' }} component={Paper}>
-                <Table aria-label="customized table">
+              <TableContainer sx={{ marginTop: '15px',maxHeight:{xs:'100vh',sm:'60vh'} }} component={Paper}>
+                <Table stickyHeader aria-label="customized table">
                   <TableHead>
                     <TableRow>
                       <StyledTableCell align="center">#</StyledTableCell>
@@ -147,7 +151,7 @@ export default function ModalHistory({ open, onClose, selected }) {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button variant="text" onClick={handleClose}>
+          <Button variant="custom" onClick={handleClose}>
             Close
           </Button>
         </DialogActions>

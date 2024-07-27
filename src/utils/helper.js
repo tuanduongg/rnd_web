@@ -86,19 +86,28 @@ export function addZero(num) {
   const numInt = parseInt(num);
   return (numInt < 10 ? '0' : '') + numInt;
 }
-
+function isDate(value) {
+  return value instanceof Date;
+}
 export const formatDateFromDB = (dateString, showTime = true) => {
   if (!dateString) {
     return '';
   }
   // Tạo một đối tượng Date từ chuỗi
-  var date = new Date(dateString);
+  var date = null;
+  if (isDate(dateString)) {
+    date = dateString;
+
+  } else {
+
+    date = new Date(dateString);
+  }
   // Lấy các thành phần ngày
   var day = date.getDate();
   var month = date.getMonth() + 1; // Lưu ý: Tháng bắt đầu từ 0 nên cần cộng thêm 1
   var year = date.getFullYear();
   if (!showTime) {
-    return addZero(day) + '/' + addZero(month) + '/' + year;
+    return year + '/' + addZero(month) + '/' + addZero(day);
   }
   // Lấy các thành phần thời gian
   var hours = date.getHours();
@@ -106,10 +115,10 @@ export const formatDateFromDB = (dateString, showTime = true) => {
 
   // Hàm để thêm số 0 trước các giá trị nhỏ hơn 10
   // Tạo chuỗi định dạng
-  return addZero(hours) + ':' + addZero(minutes) + ' ' + addZero(day) + '/' + addZero(month) + '/' + year;
+  return addZero(hours) + ':' + addZero(minutes) + ' ' + year + '/' + addZero(month) + '/' + addZero(day);
 };
 export function getExtenstionFromOriginalName(originalname) {
   return originalname?.includes('.')
-  ? originalname.split('.').pop()
-  : '';
+    ? originalname.split('.').pop()
+    : '';
 }

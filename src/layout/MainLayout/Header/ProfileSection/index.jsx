@@ -40,6 +40,7 @@ import { ShowConfirm, ShowMessage } from 'ui-component/ShowDialog';
 import { IconBrandSamsungpass } from '@tabler/icons-react';
 import ModalChangePassword from 'ui-component/modals/ModalChangePassword/ModalChangePassword';
 
+
 // ==============================|| PROFILE MENU ||============================== //
 
 const ProfileSection = () => {
@@ -247,6 +248,9 @@ const ProfileSection = () => {
                           <ListItemText primary={<Typography variant="body2">Logout</Typography>} />
                         </ListItemButton>
                       </List>
+                      <Stack direction={'row'} justifyContent={'flex-end'}>
+                        <Typography variant="subtitle2" >{import.meta.env.VITE_APP_VERSION}</Typography>
+                      </Stack>
                     </Box>
                   </PerfectScrollbar>
                 </MainCard>
