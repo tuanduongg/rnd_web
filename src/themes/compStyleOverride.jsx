@@ -1,11 +1,29 @@
+import { padding } from "@mui/system";
+import { color } from "framer-motion";
+
 export default function componentStyleOverrides(theme) {
   const bgColor = theme.colors?.grey50;
   return {
     MuiButton: {
+      variants: [
+        {
+          props: { variant: 'custom' },
+          style: {
+            backgroundColor: '#0055951f',
+            color:theme.colors?.primaryMain
+          },
+        },
+      ],
       styleOverrides: {
         root: {
           fontWeight: 500,
-          borderRadius: '4px'
+          borderRadius: `${theme?.customization?.borderRadius}px`,
+          padding: '5px 10px',
+          // backgroundColor:'rgba(0, 85, 149, 0.04)'
+        },
+        outlined: {
+          border: '1px solid #0000004f', // Custom border for outlined buttons
+
         }
       }
     },

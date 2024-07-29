@@ -16,7 +16,8 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  TextField
+  TextField,
+  useTheme
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
@@ -30,15 +31,31 @@ import { IconDeviceFloppy } from '@tabler/icons-react';
 import { isMobile } from 'react-device-detect';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
-    padding: theme.spacing(2)
+    padding: theme.spacing(2),
+    borderBottom:'none',
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1)
+  },
+  '& .MuiDialogTitle-root': {
+    padding: '10px 15px'
   }
 }));
-const names = ['ACC', 'RUBBER', 'CONVERTING', 'INJECTION', 'METAL KEY 5개중 택'];
+const regexNoDiacritics = /^[a-zA-Z0-9-_]+$/;
+
+function isValidUsername(username) {
+  if (!regexNoDiacritics.test(username)) {
+    if (/[^\u0000-\u007F]/.test(username)) {
+      return "Tên tài khoản chứa dấu tiếng Việt hoặc ký tự đặc biệt";
+    }
+    return "Tên tài khoản chứa ký tự không hợp lệ";
+  }
+  return "Tên tài khoản hợp lệ";
+}
+
 const initvalidate = { error: false, msg: '' };
-export default function ModalAccount({ open, onClose, afterSave, setSnackBar,selected,typeModal }) {
+export default function ModalAccount({ open, onClose, afterSave, setSnackBar, selected, typeModal }) {
+  const theme = useTheme();
   const [personName, setPersonName] = useState([]);
   const [fullName, setFullName] = useState('');
   const [roles, setRoles] = useState([]);
@@ -75,7 +92,7 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
   };
   const findUser = async () => {
     setLoading(true);
-    const response = await restApi.post(RouterApi.findUser,{userId:selected?.userId});
+    const response = await restApi.post(RouterApi.findUser, { userId: selected?.userId });
     setLoading(false);
     if (response?.status === 200) {
       const data = response?.data;
@@ -89,7 +106,7 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
     getAllRole();
   }, []);
   useEffect(() => {
-    if(open && typeModal === 'EDIT' && selected) {
+    if (open && typeModal === 'EDIT' && selected) {
       findUser();
     }
   }, [open]);
@@ -134,6 +151,20 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
       check = true;
       setValidateUserName({ error: true, msg: 'This field is requird!' });
     }
+    if (!regexNoDiacritics.test(userName)) {
+      if (/[^\u0000-\u007F]/.test(userName)) {
+        check = true;
+        setValidateUserName({ error: true, msg: 'Username contains Vietnamese characters or special characters!' });
+      } else {
+
+        check = true;
+        setValidateUserName({ error: true, msg: 'Username contains invalid characters!' });
+      }
+    }
+    // if (userName?.includes(' ')) {
+    //   check = true;
+    //   setValidateUserName({ error: true, msg: 'Username not contant space character!' });
+    // }
     if (password?.trim() === '' && typeModal === 'ADD') {
       check = true;
       setValidatePassword({ error: true, msg: 'This field is requird!' });
@@ -141,11 +172,11 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
     if (check === false) {
       let urlAPI = typeModal === 'ADD' ? RouterApi.createUser : RouterApi.updateUser;
       ShowConfirm({
-        title: typeModal === 'ADD'? 'Create User' : 'Update User',
+        title: typeModal === 'ADD' ? 'Create User' : 'Update User',
         message: 'Do you want to save changes?',
         onOK: async () => {
           const res = await restApi.post(urlAPI, {
-            userId:selected?.userId,
+            userId: selected?.userId,
             fullName,
             userName,
             role,
@@ -166,8 +197,8 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
   return (
     <>
       <BootstrapDialog fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-        <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
-          Create New User
+        <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px'}} id="customized-dialog-title">
+          { typeModal === 'ADD' ? 'Create New User' : 'Update User'}
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -200,7 +231,7 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
             <Grid item xs={12}>
               <FormControl fullWidth size="small">
                 <TextField
-                disabled={typeModal==='EDIT'}
+                  disabled={typeModal === 'EDIT'}
                   helperText={validateUserName.msg}
                   error={validateUserName.error}
                   onChange={onChangeInput}
@@ -259,13 +290,13 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar,sel
                     }}
                   />
                 }
-                label="Root (Have All Role)"
+                label="Admin"
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button variant="text" onClick={handleClose}>
+          <Button variant="custom" onClick={handleClose}>
             Close
           </Button>
           <Button variant="contained" startIcon={<IconDeviceFloppy />} autoFocus onClick={onClickSave}>

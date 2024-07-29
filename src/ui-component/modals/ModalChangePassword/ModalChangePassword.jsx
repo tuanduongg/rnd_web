@@ -31,11 +31,15 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
-    padding: theme.spacing(2)
+    padding: theme.spacing(2),
+    borderBottom: 'none',
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1)
-  }
+  },
+  '& .MuiDialogTitle-root': {
+    padding: '10px 15px'
+  },
 }));
 const initvalidate = { error: false, msg: '' };
 export default function ModalChangePassword({ open, onClose }) {
@@ -133,12 +137,12 @@ export default function ModalChangePassword({ open, onClose }) {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           open={snackBar?.open}
           onClose={() => {
-            setSnackBar({ open: false, message: '' });
+            setSnackBar({ open: false, message: '', type: snackBar?.type });
           }}
         >
           <Alert
             onClose={() => {
-              setSnackBar({ open: false, message: '' });
+              setSnackBar({ open: false, message: '', type: snackBar?.type });
             }}
             severity={snackBar?.type ? 'success' : 'error'}
             variant="filled"
@@ -215,7 +219,7 @@ export default function ModalChangePassword({ open, onClose }) {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button variant="text" onClick={handleClose}>
+          <Button variant="custom" onClick={handleClose}>
             Close
           </Button>
           <Button variant="contained" startIcon={<IconDeviceFloppy />} autoFocus onClick={onClickSave}>

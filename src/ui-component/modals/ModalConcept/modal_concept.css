@@ -1,0 +1,6 @@
+.iconcustom_modal::before {
+    font-size: 25px;
+}
+.iconcustom_modal {
+    min-width: 35px;
+}

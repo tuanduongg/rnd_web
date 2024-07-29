@@ -41,17 +41,18 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && pr
   ),
   [theme.breakpoints.up('md')]: {
     marginLeft: open ? 0 : -(drawerWidth - 20),
-    width: `calc(100% - ${drawerWidth}px)`
+    width: `calc(100% - ${drawerWidth}px)`,
+    padding: '10px'
   },
   [theme.breakpoints.down('md')]: {
     marginLeft: '20px',
     width: `calc(100% - ${drawerWidth}px)`,
-    padding: '16px'
+    padding: '10px'
   },
   [theme.breakpoints.down('sm')]: {
     marginLeft: '10px',
     width: `calc(100% - ${drawerWidth}px)`,
-    padding: '16px',
+    padding: '05px',
     marginRight: '10px'
   }
 }));

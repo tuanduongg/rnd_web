@@ -4,7 +4,7 @@ const config = {
     basename: '/',
     defaultPath: '/',
     fontFamily: `'Roboto', sans-serif`,
-    borderRadius: 8,
+    borderRadius: 4,
     colorSelected: '#00000047',
 };
 

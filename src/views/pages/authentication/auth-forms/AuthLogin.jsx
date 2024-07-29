@@ -57,7 +57,7 @@ const AuthLogin = ({ ...others }) => {
         setSubmitting(false); // Ngừng trạng thái submitting sau khi xử lý xong
         if (response?.status === 200) {
             const { token, user } = response.data.data;
-            setCookie('AUTH',token,1);
+            setCookie('AUTH', token, 1);
             dispatch({ type: SET_DATA_USER, dataUser: user });
             location.href = ConfigRouter.homePage;
             // navigate(ConfigRouter.homePage);
@@ -154,15 +154,15 @@ const AuthLogin = ({ ...others }) => {
                 )}
             </Formik>
             <Snackbar
-             anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
                 open={snackBar?.open}
                 onClose={() => {
-                    setSnackBar({ open: false, message: '' });
+                    setSnackBar({ open: false, message: '', type: snackBar?.type });
                 }}
             >
                 <Alert
                     onClose={() => {
-                        setSnackBar({ open: false, message: '' });
+                        setSnackBar({ open: false, message: '', type: snackBar?.type });
                     }}
                     severity="error"
                     variant="filled"

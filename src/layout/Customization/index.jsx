@@ -25,13 +25,19 @@ import { SET_BORDER_RADIUS, SET_FONT_FAMILY, SET_OPEN_DRAWE_RIGHT } from 'store/
 import { gridSpacing } from 'store/constant';
 
 // assets
-import { IconSettings } from '@tabler/icons-react';
+import { IconRefresh, IconSettings } from '@tabler/icons-react';
+import LinearProgressWithLabel from './component/LinearWithLabel';
+import { Box, Stack } from '@mui/material';
+import restApi from 'utils/restAPI';
+import { RouterApi } from 'utils/router-api';
+import { formatBytes } from 'utils/helper';
+import Loading from 'ui-component/Loading';
 
 // concat 'px'
 function valueText(value) {
     return `${value}px`;
 }
-
+const oneTB = 1099511627776;
 // ==============================|| LIVE CUSTOMIZATION ||============================== //
 
 const Customization = () => {
@@ -46,10 +52,23 @@ const Customization = () => {
     // };
 
     // state - border radius
+    const [loading, setLoading] = useState(false);
+    const [size, setSize] = useState(0);
     const [borderRadius, setBorderRadius] = useState(customization.borderRadius);
     const handleBorderRadius = (event, newValue) => {
         setBorderRadius(newValue);
     };
+    const getStorage = async () => {
+        setLoading(true);
+        const res = await restApi.get(RouterApi.userGetStorage);
+        setLoading(false);
+        if (res?.status === 200) {
+            setSize(res?.data?.size);
+        }
+    }
+    useEffect(() => {
+        getStorage();
+    }, [])
 
     useEffect(() => {
         dispatch({ type: SET_BORDER_RADIUS, borderRadius });
@@ -91,6 +110,10 @@ const Customization = () => {
     const handleToggle = () => {
         dispatch({ type: SET_OPEN_DRAWE_RIGHT, openRightDrawer: false });
     };
+    const onClickRefresh = () => {
+        getStorage();
+    };
+
     return (
         <>
             {/* toggle button */}
@@ -135,7 +158,7 @@ const Customization = () => {
                     <Grid container spacing={gridSpacing} sx={{ p: 3 }}>
                         <Grid item xs={12}>
                             {/* font family */}
-                            <SubCard title="Font Family">
+                            <SubCard title="Font">
                                 <FormControl>
                                     <RadioGroup
                                         aria-label="font-family"
@@ -176,10 +199,10 @@ const Customization = () => {
                         </Grid>
                         <Grid item xs={12}>
                             {/* border radius */}
-                            <SubCard title="Border Radius">
+                            <SubCard title='Border'>
                                 <Grid item xs={12} container spacing={2} alignItems="center" sx={{ mt: 2.5 }}>
                                     <Grid item>
-                                        <Typography variant="h6" color="secondary">
+                                        <Typography variant="h6" color="primary">
                                             4px
                                         </Typography>
                                     </Grid>
@@ -195,7 +218,7 @@ const Customization = () => {
                                             step={2}
                                             min={4}
                                             max={24}
-                                            color="secondary"
+                                            color="primary"
                                             sx={{
                                                 '& .MuiSlider-valueLabel': {
                                                     color: 'secondary.light'
@@ -204,16 +227,35 @@ const Customization = () => {
                                         />
                                     </Grid>
                                     <Grid item>
-                                        <Typography variant="h6" color="secondary">
+                                        <Typography variant="h6" color="primary">
                                             24px
                                         </Typography>
                                     </Grid>
                                 </Grid>
                             </SubCard>
                         </Grid>
+                        <Grid item xs={12}>
+                            {/* border radius */}
+                            <SubCard title={<Stack direction={'row'} alignItems={'center'}>
+                                Your storage
+                                <IconButton onClick={onClickRefresh} size='small' color='primary'>
+                                    <IconRefresh />
+                                </IconButton>
+                            </Stack>}>
+                                <Grid item xs={12} container spacing={2} alignItems="center" >
+                                    <Typography ml={2} pt={1} pb={1} variant='h6' component={'h6'}>{formatBytes(size)} of {formatBytes(oneTB)} are used</Typography>
+                                </Grid>
+                                <Grid item xs={12} container spacing={2} alignItems="center" >
+                                    <Grid item xs>
+                                        <LinearProgressWithLabel sx={{ height: '20px', borderRadius: `${customization.borderRadius}px` }} color={parseFloat(size / oneTB) * 100 >= 90 ? 'error' : 'primary'} value={parseFloat(size / oneTB) * 100} />
+                                    </Grid>
+                                </Grid>
+                            </SubCard>
+                        </Grid>
                     </Grid>
                 </PerfectScrollbar>
-            </Drawer>
+            </Drawer >
+            {loading && (<Loading open={loading} />)}
         </>
     );
 };

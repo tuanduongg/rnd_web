@@ -45,7 +45,7 @@ import { styled } from '@mui/material/styles';
 import { IconPlus, IconEdit, IconCheck, IconFilter, IconCircleCheckFilled, IconCircleCheck, IconUser, IconEye } from '@tabler/icons-react';
 import SubCard from 'ui-component/cards/SubCard';
 import { IconX } from '@tabler/icons-react';
-import { maxHeight } from '@mui/system';
+import { maxHeight, padding } from '@mui/system';
 import { DatePicker } from '@mui/x-date-pickers';
 import ModalConcept from 'ui-component/modals/ModalConcept/ModalConcept';
 import { formatDateFromDB } from 'utils/helper';
@@ -57,16 +57,28 @@ import IMAGE_EMPTYDATA from '../../assets/images/backgrounds/empty-box.png';
 import './homepage.css';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import ModalHistory from 'ui-component/modals/ModalHistory/ModalHistory';
+import { IconTrash } from '@tabler/icons-react';
+import { isMobile } from 'react-device-detect';
+import { IconFileDownload } from '@tabler/icons-react';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const currentDate = dayjs();
-const tomorrow = currentDate.add(10, 'day');
-const dayBefore20Days = currentDate.subtract(20, 'day');
+// Lấy ngày đầu tiên của tháng hiện tại
+const firstDayOfCurrentMonth = currentDate.startOf('month');
+
+// Lấy ngày đầu tiên của tháng trước
+const firstDayOfLastMonth = firstDayOfCurrentMonth.subtract(1, 'month');
+
+// Lấy ngày đầu tiên của tháng sau
+const firstDayOfNextMonth = firstDayOfCurrentMonth.add(1, 'month');
+
+// const firstDayOfNextMonth = currentDate.add(10, 'day');
+// const firstDayOfLastMonth = currentDate.subtract(20, 'day');
 const initFilter = {
   personName: [],
   categoryFilter: [],
-  startDate: dayBefore20Days,
-  endDate: tomorrow,
+  startDate: firstDayOfLastMonth,
+  endDate: firstDayOfNextMonth,
   codeFilter: '',
   plNameFilter: '',
   modelFilter: '',
@@ -83,8 +95,8 @@ const HomePage = () => {
   const [arrChipFilter, setArrChipFilter] = useState([]);
   const [categories, setCategories] = useState([]);
   const [concepts, setConcepts] = useState([]);
-  const [startDate, setStartDate] = useState(dayBefore20Days);
-  const [endDate, setEndDate] = useState(tomorrow);
+  const [startDate, setStartDate] = useState(firstDayOfLastMonth);
+  const [endDate, setEndDate] = useState(firstDayOfNextMonth);
   const [codeFilter, setCodeFilter] = useState('');
   const [plNameFilter, setPlNameFilter] = useState('');
   const [modelFilter, setModelFilter] = useState('');
@@ -117,8 +129,7 @@ const HomePage = () => {
       const is_import = res?.data?.import;
       const is_export = res?.data?.export;
       const is_accept = res?.data?.accept;
-
-      if (is_create && is_update && !is_delete && !is_import && !is_export && !is_accept) {
+      if (is_create && is_update && !is_delete && !is_import && !is_export && !is_accept || is_create && is_update && is_delete && !is_import && !is_export && !is_accept) {
         const currentUser = auth?.dataUser?.userId;
         setCurrentFilter({ ...initFilter, personName: [currentUser] });
         setPersonName([currentUser]);
@@ -219,7 +230,7 @@ const HomePage = () => {
     if (currentFilter?.startDate && currentFilter?.endDate) {
       if (currentFilter?.startDate?.isValid() && currentFilter?.endDate?.isValid()) {
         arrChip.push({
-          label: `Registration Date: ${currentFilter?.startDate.format('DD/MM/YYYY')} ~ ${currentFilter?.endDate.format('DD/MM/YYYY')}`,
+          label: `Registration Date: ${currentFilter?.startDate.format('YYYY/MM/DD')} ~ ${currentFilter?.endDate.format('YYYY/MM/DD')}`,
           onDelete: false
         });
       }
@@ -274,10 +285,12 @@ const HomePage = () => {
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: theme.palette.primary.main,
-      color: theme.palette.common.white
+      color: theme.palette.common.white,
+      padding: '12px'
     },
     [`&.${tableCellClasses.body}`]: {
-      fontSize: 14
+      fontSize: 14,
+      padding: '10px'
     }
   }));
 
@@ -330,8 +343,8 @@ const HomePage = () => {
   const onClickResetAll = () => {
     setPersonName([]);
     setCategoryFiler([]);
-    setStartDate(dayBefore20Days);
-    setEndDate(tomorrow);
+    setStartDate(firstDayOfLastMonth);
+    setEndDate(firstDayOfNextMonth);
     setCodeFilter('');
     setPlNameFilter('');
     setModelFilter('');
@@ -384,6 +397,25 @@ const HomePage = () => {
     setAnchorEl(null);
   };
 
+  const onClickDelete = () => {
+    ShowConfirm({
+      title: 'Delete', message: 'Do you want to delete it ?', onOK: () => {
+        onDelete();
+      }
+    })
+  };
+  const onDelete = async () => {
+    if (selectedRow && selectedRow?.conceptId) {
+      const res = await restApi.post(RouterApi.conceptDelete, { conceptId: selectedRow?.conceptId });
+      if (res?.status === 200) {
+        
+        afterSave();
+        setSnackBar({ open: true, message: res?.data?.message || 'Delete successful !', type: true });
+      } else {
+        setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
+      }
+    }
+  }
   const handleChangePage = (event, newPage) => {
     setSelectedRow(null);
     setPage(newPage);
@@ -396,7 +428,7 @@ const HomePage = () => {
   };
   return (
     <>
-      <Grid container spacing={2}>
+      <Grid container spacing={1}>
         {(role?.create || role?.accept || role?.update) && (
           <Grid item xs={12}>
             <SubCard contentSX={{ padding: '13px !important' }}>
@@ -439,6 +471,17 @@ const HomePage = () => {
                     Edit
                   </Button>
                 )}
+
+                {role?.delete && (<Button
+                  onClick={onClickDelete}
+                  disabled={!selectedRow}
+                  size="small"
+                  startIcon={<IconTrash />}
+                  variant="outlined"
+                  color="error"
+                >
+                  Delete
+                </Button>)}
               </Stack>
               {/* </Stack> */}
             </SubCard>
@@ -474,7 +517,7 @@ const HomePage = () => {
               </Grid>
             </Grid>
             <Divider sx={{ margin: '10px 0px' }} />
-            <TableContainer sx={{ marginTop: '15px', maxHeight: `calc(100vh - 320px)` }} component={Paper}>
+            <TableContainer sx={{ marginTop: '15px', maxHeight: !role || (!role?.create && !role?.update && !role?.accept && !role?.delete) ? `calc(100vh - 250px)` : `calc(100vh - 315px)` }} component={Paper}>
               <Table stickyHeader sx={{ minWidth: 700 }} aria-label="customized table">
                 <TableHead>
                   <TableRow>
@@ -534,24 +577,29 @@ const HomePage = () => {
                         <StyledTableCell>{row?.productName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.regisDate ? formatDateFromDB(row?.regisDate, false) : null}</StyledTableCell>
                         <StyledTableCell align="center">
-                          <Tooltip title={row?.user?.fullName}>{row?.isMe ? <IconUser /> : row?.user?.userName}</Tooltip>
+                          <Tooltip arrow title={row?.user?.fullName}>{row?.isMe ? <IconUser /> : row?.user?.userName}</Tooltip>
                         </StyledTableCell>
-                        <StyledTableCell align="center">{row?.approval}</StyledTableCell>
+                        <StyledTableCell align="center">
+                          <span style={{ fontWeight: '500' }}>
+
+                            {row?.approval}
+                          </span>
+                        </StyledTableCell>
                         <StyledTableCell align="right">
-                          <Tooltip title="Detail">
-                            <IconButton
-                              color="primary"
-                              onClick={() => {
-                                setSelectedRow(row);
-                                setTypeModal('VIEW');
-                                setOpenModalConcept(true);
-                              }}
-                              size="small"
-                              aria-label="Detail"
-                            >
-                              <IconEye />
-                            </IconButton>
-                          </Tooltip>
+                          {/* <Tooltip arrow placement='left' title="Download"> */}
+                          <IconButton
+                            color="primary"
+                            onClick={() => {
+                              setSelectedRow(row);
+                              setTypeModal('VIEW');
+                              setOpenModalConcept(true);
+                            }}
+                            size="small"
+                            aria-label="Download"
+                          >
+                            <IconFileDownload />
+                          </IconButton>
+                          {/* </Tooltip> */}
                         </StyledTableCell>
                       </StyledTableRow>
                     ))
@@ -564,34 +612,31 @@ const HomePage = () => {
                     </TableRow>
                   )}
                 </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      color="primary"
+                      rowsPerPageOptions={[5, 10, 25, 100]}
+                      // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                      colSpan={10}
+                      count={total}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      slotProps={{
+                        select: {
+                          inputProps: {
+                            'aria-label': 'rows per page'
+                          },
+                          native: true
+                        }
+                      }}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                  </TableRow>
+                </TableFooter>
               </Table>
             </TableContainer>
-            <Stack direction={'row'} justifyContent={'flex-end'}>
-
-              <TablePagination
-                sx={{
-                  '.MuiTablePagination-toolbar': { padding: '0px' },
-                  borderBottom: 'none',
-                }}
-                color="primary"
-                rowsPerPageOptions={[5, 10, 25, 100]}
-                // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                colSpan={10}
-                count={total}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                slotProps={{
-                  select: {
-                    inputProps: {
-                      'aria-label': 'rows per page'
-                    },
-                    native: true
-                  }
-                }}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </Stack>
           </MainCard>
         </Grid>
       </Grid>
@@ -607,7 +652,7 @@ const HomePage = () => {
         }}
       // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
-        <Paper sx={{ width: { xs: 340, sm: 400 }, padding: '10px' }}>
+        <Paper sx={{ width: '100%', maxWidth: { xs: 340, sm: 400 }, padding: '10px' }}>
           {/* <Grid container spacing={2}>
             <Grid item xs={12}> */}
           <Stack direction="row" alignItems={'center'} justifyContent="space-between">
@@ -744,7 +789,7 @@ const HomePage = () => {
                   }}
                   value={startDate}
                   views={['year', 'month', 'day']}
-                  format="DD/MM/YYYY"
+                  format="YYYY/MM/DD"
                   slotProps={{ textField: { size: 'small' } }}
                   label="Start Registration Date"
                   size="small"
@@ -756,7 +801,7 @@ const HomePage = () => {
                   }}
                   value={endDate}
                   views={['year', 'month', 'day']}
-                  format="DD/MM/YYYY"
+                  format="YYYY/MM/DD"
                   slotProps={{ textField: { size: 'small' } }}
                   label="End Registration Date"
                   size="small"
@@ -766,7 +811,7 @@ const HomePage = () => {
           </Box>
           <Divider />
           <Stack direction="row" alignItems={'center'} sx={{ marginTop: '10px' }} justifyContent="space-between">
-            <Button onClick={onClickResetAll} size="small">
+            <Button onClick={onClickResetAll} variant='custom' size="small">
               Reset all
             </Button>
             <Button startIcon={<IconCircleCheck />} onClick={handleClickApplyFiler} variant="contained" size="small">
@@ -780,16 +825,16 @@ const HomePage = () => {
       {loading && <Loading open={loading} />}
       <Portal>
         <Snackbar
-          autoHideDuration={6000}
+          autoHideDuration={2000}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           open={snackBar?.open}
           onClose={() => {
-            setSnackBar({ open: false, message: '' });
+            setSnackBar({ open: false, message: '', type: snackBar?.type });
           }}
         >
           <Alert
             onClose={() => {
-              setSnackBar({ open: false, message: '' });
+              setSnackBar({ open: false, message: '', type: snackBar?.type });
             }}
             severity={snackBar?.type ? 'success' : 'error'}
             variant="filled"

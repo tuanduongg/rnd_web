@@ -1,5 +1,6 @@
 import { ConfigRouter } from 'routes/ConfigRouter';
 import authReducer from 'store/authReducer';
+import { initialState } from 'store/customizationReducer';
 
 function stringToColor(string) {
   let hash = 0;
@@ -40,7 +41,12 @@ export function stringAvatar(name) {
       children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`
     };
   }
-  return name;
+  return {
+    sx: {
+      bgcolor: '#fafafa',
+    },
+    children: `${name.at(0)}`
+  };;
 }
 export function getCookie(name) {
   var nameEQ = name + '=';
@@ -57,6 +63,7 @@ export const delete_cookie = (name) => {
 };
 export function logout() {
   localStorage.setItem('DATA_USER', null);
+  localStorage.setItem('theme', JSON.stringify(initialState));
   setCookie('AUTH', '', 1);
   delete_cookie('AUTH');
   if (location.pathname !== ConfigRouter.login) {
@@ -79,19 +86,28 @@ export function addZero(num) {
   const numInt = parseInt(num);
   return (numInt < 10 ? '0' : '') + numInt;
 }
-
+function isDate(value) {
+  return value instanceof Date;
+}
 export const formatDateFromDB = (dateString, showTime = true) => {
   if (!dateString) {
     return '';
   }
   // Tạo một đối tượng Date từ chuỗi
-  var date = new Date(dateString);
+  var date = null;
+  if (isDate(dateString)) {
+    date = dateString;
+
+  } else {
+
+    date = new Date(dateString);
+  }
   // Lấy các thành phần ngày
   var day = date.getDate();
   var month = date.getMonth() + 1; // Lưu ý: Tháng bắt đầu từ 0 nên cần cộng thêm 1
   var year = date.getFullYear();
   if (!showTime) {
-    return addZero(day) + '/' + addZero(month) + '/' + year;
+    return year + '/' + addZero(month) + '/' + addZero(day);
   }
   // Lấy các thành phần thời gian
   var hours = date.getHours();
@@ -99,5 +115,10 @@ export const formatDateFromDB = (dateString, showTime = true) => {
 
   // Hàm để thêm số 0 trước các giá trị nhỏ hơn 10
   // Tạo chuỗi định dạng
-  return addZero(hours) + ':' + addZero(minutes) + ' ' + addZero(day) + '/' + addZero(month) + '/' + year;
+  return addZero(hours) + ':' + addZero(minutes) + ' ' + year + '/' + addZero(month) + '/' + addZero(day);
 };
+export function getExtenstionFromOriginalName(originalname) {
+  return originalname?.includes('.')
+    ? originalname.split('.').pop()
+    : '';
+}
