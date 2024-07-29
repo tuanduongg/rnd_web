@@ -445,7 +445,7 @@ const HomePage = () => {
           </Grid>
         )}
         <Grid item xs={12}>
-          <MainCard contentSX={{ padding: '10px' }}>
+          <MainCard contentSX={{ padding: '10px !important' }}>
             <Grid container spacing={1}>
               <Grid item xs={12}>
                 <Button
@@ -462,20 +462,20 @@ const HomePage = () => {
                 </Button>
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                      <Chip
-                        key={index}
-                        sx={{ marginRight: '5px', marginTop: '5px' }}
-                        variant="outlined"
-                        label={chip?.label}
-                        onDelete={chip?.onDelete}
-                      />
-                    ))
+                    <Chip
+                      key={index}
+                      sx={{ marginRight: '5px', marginTop: '5px' }}
+                      variant="outlined"
+                      label={chip?.label}
+                      onDelete={chip?.onDelete}
+                    />
+                  ))
                   : null}
               </Grid>
             </Grid>
             <Divider sx={{ margin: '10px 0px' }} />
-            <TableContainer sx={{ marginTop: '15px' }} component={Paper}>
-              <Table sx={{ minWidth: 700 }} aria-label="customized table">
+            <TableContainer sx={{ marginTop: '15px', maxHeight: `calc(100vh - 320px)` }} component={Paper}>
+              <Table stickyHeader sx={{ minWidth: 700 }} aria-label="customized table">
                 <TableHead>
                   <TableRow>
                     <StyledTableCell align="center">#</StyledTableCell>
@@ -564,31 +564,34 @@ const HomePage = () => {
                     </TableRow>
                   )}
                 </TableBody>
-                <TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      color="primary"
-                      rowsPerPageOptions={[5, 10, 25, 100]}
-                      // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                      colSpan={10}
-                      count={total}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      slotProps={{
-                        select: {
-                          inputProps: {
-                            'aria-label': 'rows per page'
-                          },
-                          native: true
-                        }
-                      }}
-                      onPageChange={handleChangePage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
-                  </TableRow>
-                </TableFooter>
               </Table>
             </TableContainer>
+            <Stack direction={'row'} justifyContent={'flex-end'}>
+
+              <TablePagination
+                sx={{
+                  '.MuiTablePagination-toolbar': { padding: '0px' },
+                  borderBottom: 'none',
+                }}
+                color="primary"
+                rowsPerPageOptions={[5, 10, 25, 100]}
+                // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                colSpan={10}
+                count={total}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                slotProps={{
+                  select: {
+                    inputProps: {
+                      'aria-label': 'rows per page'
+                    },
+                    native: true
+                  }
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </Stack>
           </MainCard>
         </Grid>
       </Grid>
@@ -602,7 +605,7 @@ const HomePage = () => {
         MenuListProps={{
           'aria-labelledby': 'basic-button'
         }}
-        // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+      // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         <Paper sx={{ width: { xs: 340, sm: 400 }, padding: '10px' }}>
           {/* <Grid container spacing={2}>
