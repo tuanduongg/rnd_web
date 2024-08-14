@@ -36,17 +36,17 @@ export function stringAvatar(name) {
   if (name.includes(' ')) {
     return {
       sx: {
-        bgcolor: '#fafafa',
+        bgcolor: '#fafafa'
       },
       children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`
     };
   }
   return {
     sx: {
-      bgcolor: '#fafafa',
+      bgcolor: '#fafafa'
     },
     children: `${name.at(0)}`
-  };;
+  };
 }
 export function getCookie(name) {
   var nameEQ = name + '=';
@@ -66,8 +66,10 @@ export function logout() {
   localStorage.setItem('theme', JSON.stringify(initialState));
   setCookie('AUTH', '', 1);
   delete_cookie('AUTH');
+  sessionStorage.removeItem('token');
   if (location.pathname !== ConfigRouter.login) {
-    location.href = ConfigRouter.login;
+    window.location.replace(ConfigRouter.login);
+    // location.href = ConfigRouter.login;
   }
 }
 export function formatBytes(bytes, decimals = 2) {
@@ -97,9 +99,7 @@ export const formatDateFromDB = (dateString, showTime = true) => {
   var date = null;
   if (isDate(dateString)) {
     date = dateString;
-
   } else {
-
     date = new Date(dateString);
   }
   // Lấy các thành phần ngày
@@ -118,7 +118,32 @@ export const formatDateFromDB = (dateString, showTime = true) => {
   return addZero(hours) + ':' + addZero(minutes) + ' ' + year + '/' + addZero(month) + '/' + addZero(day);
 };
 export function getExtenstionFromOriginalName(originalname) {
-  return originalname?.includes('.')
-    ? originalname.split('.').pop()
-    : '';
+  return originalname?.includes('.') ? originalname.split('.').pop() : '';
+}
+
+export function isValidFileType(fileExtension) {
+  const validFileTypes = [
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'svg',
+    'webp', // Hình ảnh
+    'pdf', // Tài liệu
+    'mp4',
+    'webm',
+    'ogg', // Video
+    'mp3',
+    'wav',
+    'ogg', // Âm thanh
+    'txt',
+    'html',
+    'css',
+    'js',
+    'json', // Các file văn bản
+    'doc',
+    'docx'
+  ];
+
+  return validFileTypes.includes(fileExtension);
 }

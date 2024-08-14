@@ -129,7 +129,10 @@ const HomePage = () => {
       const is_import = res?.data?.import;
       const is_export = res?.data?.export;
       const is_accept = res?.data?.accept;
-      if (is_create && is_update && !is_delete && !is_import && !is_export && !is_accept || is_create && is_update && is_delete && !is_import && !is_export && !is_accept) {
+      if (
+        (is_create && is_update && !is_delete && !is_import && !is_export && !is_accept) ||
+        (is_create && is_update && is_delete && !is_import && !is_export && !is_accept)
+      ) {
         const currentUser = auth?.dataUser?.userId;
         setCurrentFilter({ ...initFilter, personName: [currentUser] });
         setPersonName([currentUser]);
@@ -186,7 +189,13 @@ const HomePage = () => {
   };
   const getAllConcept = async (data) => {
     setLoading(true);
-    const res = await restApi.post(RouterApi.conceptAll, { ...data, page, rowsPerPage });
+    const res = await restApi.post(RouterApi.conceptAll, {
+      ...data,
+      page,
+      rowsPerPage,
+      startDate: data?.startDate?.hour(0).minute(0).second(0),
+      endDate: data?.endDate?.hour(23).minute(59).second(59)
+    });
     setLoading(false);
     if (res?.status === 200) {
       setConcepts(res?.data?.data);
@@ -399,23 +408,24 @@ const HomePage = () => {
 
   const onClickDelete = () => {
     ShowConfirm({
-      title: 'Delete', message: 'Do you want to delete it ?', onOK: () => {
+      title: 'Delete',
+      message: 'Do you want to delete it ?',
+      onOK: () => {
         onDelete();
       }
-    })
+    });
   };
   const onDelete = async () => {
     if (selectedRow && selectedRow?.conceptId) {
       const res = await restApi.post(RouterApi.conceptDelete, { conceptId: selectedRow?.conceptId });
       if (res?.status === 200) {
-        
         afterSave();
         setSnackBar({ open: true, message: res?.data?.message || 'Delete successful !', type: true });
       } else {
         setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
       }
     }
-  }
+  };
   const handleChangePage = (event, newPage) => {
     setSelectedRow(null);
     setPage(newPage);
@@ -472,16 +482,18 @@ const HomePage = () => {
                   </Button>
                 )}
 
-                {role?.delete && (<Button
-                  onClick={onClickDelete}
-                  disabled={!selectedRow}
-                  size="small"
-                  startIcon={<IconTrash />}
-                  variant="outlined"
-                  color="error"
-                >
-                  Delete
-                </Button>)}
+                {role?.delete && (
+                  <Button
+                    onClick={onClickDelete}
+                    disabled={!selectedRow}
+                    size="small"
+                    startIcon={<IconTrash />}
+                    variant="outlined"
+                    color="error"
+                  >
+                    Delete
+                  </Button>
+                )}
               </Stack>
               {/* </Stack> */}
             </SubCard>
@@ -505,19 +517,28 @@ const HomePage = () => {
                 </Button>
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                    <Chip
-                      key={index}
-                      sx={{ marginRight: '5px', marginTop: '5px' }}
-                      variant="outlined"
-                      label={chip?.label}
-                      onDelete={chip?.onDelete}
-                    />
-                  ))
+                      <Chip
+                        key={index}
+                        sx={{ marginRight: '5px', marginTop: '5px' }}
+                        variant="outlined"
+                        label={chip?.label}
+                        onDelete={chip?.onDelete}
+                      />
+                    ))
                   : null}
               </Grid>
             </Grid>
             <Divider sx={{ margin: '10px 0px' }} />
-            <TableContainer sx={{ marginTop: '15px', maxHeight: !role || (!role?.create && !role?.update && !role?.accept && !role?.delete) ? `calc(100vh - 250px)` : `calc(100vh - 315px)` }} component={Paper}>
+            <TableContainer
+              sx={{
+                marginTop: '15px',
+                maxHeight:
+                  !role || (!role?.create && !role?.update && !role?.accept && !role?.delete)
+                    ? `calc(100vh - 250px)`
+                    : `calc(100vh - 215px)`
+              }}
+              component={Paper}
+            >
               <Table stickyHeader sx={{ minWidth: 700 }} aria-label="customized table">
                 <TableHead>
                   <TableRow>
@@ -526,11 +547,11 @@ const HomePage = () => {
                       <p className="name-colum">카테고리</p>
                       <p className="name-colum">(Category)</p>
                     </StyledTableCell>
-                    <StyledTableCell>
+                    <StyledTableCell  sx={{ minWidth: '100px' }}>
                       <p className="name-colum">모델명</p>
                       <p className="name-colum">(Model)</p>
                     </StyledTableCell>
-                    <StyledTableCell>P/L NAME</StyledTableCell>
+                    <StyledTableCell  align="center">P/L NAME</StyledTableCell>
                     <StyledTableCell sx={{ minWidth: '130px' }}>
                       <p className="name-colum">코드</p>
                       <p className="name-colum">(Code)</p>
@@ -572,18 +593,17 @@ const HomePage = () => {
                           {row?.category?.categoryName}
                         </StyledTableCell>
                         <StyledTableCell align="center">{row?.modelName}</StyledTableCell>
-                        <StyledTableCell>{row?.plName}</StyledTableCell>
+                        <StyledTableCell align="center">{row?.plName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.code}</StyledTableCell>
-                        <StyledTableCell>{row?.productName}</StyledTableCell>
+                        <StyledTableCell sx={{wordBreak:'break-all'}}>{row?.productName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.regisDate ? formatDateFromDB(row?.regisDate, false) : null}</StyledTableCell>
                         <StyledTableCell align="center">
-                          <Tooltip arrow title={row?.user?.fullName}>{row?.isMe ? <IconUser /> : row?.user?.userName}</Tooltip>
+                          <Tooltip arrow title={row?.user?.fullName}>
+                            {row?.isMe ? <IconUser /> : row?.user?.userName}
+                          </Tooltip>
                         </StyledTableCell>
                         <StyledTableCell align="center">
-                          <span style={{ fontWeight: '500' }}>
-
-                            {row?.approval}
-                          </span>
+                          <span style={{ fontWeight: '500' }}>{row?.approval}</span>
                         </StyledTableCell>
                         <StyledTableCell align="right">
                           {/* <Tooltip arrow placement='left' title="Download"> */}
@@ -614,32 +634,33 @@ const HomePage = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-            {concepts?.length > 0 && (<Stack direction={'row'} sx={{ borderTop: '1px solid rgba(224, 224, 224, 1)' }} justifyContent={'flex-end'}>
-
-              <TablePagination
-                sx={{
-                  '.MuiTablePagination-toolbar': { padding: '0px' },
-                  borderBottom: 'none',
-                }}
-                color="primary"
-                rowsPerPageOptions={[5, 10, 25, 100]}
-                // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                colSpan={10}
-                count={total}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                slotProps={{
-                  select: {
-                    inputProps: {
-                      'aria-label': 'rows per page'
-                    },
-                    // native: true
-                  }
-                }}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </Stack>)}
+            {concepts?.length > 0 && (
+              <Stack direction={'row'} sx={{ borderTop: '1px solid rgba(224, 224, 224, 1)' }} justifyContent={'flex-end'}>
+                <TablePagination
+                  sx={{
+                    '.MuiTablePagination-toolbar': { padding: '0px' },
+                    borderBottom: 'none'
+                  }}
+                  color="primary"
+                  rowsPerPageOptions={[5, 10, 25, 100,500,1000]}
+                  // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                  colSpan={10}
+                  count={total}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  slotProps={{
+                    select: {
+                      inputProps: {
+                        'aria-label': 'rows per page'
+                      }
+                      // native: true
+                    }
+                  }}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </Stack>
+            )}
           </MainCard>
         </Grid>
       </Grid>
@@ -653,7 +674,7 @@ const HomePage = () => {
         MenuListProps={{
           'aria-labelledby': 'basic-button'
         }}
-      // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+        // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         <Paper sx={{ width: '100%', maxWidth: { xs: 340, sm: 400 }, padding: '10px' }}>
           {/* <Grid container spacing={2}>
@@ -669,10 +690,10 @@ const HomePage = () => {
           <Divider />
           <Box sx={{ margin: '10px 0px 0px 0px', height: { xs: '380px' }, overflowY: 'auto' }}>
             <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
-              <InputLabel id="demo-multiple-checkbox-label">카테고리(Category)</InputLabel>
+              <InputLabel htmlFor="demo-multiple-checkbox">카테고리(Category)</InputLabel>
               <Select
                 label="카테고리(Category)"
-                labelId="demo-multiple-checkbox-label"
+                // labelId="demo-multiple-checkbox-label"
                 id="demo-multiple-checkbox"
                 multiple
                 value={categoryFilter}
@@ -705,11 +726,12 @@ const HomePage = () => {
               </Select>
             </FormControl>
             <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
+
               <TextField
                 onChange={onChangeInputFilter}
                 name="modelFilter"
                 value={modelFilter}
-                id="standard-basic"
+                id="standard-basic-model"
                 label="모델명(Model)"
                 size="small"
                 variant="outlined"
@@ -814,7 +836,7 @@ const HomePage = () => {
           </Box>
           <Divider />
           <Stack direction="row" alignItems={'center'} sx={{ marginTop: '10px' }} justifyContent="space-between">
-            <Button onClick={onClickResetAll} variant='custom' size="small">
+            <Button onClick={onClickResetAll} variant="custom" size="small">
               Reset all
             </Button>
             <Button startIcon={<IconCircleCheck />} onClick={handleClickApplyFiler} variant="contained" size="small">

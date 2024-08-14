@@ -29,7 +29,8 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Alert
+  Alert,
+  TextField
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
@@ -56,8 +57,10 @@ const AccountPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [openModal, setOpenModal] = useState(false);
   const [users, setUsers] = useState([]);
+  const [listUser, setListUser] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [typeModal, setTypeModal] = useState('ADD');
+  const [search, setSearch] = useState('');
   const theme = useTheme();
   const [snackBar, setSnackBar] = useState({
     open: false,
@@ -65,11 +68,14 @@ const AccountPage = () => {
     type: true
   });
   const getUsers = async () => {
-    const res = await restApi.get(RouterApi.userAll + '?screen=account');
+    const res = await restApi.post(RouterApi.userAll, { search: '' });
     if (res?.status === 200) {
-      setUsers(res?.data);
+      setListUser(res?.data);
     }
   };
+  useEffect(() => {
+    onSearch(search);
+  }, [listUser]);
   useEffect(() => {
     getUsers();
   }, []);
@@ -77,14 +83,22 @@ const AccountPage = () => {
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: theme.palette.primary.main,
-      color: theme.palette.common.white,
-
+      color: theme.palette.common.white
     },
     [`&.${tableCellClasses.body}`]: {
       fontSize: 14,
       padding: '10px'
     }
   }));
+
+  const onSearch = (value) => {
+    const userNew = listUser.filter((item) => {
+      const newSearch = value.trim().toLocaleLowerCase();
+      return `${item?.userName}`.toLocaleLowerCase().indexOf(newSearch) > -1 || `${item?.fullName}`.indexOf(newSearch) > -1;
+    });
+    setSelectedRow(null)
+    setUsers(userNew);
+  };
 
   const StyledTableRow = styled(TableRow)(({ theme }) => ({
     '&:nth-of-type(odd)': {
@@ -100,31 +114,55 @@ const AccountPage = () => {
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <SubCard contentSX={{ padding: '13px !important' }}>
-            <Stack direction="row" justifyContent="flex-end" spacing={1}>
-              <Button
-                onClick={() => {
-                  setTypeModal('ADD');
-                  setOpenModal(true);
-                }}
-                size="small"
-                startIcon={<IconPlus />}
-                variant="contained"
-              >
-                New
-              </Button>
-              <Button
-                onClick={() => {
-                  setTypeModal('EDIT');
+            <Stack direction="row" justifyContent="space-between" spacing={1}>
+              <FormControl size="small" sx={{maxWidth:'170px'}} variant="outlined">
+                {/* <InputLabel htmlFor="outlined-adornment-password">Search</InputLabel> */}
+                <OutlinedInput
+                  onChange={(e) => {
+                    onSearch(e.target.value);
+                    setSearch(e.target.value);
+                  }}
+                  value={search}
+                  placeholder="Search..."
+                  id="outlined-adornment-password"
+                  type={'text'}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton aria-label="search" onClick={onSearch} onMouseDown={onSearch} edge="end">
+                        <IconSearch />
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  // label="Search"
+                />
+              </FormControl>
+              <div>
+                <Button
+                  sx={{ marginRight: '10px' }}
+                  onClick={() => {
+                    setTypeModal('ADD');
+                    setOpenModal(true);
+                  }}
+                  size="small"
+                  startIcon={<IconPlus />}
+                  variant="contained"
+                >
+                  New
+                </Button>
+                <Button
+                  onClick={() => {
+                    setTypeModal('EDIT');
 
-                  setOpenModal(true);
-                }}
-                disabled={!selectedRow || selectedRow?.isRoot || auth?.dataUser?.userId === selectedRow?.userId}
-                size="small"
-                startIcon={<IconEdit />}
-                variant="outlined"
-              >
-                Edit
-              </Button>
+                    setOpenModal(true);
+                  }}
+                  disabled={!selectedRow || selectedRow?.isRoot || auth?.dataUser?.userId === selectedRow?.userId}
+                  size="small"
+                  startIcon={<IconEdit />}
+                  variant="outlined"
+                >
+                  Edit
+                </Button>
+              </div>
             </Stack>
           </SubCard>
         </Grid>
@@ -132,8 +170,8 @@ const AccountPage = () => {
           <MainCard contentSX={{ padding: '10px' }}>
             <TableContainer sx={{ marginTop: '15px' }} component={Paper}>
               <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                <TableHead >
-                  <TableRow >
+                <TableHead>
+                  <TableRow>
                     <StyledTableCell align="center">#</StyledTableCell>
                     <StyledTableCell align="left">Full Name</StyledTableCell>
                     <StyledTableCell align="left">User Name</StyledTableCell>
