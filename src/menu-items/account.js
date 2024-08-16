@@ -9,7 +9,7 @@ const icons = { IconDashboard, IconUser };
 
 const account = {
     id: 'acc',
-    title: 'Account page',
+    title: 'Account & Role',
     type: 'group',
     children: [
         {

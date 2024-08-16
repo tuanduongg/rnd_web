@@ -115,7 +115,7 @@ const AccountPage = () => {
         <Grid item xs={12}>
           <SubCard contentSX={{ padding: '13px !important' }}>
             <Stack direction="row" justifyContent="space-between" spacing={1}>
-              <FormControl size="small" sx={{maxWidth:'170px'}} variant="outlined">
+              <FormControl size="small" sx={{maxWidth:'220px'}} variant="outlined">
                 {/* <InputLabel htmlFor="outlined-adornment-password">Search</InputLabel> */}
                 <OutlinedInput
                   onChange={(e) => {
@@ -128,7 +128,7 @@ const AccountPage = () => {
                   type={'text'}
                   endAdornment={
                     <InputAdornment position="end">
-                      <IconButton aria-label="search" onClick={onSearch} onMouseDown={onSearch} edge="end">
+                      <IconButton color='primary' aria-label="search" onClick={onSearch} onMouseDown={onSearch} edge="end">
                         <IconSearch />
                       </IconButton>
                     </InputAdornment>
