@@ -8,6 +8,7 @@ import { ConfigRouter } from './ConfigRouter';
 // dashboard routing
 const HomePage = Loadable(lazy(() => import('views/homepage/HomePage.jsx')));
 const AccountPage = Loadable(lazy(() => import('views/account/AccountPage')));
+const CounterTacticsPage = Loadable(lazy(() => import('views/counter_tactics/CounterTacticsPage')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -22,6 +23,10 @@ const MainRoutes = {
         {
             path: ConfigRouter.accPage,
             element: <AccountPage />
+        },
+        {
+            path: ConfigRouter.qc,
+            element: <CounterTacticsPage />
         }
     ]
 };

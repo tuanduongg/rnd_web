@@ -128,7 +128,7 @@ const AccountPage = () => {
                   type={'text'}
                   endAdornment={
                     <InputAdornment position="end">
-                      <IconButton aria-label="search" onClick={onSearch} onMouseDown={onSearch} edge="end">
+                      <IconButton color='primary' aria-label="search" onClick={onSearch} onMouseDown={onSearch} edge="end">
                         <IconSearch />
                       </IconButton>
                     </InputAdornment>

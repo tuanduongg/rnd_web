@@ -66,7 +66,7 @@ export function logout() {
   localStorage.setItem('theme', JSON.stringify(initialState));
   setCookie('AUTH', '', 1);
   delete_cookie('AUTH');
-  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('AUTH');
   if (location.pathname !== ConfigRouter.login) {
     window.location.replace(ConfigRouter.login);
     // location.href = ConfigRouter.login;
