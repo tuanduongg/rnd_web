@@ -60,6 +60,8 @@ import ModalHistory from 'ui-component/modals/ModalHistory/ModalHistory';
 import { IconTrash } from '@tabler/icons-react';
 import { isMobile } from 'react-device-detect';
 import { IconFileDownload } from '@tabler/icons-react';
+import { IconSearch } from '@tabler/icons-react';
+import { IconAdjustmentsAlt } from '@tabler/icons-react';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const currentDate = dayjs();
@@ -104,6 +106,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const auth = useSelector((state) => state.auth);
   const [currentFilter, setCurrentFilter] = useState(initFilter);
+  const [search, setSearch] = useState('');
   const [typeModal, setTypeModal] = useState('');
   const [total, setTotal] = useState(0);
   const [role, setRole] = useState({});
@@ -213,6 +216,14 @@ const HomePage = () => {
       }
       return false;
     });
+    if (currentFilter?.startDate && currentFilter?.endDate) {
+      if (currentFilter?.startDate?.isValid() && currentFilter?.endDate?.isValid()) {
+        arrChip.push({
+          label: `Registration Date: ${currentFilter?.startDate.format('YYYY/MM/DD')} ~ ${currentFilter?.endDate.format('YYYY/MM/DD')}`,
+          onDelete: false
+        });
+      }
+    }
     if (labelCate.length > 0) {
       arrChip.push({
         label: `카테고리: ${labelCate.join(', ')}`,
@@ -228,6 +239,7 @@ const HomePage = () => {
       }
       return false;
     });
+    
     if (labelUser?.length > 0) {
       arrChip.push({
         label: `등록자: ${labelUser.join(', ')}`,
@@ -235,14 +247,6 @@ const HomePage = () => {
           onDeleteChip('personName');
         }
       });
-    }
-    if (currentFilter?.startDate && currentFilter?.endDate) {
-      if (currentFilter?.startDate?.isValid() && currentFilter?.endDate?.isValid()) {
-        arrChip.push({
-          label: `Registration Date: ${currentFilter?.startDate.format('YYYY/MM/DD')} ~ ${currentFilter?.endDate.format('YYYY/MM/DD')}`,
-          onDelete: false
-        });
-      }
     }
     if (currentFilter?.codeFilter) {
       arrChip.push({
@@ -382,6 +386,9 @@ const HomePage = () => {
     setSelectedRow(null);
     getAllConcept(currentFilter);
   };
+  const onClickSearch = () => {
+    setCurrentFilter({ ...currentFilter, codeFilter })
+  };
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
@@ -502,8 +509,8 @@ const HomePage = () => {
         <Grid item xs={12}>
           <MainCard contentSX={{ padding: '10px !important' }}>
             <Grid container spacing={1}>
-              <Grid item xs={12}>
-                <Button
+              <Grid item xs={8}>
+                {/* <Button
                   sx={{ marginRight: '10px' }}
                   aria-controls={open ? 'basic-menu' : undefined}
                   aria-haspopup="true"
@@ -514,18 +521,50 @@ const HomePage = () => {
                   startIcon={<IconFilter />}
                 >
                   Filter
-                </Button>
+                </Button> */}
+
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                      <Chip
-                        key={index}
-                        sx={{ marginRight: '5px', marginTop: '5px' }}
-                        variant="outlined"
-                        label={chip?.label}
-                        onDelete={chip?.onDelete}
-                      />
-                    ))
+                    <Chip
+                      key={index}
+                      sx={{ marginRight: '5px', marginTop: '5px' }}
+                      variant="outlined"
+                      label={chip?.label}
+                      onDelete={chip?.onDelete}
+                    />
+                  ))
                   : null}
+              </Grid>
+              <Grid item sx={{ textAlign: 'right' }} xs={4}>
+                <Stack direction={'row'} justifyContent={'flex-end'}>
+                  <FormControl fullWidth sx={{ maxWidth: '220px' }} size="small" ariant="outlined">
+                    {/* <InputLabel htmlFor="outlined-adornment-password">Search</InputLabel> */}
+                    <OutlinedInput
+                      onChange={(e) => {
+                        const { value } = e.target;
+                        setCodeFilter(value)
+                      }}
+                      value={codeFilter}
+                      placeholder="Search..."
+                      id="outlined-adornment-password"
+                      type={'text'}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton aria-controls={open ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            onClick={handleOpenMenu} aria-label="search" edge="end">
+                            <IconAdjustmentsAlt />
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                    // label="Search"
+                    />
+                  </FormControl>
+                  <Button variant='contained' startIcon={<IconSearch />} onClick={onClickSearch} size='small' sx={{ marginLeft: '10px' }}>
+                    Search
+                  </Button>
+                </Stack>
               </Grid>
             </Grid>
             <Divider sx={{ margin: '10px 0px' }} />
@@ -547,11 +586,11 @@ const HomePage = () => {
                       <p className="name-colum">카테고리</p>
                       <p className="name-colum">(Category)</p>
                     </StyledTableCell>
-                    <StyledTableCell  sx={{ minWidth: '100px' }}>
+                    <StyledTableCell sx={{ minWidth: '100px' }}>
                       <p className="name-colum">모델명</p>
                       <p className="name-colum">(Model)</p>
                     </StyledTableCell>
-                    <StyledTableCell  align="center">P/L NAME</StyledTableCell>
+                    <StyledTableCell align="center">P/L NAME</StyledTableCell>
                     <StyledTableCell sx={{ minWidth: '130px' }}>
                       <p className="name-colum">코드</p>
                       <p className="name-colum">(Code)</p>
@@ -595,7 +634,7 @@ const HomePage = () => {
                         <StyledTableCell align="center">{row?.modelName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.plName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.code}</StyledTableCell>
-                        <StyledTableCell sx={{wordBreak:'break-all'}}>{row?.productName}</StyledTableCell>
+                        <StyledTableCell sx={{ wordBreak: 'break-all' }}>{row?.productName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.regisDate ? formatDateFromDB(row?.regisDate, false) : null}</StyledTableCell>
                         <StyledTableCell align="center">
                           <Tooltip arrow title={row?.user?.fullName}>
@@ -642,7 +681,7 @@ const HomePage = () => {
                     borderBottom: 'none'
                   }}
                   color="primary"
-                  rowsPerPageOptions={[5, 10, 25, 100,500,1000]}
+                  rowsPerPageOptions={[5, 10, 25, 50, 100]}
                   // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                   colSpan={10}
                   count={total}
@@ -674,14 +713,14 @@ const HomePage = () => {
         MenuListProps={{
           'aria-labelledby': 'basic-button'
         }}
-        // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+      // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         <Paper sx={{ width: '100%', maxWidth: { xs: 340, sm: 400 }, padding: '10px' }}>
           {/* <Grid container spacing={2}>
             <Grid item xs={12}> */}
           <Stack direction="row" alignItems={'center'} justifyContent="space-between">
             <Typography color={'primary'} variant="h4" component="h4">
-              Filter
+            Advance search
             </Typography>
             <IconButton onClick={onCloseMenuFilter} size="small" aria-label="close">
               <IconX />
@@ -839,8 +878,8 @@ const HomePage = () => {
             <Button onClick={onClickResetAll} variant="custom" size="small">
               Reset all
             </Button>
-            <Button startIcon={<IconCircleCheck />} onClick={handleClickApplyFiler} variant="contained" size="small">
-              Apply
+            <Button startIcon={<IconSearch />} onClick={handleClickApplyFiler} variant="contained" size="small">
+              Search
             </Button>
           </Stack>
           {/* </Grid>
