@@ -3,13 +3,10 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { styled } from '@mui/material/styles';
 import {
-  Avatar,
   Box,
-  Chip,
   Divider,
   FormControl,
   FormHelperText,
@@ -18,7 +15,6 @@ import {
   InputLabel,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemText,
   Menu,
   MenuItem,
@@ -31,35 +27,25 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
 import { DatePicker } from '@mui/x-date-pickers';
-import { useSelector } from 'react-redux';
-import { IconCaretDownFilled, IconCloud, IconDownload, IconInfoCircle } from '@tabler/icons-react';
-import { border, borderBottom, borderTop, height, maxWidth } from '@mui/system';
-import { IconFolder } from '@tabler/icons-react';
+import { IconCaretDownFilled, IconInfoCircle } from '@tabler/icons-react';
 import { IconX } from '@tabler/icons-react';
-import { IconFile } from '@tabler/icons-react';
-import { formatBytes, formatDateFromDB, getExtenstionFromOriginalName } from 'utils/helper';
+import { formatBytes, formatDateFromDB } from 'utils/helper';
 import dayjs from 'dayjs';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
-import Loading from 'ui-component/Loading';
 import { useEffect } from 'react';
 import { IconDeviceFloppy } from '@tabler/icons-react';
 import ListFile from './component/ListFile';
 import { isMobile } from 'react-device-detect';
 import { IconHistory } from '@tabler/icons-react';
 import { getIcon, showNameFile } from './modal_concept.service';
-import { IconCircleCheck } from '@tabler/icons-react';
-import { IconChecks } from '@tabler/icons-react';
 import { useTheme } from '@mui/material/styles';
-import { IconPointFilled } from '@tabler/icons-react';
-import { IconCheck } from '@tabler/icons-react';
 import { IconUserCheck } from '@tabler/icons-react';
-import { getClassWithColor } from 'file-icons-js';
 import 'file-icons-js/css/style.css';
 import './modal_concept.css';
 import { IconCloudUpload } from '@tabler/icons-react';
-import { IconCaretDown } from '@tabler/icons-react';
+import toast from 'react-hot-toast';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -96,7 +82,6 @@ export default function ModalConcept({
   open,
   onClose,
   categories,
-  setSnackBar,
   afterSave,
   typeModal,
   selected,
@@ -266,11 +251,11 @@ export default function ModalConcept({
           });
           setLoading(false);
           if (res?.status === 200) {
-            setSnackBar({ open: true, message: 'Saved changes successful!', type: true });
+            toast.success('Saved changes successful!');
             handleClose();
             afterSave();
           } else {
-            setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
+            toast.error(res?.data?.message || 'Server Error!');
           }
         }
       });
@@ -342,7 +327,7 @@ export default function ModalConcept({
       link.click();
       document.body.removeChild(link);
     } else {
-      setSnackBar({ open: true, message: response?.data?.message || 'Server Error!', type: false });
+      toast.error(response?.data?.message || 'Server Error!');
     }
   };
 
@@ -699,7 +684,6 @@ export default function ModalConcept({
           </Box>
         </DialogContent>
         <DialogActions>
-          
           <Button variant="custom" onClick={handleClose}>
             Close
           </Button>

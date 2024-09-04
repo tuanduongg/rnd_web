@@ -1,13 +1,17 @@
 .cell-custom {
-    text-align: center;
-    padding: 3px;
-    border-bottom: 1px solid #333;
+  text-align: center;
+  padding: 3px;
+  border-bottom: 1px solid #333;
 }
 .cell-head-custom {
-    color: #005595;
-    text-align: center;
-    border: 1px solid #333;
-    border-right: 0px;
-    font-weight: bold;
-    padding: 5px;
+  color: #005595;
+  text-align: center;
+  border: 1px solid #333;
+  border-right: 0px;
+  font-weight: bold;
+  padding: 3px;
+}
+.row-total {
+  font-weight: bold;
+  color: '#005595';
 }

@@ -15,6 +15,7 @@ import NavigationScroll from 'layout/NavigationScroll';
 // or for dayjs
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers';
+import 'react-photo-view/dist/react-photo-view.css';
 // ==============================|| APP ||============================== //
 
 const App = () => {

@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import { ConfigRouter } from './ConfigRouter';
+import MoldPage from 'views/mold_page/MoldPage';
 
 // dashboard routing
 const HomePage = Loadable(lazy(() => import('views/homepage/HomePage.jsx')));
@@ -23,6 +24,10 @@ const MainRoutes = {
         {
             path: ConfigRouter.accPage,
             element: <AccountPage />
+        },
+        {
+            path: ConfigRouter.moding,
+            element: <MoldPage />
         },
         {
             path: ConfigRouter.qc,

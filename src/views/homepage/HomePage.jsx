@@ -1,6 +1,5 @@
 // material-ui
 import {
-  Alert,
   Box,
   Button,
   Checkbox,
@@ -11,22 +10,18 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
-  ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
   OutlinedInput,
   Paper,
-  Portal,
   Select,
-  Snackbar,
   Stack,
   Table,
   TableBody,
   TableCell,
   tableCellClasses,
   TableContainer,
-  TableFooter,
   TableHead,
   TablePagination,
   TableRow,
@@ -36,7 +31,6 @@ import {
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import DoneIcon from '@mui/icons-material/Done';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import restApi from 'utils/restAPI';
@@ -45,7 +39,6 @@ import { styled } from '@mui/material/styles';
 import { IconPlus, IconEdit, IconCheck, IconFilter, IconCircleCheckFilled, IconCircleCheck, IconUser, IconEye } from '@tabler/icons-react';
 import SubCard from 'ui-component/cards/SubCard';
 import { IconX } from '@tabler/icons-react';
-import { maxHeight, padding } from '@mui/system';
 import { DatePicker } from '@mui/x-date-pickers';
 import ModalConcept from 'ui-component/modals/ModalConcept/ModalConcept';
 import { formatDateFromDB } from 'utils/helper';
@@ -58,10 +51,10 @@ import './homepage.css';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import ModalHistory from 'ui-component/modals/ModalHistory/ModalHistory';
 import { IconTrash } from '@tabler/icons-react';
-import { isMobile } from 'react-device-detect';
 import { IconFileDownload } from '@tabler/icons-react';
 import { IconSearch } from '@tabler/icons-react';
 import { IconAdjustmentsAlt } from '@tabler/icons-react';
+import toast from 'react-hot-toast';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const currentDate = dayjs();
@@ -110,11 +103,6 @@ const HomePage = () => {
   const [typeModal, setTypeModal] = useState('');
   const [total, setTotal] = useState(0);
   const [role, setRole] = useState({});
-  const [snackBar, setSnackBar] = useState({
-    open: false,
-    message: '',
-    type: true
-  });
   const [selectedRow, setSelectedRow] = useState(null);
 
   const [users, setUsers] = useState([]);
@@ -239,7 +227,7 @@ const HomePage = () => {
       }
       return false;
     });
-    
+
     if (labelUser?.length > 0) {
       arrChip.push({
         label: `등록자: ${labelUser.join(', ')}`,
@@ -368,9 +356,9 @@ const HomePage = () => {
     if (res?.status === 200) {
       setSelectedRow(null);
       afterSave();
-      setSnackBar({ open: true, message: 'Saved changes successful!', type: true });
+      toast.success('Saved changes successful!');
     } else {
-      setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
+      toast.error(res?.data?.message || 'Sever error!');
     }
   };
   const onClickAccept = async () => {
@@ -387,7 +375,7 @@ const HomePage = () => {
     getAllConcept(currentFilter);
   };
   const onClickSearch = () => {
-    setCurrentFilter({ ...currentFilter, codeFilter })
+    setCurrentFilter({ ...currentFilter, codeFilter });
   };
   const handleCloseMenu = () => {
     setAnchorEl(null);
@@ -427,9 +415,9 @@ const HomePage = () => {
       const res = await restApi.post(RouterApi.conceptDelete, { conceptId: selectedRow?.conceptId });
       if (res?.status === 200) {
         afterSave();
-        setSnackBar({ open: true, message: res?.data?.message || 'Delete successful !', type: true });
+        toast.success('Successfully deleted!');
       } else {
-        setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
+        toast.error(res?.data?.message || 'Delete fail!');
       }
     }
   };
@@ -525,14 +513,14 @@ const HomePage = () => {
 
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                    <Chip
-                      key={index}
-                      sx={{ marginRight: '5px', marginTop: '5px' }}
-                      variant="outlined"
-                      label={chip?.label}
-                      onDelete={chip?.onDelete}
-                    />
-                  ))
+                      <Chip
+                        key={index}
+                        sx={{ marginRight: '5px', marginTop: '5px' }}
+                        variant="outlined"
+                        label={chip?.label}
+                        onDelete={chip?.onDelete}
+                      />
+                    ))
                   : null}
               </Grid>
               <Grid item sx={{ textAlign: 'right' }} xs={4}>
@@ -542,7 +530,12 @@ const HomePage = () => {
                     <OutlinedInput
                       onChange={(e) => {
                         const { value } = e.target;
-                        setCodeFilter(value)
+                        setCodeFilter(value);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          onClickSearch();
+                        }
                       }}
                       value={codeFilter}
                       placeholder="Search..."
@@ -550,18 +543,22 @@ const HomePage = () => {
                       type={'text'}
                       endAdornment={
                         <InputAdornment position="end">
-                          <IconButton aria-controls={open ? 'basic-menu' : undefined}
+                          <IconButton
+                            aria-controls={open ? 'basic-menu' : undefined}
                             aria-haspopup="true"
                             aria-expanded={open ? 'true' : undefined}
-                            onClick={handleOpenMenu} aria-label="search" edge="end">
+                            onClick={handleOpenMenu}
+                            aria-label="search"
+                            edge="end"
+                          >
                             <IconAdjustmentsAlt />
                           </IconButton>
                         </InputAdornment>
                       }
-                    // label="Search"
+                      // label="Search"
                     />
                   </FormControl>
-                  <Button variant='contained' startIcon={<IconSearch />} onClick={onClickSearch} size='small' sx={{ marginLeft: '10px' }}>
+                  <Button variant="contained" startIcon={<IconSearch />} onClick={onClickSearch} size="small" sx={{ marginLeft: '10px' }}>
                     Search
                   </Button>
                 </Stack>
@@ -601,7 +598,7 @@ const HomePage = () => {
                     </StyledTableCell>
                     <StyledTableCell align="center">
                       <p className="name-colum">등록일자</p>
-                      <p className="name-colum">(Regis Date)</p>
+                      <p className="name-colum">(Date)</p>
                     </StyledTableCell>
                     <StyledTableCell align="center">
                       <p className="name-colum">등록자</p>
@@ -681,7 +678,7 @@ const HomePage = () => {
                     borderBottom: 'none'
                   }}
                   color="primary"
-                  rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                  rowsPerPageOptions={[10, 20, 30]}
                   // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                   colSpan={10}
                   count={total}
@@ -713,14 +710,14 @@ const HomePage = () => {
         MenuListProps={{
           'aria-labelledby': 'basic-button'
         }}
-      // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+        // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         <Paper sx={{ width: '100%', maxWidth: { xs: 340, sm: 400 }, padding: '10px' }}>
           {/* <Grid container spacing={2}>
             <Grid item xs={12}> */}
           <Stack direction="row" alignItems={'center'} justifyContent="space-between">
             <Typography color={'primary'} variant="h4" component="h4">
-            Advance search
+              Advance search
             </Typography>
             <IconButton onClick={onCloseMenuFilter} size="small" aria-label="close">
               <IconX />
@@ -765,7 +762,6 @@ const HomePage = () => {
               </Select>
             </FormControl>
             <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
-
               <TextField
                 onChange={onChangeInputFilter}
                 name="modelFilter"
@@ -810,11 +806,11 @@ const HomePage = () => {
               />
             </FormControl>
             <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
-              <InputLabel id="demo-simple-select-label">카테고리(Registrant)</InputLabel>
+              <InputLabel id="demo-simple-select-label">등록자(Registrant)</InputLabel>
               <Select
                 id="demo-simple-select"
                 labelId="demo-simple-select-label"
-                label="카테고리(Registrant)"
+                label="등록자(Registrant)"
                 multiple
                 value={personName}
                 onChange={(event) => {
@@ -887,27 +883,6 @@ const HomePage = () => {
         </Paper>
       </Menu>
       {loading && <Loading open={loading} />}
-      <Portal>
-        <Snackbar
-          autoHideDuration={2000}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          open={snackBar?.open}
-          onClose={() => {
-            setSnackBar({ open: false, message: '', type: snackBar?.type });
-          }}
-        >
-          <Alert
-            onClose={() => {
-              setSnackBar({ open: false, message: '', type: snackBar?.type });
-            }}
-            severity={snackBar?.type ? 'success' : 'error'}
-            variant="filled"
-            sx={{ width: '100%' }}
-          >
-            {snackBar?.message}
-          </Alert>
-        </Snackbar>
-      </Portal>
       <ModalHistory
         selected={selectedRow}
         open={openModalHistory}
@@ -923,7 +898,6 @@ const HomePage = () => {
         selected={selectedRow}
         typeModal={typeModal}
         afterSave={afterSave}
-        setSnackBar={setSnackBar}
         categories={categories}
         open={openModalConcept}
         onClose={() => {

@@ -22,15 +22,8 @@ import { getIcon, showNameFile } from '../modal_concept.service';
 import { useTheme } from '@mui/material/styles';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
-import { IconFileFilled } from '@tabler/icons-react';
-import { Box } from '@mui/system';
-import { getClassWithColor } from 'file-icons-js';
 import 'file-icons-js/css/style.css';
 import './listfile.css';
-import { saveAs } from 'file-saver';
-import axios from 'axios';
-import { downloadFile } from 'fs-browsers';
-import LoadingButton from '@mui/lab/LoadingButton';
 
 const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) => {
   const theme = useTheme();
@@ -200,11 +193,6 @@ const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) 
                 >
                   <ListItemButton disableGutters sx={{ padding: '5px' }} role={undefined} onClick={handleToggle(value?.fileId)} dense>
                     <span className={getIcon(value)} style={{ fontSize: '33px', minWidth: '40px' }} />
-                    {/* <Box sx={{width:'26px',marginRight:'5px'}}>
-
-<FileIcon extension={value?.fileExtenstion} {...defaultStyles[value?.fileExtenstion]} />
-</Box> */}
-                    {/* <IconFileFilled size={33} /> */}
                     <ListItemText
                       sx={{ margin: '0px' }}
                       primary={value?.name ? value?.name : showNameFile(value?.fileName, value?.fileExtenstion)}

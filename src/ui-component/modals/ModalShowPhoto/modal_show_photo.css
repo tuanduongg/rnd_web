@@ -1,0 +1,7 @@
+.color-icon {
+  color: white;
+}
+.iconcustom::before {
+  font-size: 30px !important;
+  margin-right: 10px;
+}

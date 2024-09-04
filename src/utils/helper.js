@@ -1,3 +1,4 @@
+import config from 'config';
 import { ConfigRouter } from 'routes/ConfigRouter';
 import authReducer from 'store/authReducer';
 import { initialState } from 'store/customizationReducer';
@@ -118,7 +119,9 @@ export const formatDateFromDB = (dateString, showTime = true) => {
   return addZero(hours) + ':' + addZero(minutes) + ' ' + year + '/' + addZero(month) + '/' + addZero(day);
 };
 export function getExtenstionFromOriginalName(originalname) {
-  return originalname?.includes('.') ? originalname.split('.').pop() : '';
+  const resutl = originalname?.includes('.') ? originalname.split('.').pop() : '';
+
+  return resutl;
 }
 
 export function isValidFileType(fileExtension) {
@@ -147,3 +150,39 @@ export function isValidFileType(fileExtension) {
 
   return validFileTypes.includes(fileExtension);
 }
+export function getWeekNumber(d) {
+  // Copy date so don't modify original
+  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  // Set to nearest Thursday: current date + 4 - current day number
+  // Make Sunday's day number 7
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  // Get first day of year
+  var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  // Calculate full weeks to nearest Thursday
+  var weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+  // Return array of year and week number
+  return [d.getUTCFullYear(), weekNo];
+}
+export const formatNumberWithCommas = (text) => {
+  const numericValue = `${text}`.replace(/,/g, ''); // Remove existing commas before formatting
+  if (!isNaN(numericValue)) {
+    const formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+    return formattedValue;
+  }
+};
+
+export const showImageFromAPI = (url) => {
+  if (url) {
+    const baseUrl = config.baseUrlImage;
+    return baseUrl + url;
+  }
+  return '';
+};
+
+export const concatFileNameWithExtension = (fileName, extenstion) => {
+  if (extenstion) {
+    return fileName + '.' + extenstion;
+  }
+  return fileName;
+};

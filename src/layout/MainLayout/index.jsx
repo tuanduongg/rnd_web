@@ -8,7 +8,7 @@ import Toolbar from '@mui/material/Toolbar';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 // project imports
-import { CssBaseline, styled, useTheme } from '@mui/material';
+import { Button, CssBaseline, IconButton, Stack, styled, useTheme } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import Customization from '../Customization';
@@ -22,6 +22,8 @@ import { useEffect } from 'react';
 import { getCookie } from 'utils/helper';
 import { ConfigRouter } from 'routes/ConfigRouter';
 import { jwtDecode } from 'jwt-decode';
+import { toast, Toaster, ToastBar } from 'react-hot-toast';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && prop !== 'theme' })(({ theme, open }) => ({
   ...theme.typography.mainContent,
@@ -74,7 +76,7 @@ const MainLayout = () => {
   useEffect(() => {
     const token = getCookie('AUTH');
     if (!token) {
-        navigate(ConfigRouter.login);
+      navigate(ConfigRouter.login);
     }
   }, []);
 
@@ -96,17 +98,44 @@ const MainLayout = () => {
           <Header handleLeftDrawerToggle={handleLeftDrawerToggle} />
         </Toolbar>
       </AppBar>
-
       {/* drawer */}
       <Sidebar drawerOpen={leftDrawerOpened} drawerToggle={handleLeftDrawerToggle} />
-
       {/* main content */}
       <Main theme={theme} open={leftDrawerOpened}>
         {/* breadcrumb */}
-        <Breadcrumbs separator={IconChevronRight} navigation={navigation} icon title rightAlign />
+        <Breadcrumbs separator={IconChevronRight} icon title rightAlign />
         <Outlet />
       </Main>
       <Customization />
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          duration: 3000, // Set duration in milliseconds
+          // Tùy chỉnh duration cho từng loại toast
+          success: {
+            duration: 3000
+          },
+          error: {
+            duration: Infinity // Toast error sẽ không tự động đóng
+          }
+        }}
+      >
+        {(t) => (
+          <ToastBar toast={t}>
+            {({ icon, message }) => (
+              <>
+                {icon}
+                {message}
+                {t.type !== 'loading' && (
+                  <IconButton size="small" onClick={() => toast.dismiss(t.id)}>
+                    <CloseIcon style={{ width: '10px', height: '10px' }} />
+                  </IconButton>
+                )}
+              </>
+            )}
+          </ToastBar>
+        )}
+      </Toaster>
     </Box>
   );
 };

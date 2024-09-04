@@ -122,6 +122,11 @@ const AccountPage = () => {
                     onSearch(e.target.value);
                     setSearch(e.target.value);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      onSearch();
+                    }
+                  }}
                   value={search}
                   placeholder="Search..."
                   id="outlined-adornment-password"
@@ -210,81 +215,6 @@ const AccountPage = () => {
             </TableContainer>
           </MainCard>
         </Grid>
-        {/* <Grid item xs={12}>
-          <MainCard contentSX={{ padding: '10px' }}>
-            <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'}>
-              <Typography variant='h4' ml={2} component={'h4'}>
-                Role
-              </Typography>
-              <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                <Button
-                  onClick={() => {
-                    setTypeModal('ADD');
-                    setOpenModal(true);
-                  }}
-                  size="small"
-                  startIcon={<IconPlus />}
-                  variant="contained"
-                >
-                  New
-                </Button>
-                <Button
-                  onClick={() => {
-                    setTypeModal('EDIT');
-
-                    setOpenModal(true);
-                  }}
-                  disabled={!selectedRow || selectedRow?.isRoot || auth?.dataUser?.userId === selectedRow?.userId}
-                  size="small"
-                  startIcon={<IconEdit />}
-                  variant="outlined"
-                >
-                  Edit
-                </Button>
-              </Stack>
-            </Stack>
-            <TableContainer sx={{ marginTop: '15px' }} component={Paper}>
-              <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                <TableHead >
-                  <TableRow >
-                    <StyledTableCell align="center">#</StyledTableCell>
-                    <StyledTableCell align="left">Full Name</StyledTableCell>
-                    <StyledTableCell align="left">User Name</StyledTableCell>
-                    <StyledTableCell align="center">Role</StyledTableCell>
-                    <StyledTableCell align="right">Admin</StyledTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody
-                  sx={{
-                    '.MuiTableRow-root.Mui-selected': { backgroundColor: config.colorSelected },
-                    '.MuiTableRow-root.Mui-selected:hover': { backgroundColor: config.colorSelected }
-                  }}
-                >
-                  {users?.length > 0 ? (
-                    users?.map((row, index) => (
-                      <StyledTableRow selected={selectedRow?.userId === row?.userId} onClick={() => setSelectedRow(row)} key={index}>
-                        <StyledTableCell align="center">{index + 1}</StyledTableCell>
-                        <StyledTableCell align="left" component="th" scope="row">
-                          {row?.fullName}
-                        </StyledTableCell>
-                        <StyledTableCell align="left">{row?.userName}</StyledTableCell>
-                        <StyledTableCell align="center">{row?.role?.roleName}</StyledTableCell>
-                        <StyledTableCell align="right">{row?.isRoot && <IconCheck />}</StyledTableCell>
-                      </StyledTableRow>
-                    ))
-                  ) : (
-                    <TableRow sx={{ textAlign: 'center' }}>
-                      <StyledTableCell colSpan={10} align="center">
-                        <img src={IMAGE_EMPTYDATA} width={70} height={70} alt="image" />
-                        <div>NO DATA</div>
-                      </StyledTableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </MainCard>
-        </Grid> */}
       </Grid>
       <Snackbar
         autoHideDuration={6000}

@@ -3,6 +3,7 @@ export const ConfigRouter = {
     accPage: '/account',
     login: '/login',
     qc: '/qc',
+    moding: '/mold',
     dashboard: 'dashboard',
     samplePage: 'sample',
 }
