@@ -1,9 +1,8 @@
 export const ConfigRouter = {
-    homePage: '/',
+    aprrovalPage: '/approval',
     accPage: '/account',
     login: '/login',
     qc: '/qc',
-    moding: '/mold',
-    dashboard: 'dashboard',
-    samplePage: 'sample',
+    listJig: '/list-jig',
+    statistic_jig: '/statistic-jig',
 }

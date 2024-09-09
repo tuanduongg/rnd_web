@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Button, Skeleton, Stack, Typography } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 import { getPercentage } from '../counter_tactis.service';
 import { DatePicker } from '@mui/x-date-pickers';
@@ -31,7 +31,7 @@ const firstDayOfNextMonth = firstDayOfCurrentMonth.add(1, 'month');
 //   });
 //   return mergedArray;
 // };
-const Statistic = ({ listProcess, setLoading, dataStatistic, startDate, setStartDate, endDate, setEndDate,statistic }) => {
+const Statistic = ({ listProcess, setLoading, dataStatistic, startDate, setStartDate, endDate, setEndDate, statistic, onClickSearch }) => {
   const onClickDownLoadExcel = async () => {
     // setLoading(true);
     const response = await restApi.post(
@@ -117,8 +117,8 @@ const Statistic = ({ listProcess, setLoading, dataStatistic, startDate, setStart
               구분
             </Box>
             {dataStatistic?.length > 0 &&
-              dataStatistic[0]?.processArr?.map((head) => (
-                <Box width={'10%'} className="cell-head-custom">
+              dataStatistic[0]?.processArr?.map((head, index) => (
+                <Box width={'10%'} key={index} className="cell-head-custom">
                   {head?.processName}
                 </Box>
               ))}
@@ -147,8 +147,9 @@ const Statistic = ({ listProcess, setLoading, dataStatistic, startDate, setStart
                 <Box className="cell-custom">완료율(Tỷ lệ)</Box>
               </Box>
               {item?.processArr &&
-                item?.processArr.map((processItem) => (
+                item?.processArr.map((processItem, index) => (
                   <Box
+                    key={index}
                     width={'10%'}
                     sx={{
                       borderLeft: '1px solid #333',

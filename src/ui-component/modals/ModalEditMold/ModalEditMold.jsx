@@ -388,7 +388,7 @@ export default function ModalEditMold({ open, onClose, selectedRow, typeModal, a
                   onChange={onChangeInput}
                   value={valueForm?.weight}
                   name="weight"
-                  label="Weight"
+                  label="Weight(Kg)"
                   size="small"
                   variant="outlined"
                 />
@@ -487,7 +487,7 @@ export default function ModalEditMold({ open, onClose, selectedRow, typeModal, a
             )}
             {typeModal === 'EDIT' && (
               <Grid item xs="12">
-                <Typography>Input/Output Infomation</Typography>
+                <Typography>In/Out Infomation</Typography>
               </Grid>
             )}
             {arrInOutJig?.length > 0 && typeModal === 'EDIT'

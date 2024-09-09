@@ -186,3 +186,21 @@ export const concatFileNameWithExtension = (fileName, extenstion) => {
   }
   return fileName;
 };
+
+export const cssScrollbar = {
+  '&::-webkit-scrollbar': {
+    width: '0.5em', // Narrower scrollbar width
+    height: '0.6em', // Shorter scrollbar height
+  },
+  '&::-webkit-scrollbar-track': {
+    boxShadow: 'inset 0 0 6px rgba(0,0,0,0.00)',
+    webkitBoxShadow: 'inset 0 0 6px rgba(0,0,0,0.00)',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: '#bdbdbd',
+    borderRadius: '20px', // Sets border radius for thumb
+  },
+  '&::-webkit-scrollbar-thumb:hover': {
+    backgroundColor: '#818181',
+  }
+};

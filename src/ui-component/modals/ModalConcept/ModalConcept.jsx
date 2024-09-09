@@ -29,7 +29,7 @@ import { useState } from 'react';
 import { DatePicker } from '@mui/x-date-pickers';
 import { IconCaretDownFilled, IconInfoCircle } from '@tabler/icons-react';
 import { IconX } from '@tabler/icons-react';
-import { formatBytes, formatDateFromDB } from 'utils/helper';
+import { cssScrollbar, formatBytes, formatDateFromDB } from 'utils/helper';
 import dayjs from 'dayjs';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import restApi from 'utils/restAPI';
@@ -308,28 +308,6 @@ export default function ModalConcept({
         break;
     }
   };
-  const onClickDownLoadAll = async () => {
-    setLoading(true);
-    const response = await restApi.post(
-      RouterApi.conceptDownloadMultiple,
-      { fileIds: checkedFile },
-      {
-        responseType: 'blob'
-      }
-    );
-    setLoading(false);
-    if (response?.status === 200) {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `files.zip`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      toast.error(response?.data?.message || 'Server Error!');
-    }
-  };
 
   return (
     <>
@@ -357,7 +335,7 @@ export default function ModalConcept({
           </IconButton>
         </DialogTitle>
         <Divider />
-        <DialogContent>
+        <DialogContent sx={{...cssScrollbar}}>
           <Box>
             <Grid container spacing={typeModal === 'VIEW' ? 1 : 2}>
               {typeModal !== 'VIEW' && (

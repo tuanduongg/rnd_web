@@ -29,7 +29,7 @@ const Login = () => {
       var decodedToken = jwtDecode(token);
       var dateNow = new Date();
       if (decodedToken.exp < dateNow.getTime()) {
-        navigate(ConfigRouter.homePage);
+        navigate(ConfigRouter.aprrovalPage);
       }
     }
   }, []);

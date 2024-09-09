@@ -7,7 +7,8 @@ const config = {
   borderRadius: 4,
   colorSelected: '#00000047',
   maxFileUpload: 30,
-  baseUrlImage: import.meta.env.VITE_APP_API_URL_UPLOAD || 'http://10.0.4.20:5005/'
+  baseUrlImage: import.meta.env.VITE_APP_API_URL_UPLOAD || 'http://10.0.4.20:5005/',
+  arrRowperpages: [5,10, 25, 50]
 };
 
 export default config;

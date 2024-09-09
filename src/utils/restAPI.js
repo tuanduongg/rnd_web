@@ -37,7 +37,7 @@ restApi.interceptors.response.use(
         }
         if (error?.response?.status === 403) {
             ShowMessage({title:'403',message:'Unauthorized',labelYes:'Close',onOK:()=>{
-                location.href = ConfigRouter.homePage
+                location.href = ConfigRouter.aprrovalPage
             }})
         }
         return error.response;

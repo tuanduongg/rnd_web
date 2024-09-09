@@ -1,7 +1,8 @@
 import { ConfigRouter } from 'routes/ConfigRouter';
 import account from './account';
 import home from './home';
-import { IconLicense,IconAugmentedReality } from '@tabler/icons-react';
+import { IconLicense, IconAugmentedReality } from '@tabler/icons-react';
+import { IconGraph } from '@tabler/icons-react';
 
 // ==============================|| MENU ITEMS ||============================== //
 
@@ -23,21 +24,29 @@ export const menuItems = {
         }
       ]
     },
-    {
-      id: 'qc',
-      title: 'moding',
-      type: 'group',
-      children: [
-        {
-          id: ConfigRouter.moding,
-          title: 'Mold',
-          type: 'item',
-          url: ConfigRouter.moding,
-          icon: IconAugmentedReality,
-          breadcrumbs: false
-        }
-      ]
-    },
+    // {
+    //   id: 'qc',
+    //   title: 'moding',
+    //   type: 'group',
+    //   children: [
+    //     {
+    //       id: ConfigRouter.listJig,
+    //       title: 'List JIG',
+    //       type: 'item',
+    //       url: ConfigRouter.listJig,
+    //       icon: IconAugmentedReality,
+    //       breadcrumbs: false
+    //     },
+    //     {
+    //       id: ConfigRouter.statistic_jig,
+    //       title: 'Statistic JIG',
+    //       type: 'item',
+    //       url: ConfigRouter.statistic_jig,
+    //       icon: IconGraph,
+    //       breadcrumbs: false
+    //     }
+    //   ]
+    // },
     account
   ]
 };

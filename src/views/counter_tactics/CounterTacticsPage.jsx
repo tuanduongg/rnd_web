@@ -1,28 +1,10 @@
 import {
-  Box,
-  Button,
   Grid,
-  IconButton,
-  Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  tableCellClasses,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Typography,
   useTheme
 } from '@mui/material';
-import MainCard from 'ui-component/cards/MainCard';
-import SubCard from 'ui-component/cards/SubCard';
-import { styled } from '@mui/material/styles';
 import './counter_tactics.css';
 import Statistic from './component/Statistic';
 import TableList from './component/TableList';
-import ModalCounterTactics from 'ui-component/modals/ModalCounterTactics/ModalCounterTactics';
 import { useEffect, useState } from 'react';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
@@ -44,9 +26,8 @@ const firstDayOfNextMonth = firstDayOfCurrentMonth.add(1, 'month');
 const CounterTacticsPage = () => {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
-  const [reports, setReports] = useState([]);
-  const [search, setSearch] = useState('');
-  const [selectedRow, setSelectedRow] = useState(null);
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  const [role, setRole] = useState(null);
   const [listProcess, setListProcess] = useState([]);
   const [dataStatistic, setDataStatistic] = useState([]);
   const [startDate, setStartDate] = useState(firstDayOfLastMonth);
@@ -58,6 +39,7 @@ const CounterTacticsPage = () => {
       startDate: startDate?.hour(0).minute(0).second(0),
       endDate: endDate?.hour(23).minute(59).second(59)
     });
+    setShowSkeleton(false);
     setLoading(false);
     if (res?.status == 200) {
       const data = res?.data;
@@ -139,6 +121,18 @@ const CounterTacticsPage = () => {
       // statistic();
     }
   };
+  const checkRole = async () => {
+    setLoading(true);
+    const res = await restApi.get(RouterApi.checkRole);
+    setLoading(false);
+    if (res?.status === 200) {
+      setRole(res?.data);
+    }
+  };
+  const onClickSearch = () => {
+    setShowSkeleton(true);
+    statistic();
+  };
   const openModalCounterTactics = () => {
     setOpenModal(true);
   };
@@ -146,6 +140,7 @@ const CounterTacticsPage = () => {
     statistic();
   }, [listProcess]);
   useEffect(() => {
+    checkRole();
     getListProcess();
   }, []);
   return (
@@ -153,6 +148,7 @@ const CounterTacticsPage = () => {
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Statistic
+            onClickSearch={onClickSearch}
             statistic={statistic}
             startDate={startDate}
             setStartDate={setStartDate}
@@ -164,7 +160,7 @@ const CounterTacticsPage = () => {
           />
         </Grid>
         <Grid item xs={12}>
-          <TableList statistic={statistic} listProcess={listProcess} setLoading={setLoading} />
+          <TableList role={role} statistic={statistic} listProcess={listProcess} setLoading={setLoading} />
         </Grid>
       </Grid>
 

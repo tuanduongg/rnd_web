@@ -36,10 +36,8 @@ import MainCard from 'ui-component/cards/MainCard';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import { styled } from '@mui/material/styles';
-import { IconPlus, IconEdit, IconCheck, IconFilter, IconCircleCheckFilled, IconCircleCheck, IconUser, IconEye } from '@tabler/icons-react';
+import { IconPlus, IconEdit, IconCheck, IconUser } from '@tabler/icons-react';
 import SubCard from 'ui-component/cards/SubCard';
-import { IconX } from '@tabler/icons-react';
-import { DatePicker } from '@mui/x-date-pickers';
 import ModalConcept from 'ui-component/modals/ModalConcept/ModalConcept';
 import { formatDateFromDB } from 'utils/helper';
 import dayjs from 'dayjs';
@@ -55,6 +53,8 @@ import { IconFileDownload } from '@tabler/icons-react';
 import { IconSearch } from '@tabler/icons-react';
 import { IconAdjustmentsAlt } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
+import AdvanceSearch from './component/AdvanceSearch';
+import AllInboxIcon from '@mui/icons-material/AllInbox';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const currentDate = dayjs();
@@ -77,21 +77,39 @@ const initFilter = {
   codeFilter: '',
   plNameFilter: '',
   modelFilter: '',
-  productNameFilter: ''
+  productNameFilter: '',
+  search: ''
 };
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
+    padding: '12px'
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+    padding: '10px'
+  }
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0
+  }
+}));
+
 const HomePage = () => {
-  const theme = useTheme();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [anchorEl, setAnchorEl] = useState(null);
   const [openModalHistory, setOpenModalHistory] = useState(false);
-  const [personName, setPersonName] = useState([]);
-  const [categoryFilter, setCategoryFiler] = useState([]);
   const [arrChipFilter, setArrChipFilter] = useState([]);
   const [categories, setCategories] = useState([]);
   const [concepts, setConcepts] = useState([]);
-  const [startDate, setStartDate] = useState(firstDayOfLastMonth);
-  const [endDate, setEndDate] = useState(firstDayOfNextMonth);
   const [codeFilter, setCodeFilter] = useState('');
   const [plNameFilter, setPlNameFilter] = useState('');
   const [modelFilter, setModelFilter] = useState('');
@@ -104,7 +122,6 @@ const HomePage = () => {
   const [total, setTotal] = useState(0);
   const [role, setRole] = useState({});
   const [selectedRow, setSelectedRow] = useState(null);
-
   const [users, setUsers] = useState([]);
   const [openModalConcept, setOpenModalConcept] = useState(false);
 
@@ -148,28 +165,30 @@ const HomePage = () => {
   };
   const onDeleteChip = async (type) => {
     switch (type) {
+      case 'search':
+        setCurrentFilter((pre) => ({ ...pre, search: '' }));
+        setSearch('')
+        break;
       case 'personName':
         setPersonName([]);
-        setCurrentFilter((pre) => ({ ...pre, personName: '' }));
+        setCurrentFilter((pre) => ({
+          ...pre, personName:
+            []
+        }));
         break;
       case 'categoryFilter':
-        setCategoryFiler([]);
-        setCurrentFilter((pre) => ({ ...pre, categoryFilter: '' }));
+        setCurrentFilter((pre) => ({ ...pre, categoryFilter: [] }));
         break;
       case 'codeFilter':
-        setCodeFilter('');
         setCurrentFilter((pre) => ({ ...pre, codeFilter: '' }));
         break;
       case 'plNameFilter':
-        setPlNameFilter('');
         setCurrentFilter((pre) => ({ ...pre, plNameFilter: '' }));
         break;
       case 'modelFilter':
-        setModelFilter('');
         setCurrentFilter((pre) => ({ ...pre, modelFilter: '' }));
         break;
       case 'productNameFilter':
-        setProductNameFilter('');
         setCurrentFilter((pre) => ({ ...pre, productNameFilter: '' }));
 
         break;
@@ -208,16 +227,22 @@ const HomePage = () => {
       if (currentFilter?.startDate?.isValid() && currentFilter?.endDate?.isValid()) {
         arrChip.push({
           label: `Registration Date: ${currentFilter?.startDate.format('YYYY/MM/DD')} ~ ${currentFilter?.endDate.format('YYYY/MM/DD')}`,
-          onDelete: false
+          onDelete: ''
         });
       }
+    }
+    if (currentFilter?.search) {
+      arrChip.push({
+        label: `Search: ${currentFilter?.search}`,
+        onDelete: 'search'
+
+      });
     }
     if (labelCate.length > 0) {
       arrChip.push({
         label: `카테고리: ${labelCate.join(', ')}`,
-        onDelete: (e) => {
-          onDeleteChip('categoryFilter');
-        }
+        onDelete: 'categoryFilter'
+
       });
     }
     users.filter((userItem) => {
@@ -231,43 +256,39 @@ const HomePage = () => {
     if (labelUser?.length > 0) {
       arrChip.push({
         label: `등록자: ${labelUser.join(', ')}`,
-        onDelete: (e) => {
-          onDeleteChip('personName');
-        }
+        onDelete: 'personName'
+
       });
     }
     if (currentFilter?.codeFilter) {
       arrChip.push({
         label: `코드: ${currentFilter?.codeFilter}`,
-        onDelete: () => {
-          onDeleteChip('codeFilter');
-        }
+        onDelete: 'codeFilter'
+
       });
     }
     if (currentFilter?.plNameFilter) {
       arrChip.push({
         label: `P/L Name: ${currentFilter?.plNameFilter}`,
-        onDelete: () => {
-          onDeleteChip('plNameFilter');
-        }
+        onDelete: 'plNameFilter'
+
       });
     }
     if (currentFilter?.modelFilter) {
       arrChip.push({
         label: `모델명: ${currentFilter?.modelFilter}`,
-        onDelete: () => {
-          onDeleteChip('modelFilter');
-        }
+        onDelete: 'modelFilter'
+
       });
     }
     if (currentFilter?.productNameFilter) {
       arrChip.push({
         label: `품명: ${currentFilter?.productNameFilter}`,
-        onDelete: () => {
-          onDeleteChip('productNameFilter');
-        }
+        onDelete: 'productNameFilter'
+
       });
     }
+
     setArrChipFilter(arrChip);
     setPage(0);
   }, [currentFilter]);
@@ -283,74 +304,26 @@ const HomePage = () => {
     checkRole();
   }, []);
 
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: theme.palette.primary.main,
-      color: theme.palette.common.white,
-      padding: '12px'
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 14,
-      padding: '10px'
-    }
-  }));
 
-  const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.action.hover
-    },
-    // hide last border
-    '&:last-child td, &:last-child th': {
-      border: 0
-    }
-  }));
   const open = Boolean(anchorEl);
   const handleOpenMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClickApplyFiler = () => {
+  const handleClickApplyFiler = (data) => {
     const newObj = {
-      personName: personName,
-      categoryFilter: categoryFilter,
-      startDate: startDate,
-      endDate: endDate,
+      personName: data?.personName,
+      categoryFilter: data?.categoryFilter,
+      startDate: data?.startDate,
+      endDate: data?.endDate,
       codeFilter: codeFilter,
       plNameFilter: plNameFilter,
       modelFilter: modelFilter,
-      productNameFilter: productNameFilter
+      productNameFilter: productNameFilter,
+      search
     };
     setCurrentFilter(newObj);
   };
-  const onChangeInputFilter = (e) => {
-    const { name, value } = e.target;
-    switch (name) {
-      case 'codeFilter':
-        setCodeFilter(value);
-        break;
-      case 'plNameFilter':
-        setPlNameFilter(value);
-        break;
-      case 'modelFilter':
-        setModelFilter(value);
-        break;
-      case 'productNameFilter':
-        setProductNameFilter(value);
-        break;
 
-      default:
-        break;
-    }
-  };
-  const onClickResetAll = () => {
-    setPersonName([]);
-    setCategoryFiler([]);
-    setStartDate(firstDayOfLastMonth);
-    setEndDate(firstDayOfNextMonth);
-    setCodeFilter('');
-    setPlNameFilter('');
-    setModelFilter('');
-    setProductNameFilter('');
-  };
   const handleAccept = async () => {
     const res = await restApi.post(RouterApi.conceptAccept, { conceptId: selectedRow?.conceptId });
     if (res?.status === 200) {
@@ -375,28 +348,9 @@ const HomePage = () => {
     getAllConcept(currentFilter);
   };
   const onClickSearch = () => {
-    setCurrentFilter({ ...currentFilter, codeFilter });
-  };
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
+    setCurrentFilter({ ...currentFilter, search });
   };
   const onCloseMenuFilter = () => {
-    if (currentFilter?.personName || Array.isArray(currentFilter?.personName)) {
-      setPersonName(currentFilter?.personName || []);
-    } else {
-      setPersonName([]);
-    }
-    if (currentFilter?.categoryFilter || Array.isArray(currentFilter?.categoryFilter)) {
-      setCategoryFiler(currentFilter?.categoryFilter || []);
-    } else {
-      setPersonName([]);
-    }
-    setStartDate(currentFilter?.startDate);
-    setEndDate(currentFilter?.endDate);
-    setCodeFilter(currentFilter?.codeFilter);
-    setPlNameFilter(currentFilter?.plNameFilter);
-    setModelFilter(currentFilter?.modelFilter);
-    setProductNameFilter(currentFilter?.productNameFilter);
 
     setAnchorEl(null);
   };
@@ -513,14 +467,14 @@ const HomePage = () => {
 
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                      <Chip
-                        key={index}
-                        sx={{ marginRight: '5px', marginTop: '5px' }}
-                        variant="outlined"
-                        label={chip?.label}
-                        onDelete={chip?.onDelete}
-                      />
-                    ))
+                    <Chip
+                      key={index}
+                      sx={{ marginRight: '5px', marginTop: '5px' }}
+                      variant="outlined"
+                      label={chip?.label}
+                      onDelete={() => { onDeleteChip(chip?.onDelete) }}
+                    />
+                  ))
                   : null}
               </Grid>
               <Grid item sx={{ textAlign: 'right' }} xs={4}>
@@ -530,14 +484,14 @@ const HomePage = () => {
                     <OutlinedInput
                       onChange={(e) => {
                         const { value } = e.target;
-                        setCodeFilter(value);
+                        setSearch(value);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           onClickSearch();
                         }
                       }}
-                      value={codeFilter}
+                      value={search}
                       placeholder="Search..."
                       id="outlined-adornment-password"
                       type={'text'}
@@ -555,7 +509,7 @@ const HomePage = () => {
                           </IconButton>
                         </InputAdornment>
                       }
-                      // label="Search"
+                    // label="Search"
                     />
                   </FormControl>
                   <Button variant="contained" startIcon={<IconSearch />} onClick={onClickSearch} size="small" sx={{ marginLeft: '10px' }}>
@@ -678,7 +632,7 @@ const HomePage = () => {
                     borderBottom: 'none'
                   }}
                   color="primary"
-                  rowsPerPageOptions={[10, 20, 30]}
+                  rowsPerPageOptions={config.arrRowperpages}
                   // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                   colSpan={10}
                   count={total}
@@ -700,188 +654,7 @@ const HomePage = () => {
           </MainCard>
         </Grid>
       </Grid>
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={() => {
-          //   setAnchorEl(null);
-        }}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button'
-        }}
-        // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-      >
-        <Paper sx={{ width: '100%', maxWidth: { xs: 340, sm: 400 }, padding: '10px' }}>
-          {/* <Grid container spacing={2}>
-            <Grid item xs={12}> */}
-          <Stack direction="row" alignItems={'center'} justifyContent="space-between">
-            <Typography color={'primary'} variant="h4" component="h4">
-              Advance search
-            </Typography>
-            <IconButton onClick={onCloseMenuFilter} size="small" aria-label="close">
-              <IconX />
-            </IconButton>
-          </Stack>
-          <Divider />
-          <Box sx={{ margin: '10px 0px 0px 0px', height: { xs: '380px' }, overflowY: 'auto' }}>
-            <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
-              <InputLabel htmlFor="demo-multiple-checkbox">카테고리(Category)</InputLabel>
-              <Select
-                label="카테고리(Category)"
-                // labelId="demo-multiple-checkbox-label"
-                id="demo-multiple-checkbox"
-                multiple
-                value={categoryFilter}
-                onChange={(event) => {
-                  const {
-                    target: { value }
-                  } = event;
-                  setCategoryFiler(
-                    // On autofill we get a stringified value.
-                    typeof value === 'string' ? value.split(',') : value
-                  );
-                }}
-                input={<OutlinedInput label="Tag" />}
-                renderValue={(selected) => {
-                  let result = selected
-                    ?.map((id) => {
-                      let catefind = categories?.find((cate) => cate.categoryId === id);
-                      return catefind?.categoryName;
-                    })
-                    .join(' ,');
-                  return result;
-                }}
-              >
-                {categories?.map((item) => (
-                  <MenuItem key={item?.categoryId} value={item?.categoryId}>
-                    <Checkbox checked={categoryFilter.indexOf(item?.categoryId) > -1} />
-                    <ListItemText primary={item?.categoryName} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
-              <TextField
-                onChange={onChangeInputFilter}
-                name="modelFilter"
-                value={modelFilter}
-                id="standard-basic-model"
-                label="모델명(Model)"
-                size="small"
-                variant="outlined"
-              />
-            </FormControl>
-            <FormControl style={{ margin: '10px 0px' }} fullWidth size="small">
-              <TextField
-                onChange={onChangeInputFilter}
-                name="plNameFilter"
-                value={plNameFilter}
-                id="standard-basic"
-                label="P/L NAME"
-                size="small"
-                variant="outlined"
-              />
-            </FormControl>
-            <FormControl style={{ margin: '10px 0px' }} fullWidth size="small">
-              <TextField
-                onChange={onChangeInputFilter}
-                name="codeFilter"
-                id="standard-basic"
-                value={codeFilter}
-                label="코드(Code)"
-                size="small"
-                variant="outlined"
-              />
-            </FormControl>
-            <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
-              <TextField
-                onChange={onChangeInputFilter}
-                name="productNameFilter"
-                value={productNameFilter}
-                id="standard-basic"
-                label="품명(Product Name)"
-                size="small"
-                variant="outlined"
-              />
-            </FormControl>
-            <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
-              <InputLabel id="demo-simple-select-label">등록자(Registrant)</InputLabel>
-              <Select
-                id="demo-simple-select"
-                labelId="demo-simple-select-label"
-                label="등록자(Registrant)"
-                multiple
-                value={personName}
-                onChange={(event) => {
-                  const {
-                    target: { value }
-                  } = event;
-                  setPersonName(
-                    // On autofill we get a stringified value.
-                    typeof value === 'string' ? value.split(',') : value
-                  );
-                }}
-                input={<OutlinedInput label="Tag" />}
-                renderValue={(selected) => {
-                  let result = selected
-                    ?.map((id) => {
-                      let catefind = users?.find((cate) => cate.userId === id);
-                      return catefind?.userName;
-                    })
-                    .join(' ,');
-                  return result;
-                }}
-              >
-                {users?.map((item) => (
-                  <MenuItem key={item?.userId} value={item?.userId}>
-                    <Checkbox checked={personName.indexOf(item?.userId) > -1} />
-                    <ListItemText primary={item?.userName} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl style={{ margin: '10px 0px' }} fullWidth size="small">
-              <Stack spacing={2} direction="row" alignItems={'center'} justifyContent="space-between">
-                <DatePicker
-                  onChange={(newValue) => {
-                    setStartDate(newValue);
-                  }}
-                  value={startDate}
-                  views={['year', 'month', 'day']}
-                  format="YYYY/MM/DD"
-                  slotProps={{ textField: { size: 'small' } }}
-                  label="Start Registration Date"
-                  size="small"
-                />
-                <DatePicker
-                  autoOk={false}
-                  onChange={(newValue) => {
-                    setEndDate(newValue);
-                  }}
-                  value={endDate}
-                  views={['year', 'month', 'day']}
-                  format="YYYY/MM/DD"
-                  slotProps={{ textField: { size: 'small' } }}
-                  label="End Registration Date"
-                  size="small"
-                />
-              </Stack>
-            </FormControl>
-          </Box>
-          <Divider />
-          <Stack direction="row" alignItems={'center'} sx={{ marginTop: '10px' }} justifyContent="space-between">
-            <Button onClick={onClickResetAll} variant="custom" size="small">
-              Reset all
-            </Button>
-            <Button startIcon={<IconSearch />} onClick={handleClickApplyFiler} variant="contained" size="small">
-              Search
-            </Button>
-          </Stack>
-          {/* </Grid>
-          </Grid> */}
-        </Paper>
-      </Menu>
+      <AdvanceSearch currentFilter={currentFilter} anchorEl={anchorEl} open={open} onCloseMenuFilter={onCloseMenuFilter} categories={categories} handleClickApplyFiler={handleClickApplyFiler} users={users} />
       {loading && <Loading open={loading} />}
       <ModalHistory
         selected={selectedRow}

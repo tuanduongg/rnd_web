@@ -49,6 +49,8 @@ import './modal_countertactics.css';
 import 'file-icons-js/css/style.css';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
+import RotateRightIcon from '@mui/icons-material/RotateRight';
+import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import {
   initValidate,
   currentDate,
@@ -59,7 +61,7 @@ import {
   listObjDate,
   arrFieldNum
 } from './modal_countertactics.service';
-import { concatFileNameWithExtension, formatNumberWithCommas, showImageFromAPI } from 'utils/helper';
+import { concatFileNameWithExtension, cssScrollbar, formatNumberWithCommas, showImageFromAPI } from 'utils/helper';
 import toast from 'react-hot-toast';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import dayjs from 'dayjs';
@@ -388,10 +390,33 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
     e.target.value = null;
     e.target.files = null;
   };
+  const getTitleFromImage = (index) => {
+    const find = listFilePreview?.find((item, i) => (i === index));
+
+    if (find) {
+
+      return concatFileNameWithExtension(find?.fileName, find?.fileExtenstion);
+    }
+    return ''
+
+  }
 
   return (
     <>
-      <PhotoProvider pullClosable={true} maskClosable={true}>
+      <PhotoProvider  maskOpacity={0.5} toolbarRender={({ rotate, onRotate, index }) => {
+        return (
+          <Stack direction={'row'} alignItems={'center'}>
+            <span style={{ marginRight: '10px' }}>{getTitleFromImage(index)}</span>
+
+            <IconButton className="PhotoView-Slider__toolbarIcon color-icon" onClick={() => { onRotate(rotate - 90); getTitleFromImage(index) }} size="small">
+              <RotateLeftIcon />
+            </IconButton>
+            <IconButton className="PhotoView-Slider__toolbarIcon color-icon" onClick={() => onRotate(rotate + 90)} size="small">
+              <RotateRightIcon />
+            </IconButton>
+          </Stack>
+        );
+      }} maskClosable={true}>
         <BootstrapDialog fullScreen={isMobile} maxWidth={'md'} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
           <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
             <Stack direction={'row'} alignItems={'center'}>
@@ -411,7 +436,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
             </IconButton>
           </DialogTitle>
           <Divider />
-          <DialogContent>
+          <DialogContent sx={{...cssScrollbar}}>
             <Box>
               <Grid container spacing={2}>
                 <Grid item xs={4.5}>

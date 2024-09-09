@@ -216,7 +216,7 @@ const MoldPage = () => {
                       </IconButton>
                     </InputAdornment>
                   }
-                  // label="Search"
+                // label="Search"
                 />
               </FormControl>
               <Stack direction="row" justifyContent="flex-end" spacing={1}>
@@ -262,7 +262,7 @@ const MoldPage = () => {
             <TableContainer
               sx={{
                 marginTop: '15px',
-                maxHeight: `calc(100vh - 250px)`
+                height: `calc(100vh - 250px)`
               }}
               component={Paper}
             >
@@ -323,7 +323,7 @@ const MoldPage = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-            <Stack direction={'row'} spacing={2} justifyContent={'right'}>
+            <Stack sx={{ borderTop: '1px solid rgba(224, 224, 224, 1)' }} direction={'row'} spacing={2} justifyContent={'right'}>
               <Button
                 size="small"
                 variant="text"
@@ -341,10 +341,10 @@ const MoldPage = () => {
                   borderBottom: 'none'
                 }}
                 color="primary"
-                rowsPerPageOptions={[10, 20, 30]}
+                rowsPerPageOptions={config.arrRowperpages}
                 // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                 colSpan={10}
-                count={DATA.length}
+                count={dataJIG?.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 slotProps={{
@@ -352,7 +352,6 @@ const MoldPage = () => {
                     inputProps: {
                       'aria-label': 'rows per page'
                     }
-                    // native: true
                   }
                 }}
                 onPageChange={handleChangePage}
@@ -364,6 +363,7 @@ const MoldPage = () => {
       </Grid>
       <ModalEditMold
         afterSave={() => {
+          setSelectedRow(null)
           getAllData();
         }}
         typeModal={typeModal}
@@ -371,6 +371,7 @@ const MoldPage = () => {
         open={openModalEdit}
         setLoading={setLoading}
         onClose={() => {
+          setSelectedRow(null)
           setOpenModalEdit(false);
           setSelected(null);
         }}
@@ -415,7 +416,7 @@ const MoldPage = () => {
         <Box sx={{ overflowY: 'auto', maxHeight: '300px' }}>
           {LIST_COL.map((item, index) => {
             return item?.canHide ? (
-              <MenuItem>
+              <MenuItem key={index}>
                 <ListItemText key={index}>
                   <Checkbox
                     onChange={(e) => {

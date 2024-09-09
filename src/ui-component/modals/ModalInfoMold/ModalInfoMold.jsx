@@ -29,8 +29,9 @@ import {
 import OutputIcon from '@mui/icons-material/Output';
 import InputIcon from '@mui/icons-material/Input';
 import { formatDateFromDB } from 'utils/helper';
-import SubCard from 'ui-component/cards/SubCard';
 import './modal_info_mold.css';
+import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
+import 'react-vertical-timeline-component/style.min.css';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -86,7 +87,7 @@ export default function ModalInfoMold({ open, onClose, selectedProp }) {
   };
   return (
     <>
-      <PhotoProvider pullClosable={true} maskClosable={true}>
+      <PhotoProvider  maskClosable={true}>
         <BootstrapDialog fullScreen={isMobile} maxWidth={'md'} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
           <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
             <Stack direction={'row'} alignItems={'center'}>
@@ -110,7 +111,7 @@ export default function ModalInfoMold({ open, onClose, selectedProp }) {
             <Box>
               <>
                 <Grid container>
-                  <Grid item xs={6}>
+                  <Grid item xs={4}>
                     <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
                       &bull; Assset No.
                     </Typography>
@@ -118,7 +119,7 @@ export default function ModalInfoMold({ open, onClose, selectedProp }) {
                       {selected?.assetNo}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={4}>
                     <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
                       &bull; Phan Loai
                     </Typography>
@@ -126,7 +127,7 @@ export default function ModalInfoMold({ open, onClose, selectedProp }) {
                       {selected?.category}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={4}>
                     <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
                       &bull; Model
                     </Typography>
@@ -134,7 +135,7 @@ export default function ModalInfoMold({ open, onClose, selectedProp }) {
                       {selected?.model}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={4}>
                     <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
                       &bull; Product Name
                     </Typography>
@@ -142,7 +143,7 @@ export default function ModalInfoMold({ open, onClose, selectedProp }) {
                       {selected?.productName}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={4}>
                     <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
                       &bull; Ver/Editon/S*F*C
                     </Typography>
@@ -150,7 +151,7 @@ export default function ModalInfoMold({ open, onClose, selectedProp }) {
                       {selected?.version + '/' + selected?.edition + '/' + selected?.SFC}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={4}>
                     <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
                       &bull; Company
                     </Typography>
@@ -158,7 +159,7 @@ export default function ModalInfoMold({ open, onClose, selectedProp }) {
                       {selected?.company}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={4}>
                     <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
                       &bull; Model Code
                     </Typography>
@@ -166,7 +167,48 @@ export default function ModalInfoMold({ open, onClose, selectedProp }) {
                       {selected?.code}
                     </Typography>
                   </Grid>
+                  <Grid item xs={4}>
+                    <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                      &bull; Material
+                    </Typography>
+                    <Typography ml={1} variant="subtitle1">
+                      {selected?.material}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                      &bull; Weight
+                    </Typography>
+                    <Typography ml={1} variant="subtitle1">
+                      {selected?.weight}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                      &bull; Size
+                    </Typography>
+                    <Typography ml={1} variant="subtitle1">
+                      {selected?.size}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                      &bull; Maker
+                    </Typography>
+                    <Typography ml={1} variant="subtitle1">
+                      {selected?.maker}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography sx={{ color: theme?.palette?.primary?.main }} variant="subtitle2">
+                      &bull; Type
+                    </Typography>
+                    <Typography ml={1} variant="subtitle1">
+                      {selected?.type}
+                    </Typography>
+                  </Grid>
                   <Grid item xs={12}>
+                    <br />
                     <Divider />
                     <br />
                   </Grid>
@@ -174,41 +216,74 @@ export default function ModalInfoMold({ open, onClose, selectedProp }) {
                     <Typography color={'primary'} textAlign={'center'} variant="h4">
                       In/Out JIG
                     </Typography>
-                    <Timeline>
+                    <VerticalTimeline layout='1-column-left'>
+                      {selected?.inOutJig?.length > 0 ? selected?.inOutJig?.map((item, index) => (
+                        <>
+                          {item?.type === 'IN' && (<VerticalTimelineElement
+                            className="vertical-timeline-element--work"
+                            contentStyle={{ background: '#fafafa', color: '#111' }}
+                            contentArrowStyle={{ borderRight: '7px solid  #005595' }}
+                            date={item?.date ? formatDateFromDB(item?.date, false) : ''}
+                            iconStyle={{ background: '#005595', color: '#fff' }}
+                            icon={<InputIcon />}
+                          >
+                            <Typography color={'primary'} variant='h4'>{item?.location}</Typography>
+                          </VerticalTimelineElement>)}
+                          {item?.type === 'OUT' && (<VerticalTimelineElement
+                            className="vertical-timeline-element--work"
+                            contentStyle={{ background: '#fafafa', color: '#111' }}
+                            contentArrowStyle={{ borderRight: '7px solid  #f44336' }}
+                            date={item?.date ? formatDateFromDB(item?.date, false) : ''}
+                            iconStyle={{ background: '#f44336', color: '#fff' }}
+                            icon={<OutputIcon />}
+                          >
+                            <Typography color={'error'} variant='h4'>{item?.location}</Typography>
+                          </VerticalTimelineElement>)}
+                        </>
+
+                      )) : null}
+                    </VerticalTimeline>
+                    {/* <Timeline sx={{
+                      [`& .${timelineItemClasses.root}:before`]: {
+                        flex: 0,
+                        padding: 0,
+                      },
+                    }}>
                       {selected?.inOutJig?.length > 0
                         ? selected?.inOutJig?.map((item, index) => (
-                            <TimelineItem key={index}>
-                              <TimelineOppositeContent sx={{ m: 'auto 0' }} align="right" variant="h6">
-                                {item?.date ? formatDateFromDB(item?.date, false) : ''}
-                              </TimelineOppositeContent>
-                              <TimelineSeparator>
-                                <TimelineConnector />
-                                {item?.type === 'IN' && (
-                                  <TimelineDot color="success">
-                                    <InputIcon />
-                                  </TimelineDot>
-                                )}
-                                {item?.type === 'OUT' && (
-                                  <TimelineDot color="error">
-                                    <OutputIcon />
-                                  </TimelineDot>
-                                )}
-                                <TimelineConnector />
-                              </TimelineSeparator>
-                              <TimelineContent sx={{ py: '12px', px: 2 }}>
-                                <Box p={2} sx={{border:'1px dotted #aaa',borderRadius:'15px'}}>
-                                  <Typography variant="h5" component="span">
-                                    {item?.location}
-                                  </Typography>
-                                  <Typography variant="body2">{item?.type === 'IN' ? 'in' : 'out'}</Typography>
-                                </Box>
-                              </TimelineContent>
-                            </TimelineItem>
-                          ))
+                          <TimelineItem key={index}>
+                            <TimelineOppositeContent sx={{ m: 'auto 0' }} align="right" variant="h6">
+                              {item?.date ? formatDateFromDB(item?.date, false) : ''}
+                            </TimelineOppositeContent>
+                            <TimelineSeparator>
+                              <TimelineConnector />
+                              {item?.type === 'IN' && (
+                                <TimelineDot color="success">
+                                  <InputIcon />
+                                </TimelineDot>
+                              )}
+                              {item?.type === 'OUT' && (
+                                <TimelineDot color="error">
+                                  <OutputIcon />
+                                </TimelineDot>
+                              )}
+                              <TimelineConnector />
+                            </TimelineSeparator>
+                            <TimelineContent sx={{ py: '12px', px: 2 }}>
+                              <Box p={2} sx={{ border: '1px dotted #aaa', borderRadius: '15px' }}>
+                                <Typography variant="h5" component="span">
+                                  {item?.location}
+                                </Typography>
+                                <Typography variant="body2">{item?.type === 'IN' ? 'in' : 'out'}</Typography>
+                              </Box>
+                            </TimelineContent>
+                          </TimelineItem>
+                        ))
                         : null}
-                    </Timeline>
+                    </Timeline> */}
                   </Grid>
                   <Grid item xs={12}>
+                    <br />
                     <Divider />
                   </Grid>
                 </Grid>

@@ -59,7 +59,7 @@ const AuthLogin = ({ ...others }) => {
             const { token, user } = response.data.data;
             setCookie('AUTH', token, 1);
             dispatch({ type: SET_DATA_USER, dataUser: user });
-            location.href = ConfigRouter.homePage;
+            location.href = ConfigRouter.aprrovalPage;
             // navigate(ConfigRouter.homePage);
 
         } else {
