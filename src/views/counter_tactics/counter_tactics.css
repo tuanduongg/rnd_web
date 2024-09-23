@@ -2,11 +2,13 @@
   text-align: center;
   padding: 3px;
   border-bottom: 1px solid #333;
+  min-height: 26px;
 }
 .cell-head-custom {
-  color: #005595;
+  color: white;
+  background-color: #333;
   text-align: center;
-  border: 1px solid #333;
+  border: 1px solid white;
   border-right: 0px;
   font-weight: bold;
   padding: 3px;

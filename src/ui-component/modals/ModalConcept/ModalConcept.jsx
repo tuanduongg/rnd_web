@@ -78,16 +78,7 @@ const options = Array.from({ length: 10 }, (v, i) => i + 1);
 const initValidate = { error: false, msg: '' };
 const currentDate = dayjs(new Date());
 
-export default function ModalConcept({
-  open,
-  onClose,
-  categories,
-  afterSave,
-  typeModal,
-  selected,
-  setLoading,
-  showModalHistory
-}) {
+export default function ModalConcept({ open, onClose, categories, afterSave, typeModal, selected, setLoading, showModalHistory }) {
   const theme = useTheme();
 
   const [personName, setPersonName] = useState([]);
@@ -335,7 +326,7 @@ export default function ModalConcept({
           </IconButton>
         </DialogTitle>
         <Divider />
-        <DialogContent sx={{...cssScrollbar}}>
+        <DialogContent sx={{ ...cssScrollbar }}>
           <Box>
             <Grid container spacing={typeModal === 'VIEW' ? 1 : 2}>
               {typeModal !== 'VIEW' && (
@@ -619,7 +610,7 @@ export default function ModalConcept({
                                     </Typography> */}
                                     {<span className={getIcon(file)} />}
                                     <ListItemText
-                                      sx={{ margin: '0px' }}
+                                      sx={{ margin: '0px', wordBreak: 'break-word' }}
                                       primary={file?.name ? file?.name : showNameFile(file?.fileName, file?.fileExtenstion)}
                                       secondary={
                                         <Stack direction={'row'} sx={{ fontSize: '12px' }}>

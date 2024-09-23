@@ -141,7 +141,8 @@ const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) 
                 id={0}
                 sx={{
                   '.MuiListItemText-primary': { fontWeight: 'bold', color: theme?.palette?.primary?.main, wordBreak: 'break-all' },
-                  width: { xs: '68%', sm: '82%' }
+                  width: { xs: '68%', sm: '82%' },
+                  wordBreak: 'break-all'
                 }}
                 primary={'File Name'}
               />
@@ -194,7 +195,7 @@ const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) 
                   <ListItemButton disableGutters sx={{ padding: '5px' }} role={undefined} onClick={handleToggle(value?.fileId)} dense>
                     <span className={getIcon(value)} style={{ fontSize: '33px', minWidth: '40px' }} />
                     <ListItemText
-                      sx={{ margin: '0px' }}
+                      sx={{ margin: '0px', wordBreak: 'break-all' }}
                       primary={value?.name ? value?.name : showNameFile(value?.fileName, value?.fileExtenstion)}
                       secondary={
                         <Stack direction={'row'} sx={{ fontSize: '12px' }}>

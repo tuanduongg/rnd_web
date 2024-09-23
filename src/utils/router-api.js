@@ -41,5 +41,7 @@ export const RouterApi = {
   deleteJIG: '/jig/delete',
   updateJIG: '/jig/update',
 
+  reportQCExportList: '/report-qc/exportExcel-report',
+
   findInOutJigByJig: '/inout-jig/findByJig'
 };

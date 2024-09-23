@@ -2,7 +2,8 @@ export const ConfigRouter = {
     aprrovalPage: '/approval',
     accPage: '/account',
     login: '/login',
-    qc: '/qc',
+    qc: '/qpn',
+    managementMold: '/management-mold',
     listJig: '/list-jig',
     statistic_jig: '/statistic-jig',
 }

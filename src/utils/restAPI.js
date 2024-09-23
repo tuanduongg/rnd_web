@@ -5,7 +5,7 @@ import { getCookie, logout } from './helper';
 import { ShowMessage } from 'ui-component/ShowDialog';
 import { ConfigRouter } from 'routes/ConfigRouter';
 
-const urlAPI = import.meta.env.VITE_APP_API_URL || 'http://localhost:5005/api';
+const urlAPI = import.meta.env.VITE_APP_API_URL || 'http://10.0.0.10:5005/api';
 let token = getCookie('AUTH');
 
 const restApi = axios.create({

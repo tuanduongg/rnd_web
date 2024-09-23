@@ -1,21 +1,14 @@
 // material-ui
 import {
-  Box,
   Button,
-  Checkbox,
   Chip,
   Divider,
   FormControl,
   Grid,
   IconButton,
   InputAdornment,
-  InputLabel,
-  ListItemText,
-  Menu,
-  MenuItem,
   OutlinedInput,
   Paper,
-  Select,
   Stack,
   Table,
   TableBody,
@@ -25,11 +18,10 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  TextField,
   Tooltip
 } from '@mui/material';
 import Typography from '@mui/material/Typography';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
@@ -39,7 +31,7 @@ import { styled } from '@mui/material/styles';
 import { IconPlus, IconEdit, IconCheck, IconUser } from '@tabler/icons-react';
 import SubCard from 'ui-component/cards/SubCard';
 import ModalConcept from 'ui-component/modals/ModalConcept/ModalConcept';
-import { formatDateFromDB } from 'utils/helper';
+import { cssScrollbar, formatDateFromDB } from 'utils/helper';
 import dayjs from 'dayjs';
 import Loading from 'ui-component/Loading';
 import { useTheme } from '@mui/material/styles';
@@ -124,6 +116,7 @@ const HomePage = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [users, setUsers] = useState([]);
   const [openModalConcept, setOpenModalConcept] = useState(false);
+  const inputSearchRef = useRef('');
 
   const checkRole = async () => {
     setLoading(true);
@@ -143,7 +136,7 @@ const HomePage = () => {
       ) {
         const currentUser = auth?.dataUser?.userId;
         setCurrentFilter({ ...initFilter, personName: [currentUser] });
-        setPersonName([currentUser]);
+        // setPersonName([currentUser]);
       }
     }
   };
@@ -167,13 +160,15 @@ const HomePage = () => {
     switch (type) {
       case 'search':
         setCurrentFilter((pre) => ({ ...pre, search: '' }));
-        setSearch('')
+        setSearch(' ');
+
+        inputSearchRef.current = { ...inputSearchRef.current, value: ' ' };
         break;
       case 'personName':
-        setPersonName([]);
+        // setPersonName([]);
         setCurrentFilter((pre) => ({
-          ...pre, personName:
-            []
+          ...pre,
+          personName: []
         }));
         break;
       case 'categoryFilter':
@@ -231,18 +226,16 @@ const HomePage = () => {
         });
       }
     }
-    if (currentFilter?.search) {
-      arrChip.push({
-        label: `Search: ${currentFilter?.search}`,
-        onDelete: 'search'
-
-      });
-    }
+    // if (currentFilter?.search) {
+    //   arrChip.push({
+    //     label: `Search: ${currentFilter?.search}`,
+    //     onDelete: 'search'
+    //   });
+    // }
     if (labelCate.length > 0) {
       arrChip.push({
         label: `카테고리: ${labelCate.join(', ')}`,
         onDelete: 'categoryFilter'
-
       });
     }
     users.filter((userItem) => {
@@ -257,35 +250,30 @@ const HomePage = () => {
       arrChip.push({
         label: `등록자: ${labelUser.join(', ')}`,
         onDelete: 'personName'
-
       });
     }
     if (currentFilter?.codeFilter) {
       arrChip.push({
         label: `코드: ${currentFilter?.codeFilter}`,
         onDelete: 'codeFilter'
-
       });
     }
     if (currentFilter?.plNameFilter) {
       arrChip.push({
         label: `P/L Name: ${currentFilter?.plNameFilter}`,
         onDelete: 'plNameFilter'
-
       });
     }
     if (currentFilter?.modelFilter) {
       arrChip.push({
         label: `모델명: ${currentFilter?.modelFilter}`,
         onDelete: 'modelFilter'
-
       });
     }
     if (currentFilter?.productNameFilter) {
       arrChip.push({
         label: `품명: ${currentFilter?.productNameFilter}`,
         onDelete: 'productNameFilter'
-
       });
     }
 
@@ -304,7 +292,6 @@ const HomePage = () => {
     checkRole();
   }, []);
 
-
   const open = Boolean(anchorEl);
   const handleOpenMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -322,6 +309,7 @@ const HomePage = () => {
       search
     };
     setCurrentFilter(newObj);
+    onCloseMenuFilter();
   };
 
   const handleAccept = async () => {
@@ -347,11 +335,10 @@ const HomePage = () => {
     setSelectedRow(null);
     getAllConcept(currentFilter);
   };
-  const onClickSearch = () => {
+  const onClickSearch = (e) => {
     setCurrentFilter({ ...currentFilter, search });
   };
   const onCloseMenuFilter = () => {
-
     setAnchorEl(null);
   };
 
@@ -467,31 +454,29 @@ const HomePage = () => {
 
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                    <Chip
-                      key={index}
-                      sx={{ marginRight: '5px', marginTop: '5px' }}
-                      variant="outlined"
-                      label={chip?.label}
-                      onDelete={() => { onDeleteChip(chip?.onDelete) }}
-                    />
-                  ))
+                      <Chip
+                        key={index}
+                        sx={{ marginRight: '5px', marginTop: '5px' }}
+                        variant="outlined"
+                        label={chip?.label}
+                        onDelete={() => {
+                          onDeleteChip(chip?.onDelete);
+                        }}
+                      />
+                    ))
                   : null}
               </Grid>
               <Grid item sx={{ textAlign: 'right' }} xs={4}>
                 <Stack direction={'row'} justifyContent={'flex-end'}>
                   <FormControl fullWidth sx={{ maxWidth: '220px' }} size="small" ariant="outlined">
-                    {/* <InputLabel htmlFor="outlined-adornment-password">Search</InputLabel> */}
                     <OutlinedInput
-                      onChange={(e) => {
+                      ref={inputSearchRef}
+                      value={inputSearchRef.current.value}
+                      onBlur={(e) => {
                         const { value } = e.target;
                         setSearch(value);
+                        // inputSearchRef?.current?.value = value;
                       }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          onClickSearch();
-                        }
-                      }}
-                      value={search}
                       placeholder="Search..."
                       id="outlined-adornment-password"
                       type={'text'}
@@ -509,7 +494,6 @@ const HomePage = () => {
                           </IconButton>
                         </InputAdornment>
                       }
-                    // label="Search"
                     />
                   </FormControl>
                   <Button variant="contained" startIcon={<IconSearch />} onClick={onClickSearch} size="small" sx={{ marginLeft: '10px' }}>
@@ -525,7 +509,8 @@ const HomePage = () => {
                 maxHeight:
                   !role || (!role?.create && !role?.update && !role?.accept && !role?.delete)
                     ? `calc(100vh - 250px)`
-                    : `calc(100vh - 215px)`
+                    : `calc(100vh - 215px)`,
+                ...cssScrollbar
               }}
               component={Paper}
             >
@@ -542,7 +527,7 @@ const HomePage = () => {
                       <p className="name-colum">(Model)</p>
                     </StyledTableCell>
                     <StyledTableCell align="center">P/L NAME</StyledTableCell>
-                    <StyledTableCell sx={{ minWidth: '130px' }}>
+                    <StyledTableCell sx={{ minWidth: '150px' }}>
                       <p className="name-colum">코드</p>
                       <p className="name-colum">(Code)</p>
                     </StyledTableCell>
@@ -654,7 +639,15 @@ const HomePage = () => {
           </MainCard>
         </Grid>
       </Grid>
-      <AdvanceSearch currentFilter={currentFilter} anchorEl={anchorEl} open={open} onCloseMenuFilter={onCloseMenuFilter} categories={categories} handleClickApplyFiler={handleClickApplyFiler} users={users} />
+      <AdvanceSearch
+        currentFilter={currentFilter}
+        anchorEl={anchorEl}
+        open={open}
+        onCloseMenuFilter={onCloseMenuFilter}
+        categories={categories}
+        handleClickApplyFiler={handleClickApplyFiler}
+        users={users}
+      />
       {loading && <Loading open={loading} />}
       <ModalHistory
         selected={selectedRow}

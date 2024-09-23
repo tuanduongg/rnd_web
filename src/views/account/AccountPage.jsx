@@ -48,6 +48,7 @@ import SubCard from 'ui-component/cards/SubCard';
 import ModalAccount from 'ui-component/modals/ModalAccount/ModalAccount';
 import IMAGE_EMPTYDATA from '../../assets/images/backgrounds/empty-box.png';
 import { padding } from '@mui/system';
+import { cssScrollbar } from 'utils/helper';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const names = ['ACC', 'RUBBER', 'CONVERTING', 'INJECTION', 'METAL KEY 5개중 택'];
@@ -96,7 +97,7 @@ const AccountPage = () => {
       const newSearch = value.trim().toLocaleLowerCase();
       return `${item?.userName}`.toLocaleLowerCase().indexOf(newSearch) > -1 || `${item?.fullName}`.indexOf(newSearch) > -1;
     });
-    setSelectedRow(null)
+    setSelectedRow(null);
     setUsers(userNew);
   };
 
@@ -115,7 +116,7 @@ const AccountPage = () => {
         <Grid item xs={12}>
           <SubCard contentSX={{ padding: '13px !important' }}>
             <Stack direction="row" justifyContent="space-between" spacing={1}>
-              <FormControl size="small" sx={{maxWidth:'220px'}} variant="outlined">
+              <FormControl size="small" sx={{ maxWidth: '220px' }} variant="outlined">
                 {/* <InputLabel htmlFor="outlined-adornment-password">Search</InputLabel> */}
                 <OutlinedInput
                   onChange={(e) => {
@@ -133,7 +134,7 @@ const AccountPage = () => {
                   type={'text'}
                   endAdornment={
                     <InputAdornment position="end">
-                      <IconButton color='primary' aria-label="search" onClick={onSearch} onMouseDown={onSearch} edge="end">
+                      <IconButton color="primary" aria-label="search" onClick={onSearch} onMouseDown={onSearch} edge="end">
                         <IconSearch />
                       </IconButton>
                     </InputAdornment>
@@ -173,8 +174,8 @@ const AccountPage = () => {
         </Grid>
         <Grid item xs={12}>
           <MainCard contentSX={{ padding: '10px' }}>
-            <TableContainer sx={{ marginTop: '15px' }} component={Paper}>
-              <Table sx={{ minWidth: 700 }} aria-label="customized table">
+            <TableContainer sx={{ marginTop: '15px', ...cssScrollbar, maxHeight: `calc(100vh - 225px)` }} component={Paper}>
+              <Table stickyHeader sx={{ minWidth: 700, ...cssScrollbar }} aria-label="customized table">
                 <TableHead>
                   <TableRow>
                     <StyledTableCell align="center">#</StyledTableCell>

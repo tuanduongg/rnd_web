@@ -99,7 +99,7 @@ const AuthLogin = ({ ...others }) => {
                             onBlur={handleBlur}
                             onChange={handleChange}
                             size="small"
-                            label="User name"
+                            label="Username"
                             helperText={errors.username}
                         />
                         <FormControl size="small" fullWidth error={Boolean(touched.password && errors.password)} sx={{ marginTop: '20px' }}>

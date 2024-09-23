@@ -3,18 +3,14 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { styled } from '@mui/material/styles';
+import * as Yup from 'yup';
 import {
-  Autocomplete,
   Box,
-  CircularProgress,
   Divider,
   FormControl,
   FormControlLabel,
-  FormHelperText,
-  FormLabel,
   Grid,
   IconButton,
   ImageList,
@@ -39,7 +35,6 @@ import { useTheme } from '@mui/material/styles';
 import { useState } from 'react';
 import config from 'config';
 import { DatePicker } from '@mui/x-date-pickers';
-import { IconFile } from '@tabler/icons-react';
 import { IconPhotoPlus } from '@tabler/icons-react';
 import { useRef } from 'react';
 import { useEffect } from 'react';
@@ -53,8 +48,6 @@ import RotateRightIcon from '@mui/icons-material/RotateRight';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import {
   initValidate,
-  currentDate,
-  currenWeekNum,
   inititalValueForm,
   inititalValidateForm,
   arrNoValidate,
@@ -65,6 +58,7 @@ import { concatFileNameWithExtension, cssScrollbar, formatNumberWithCommas, show
 import toast from 'react-hot-toast';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import dayjs from 'dayjs';
+import { useForm, Controller } from 'react-hook-form';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -105,41 +99,57 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
   const [validateForm, setValidateForm] = useState(inititalValidateForm);
   const inputImageRef = useRef();
   const inputFileRef = useRef();
+  const buttonSubmit = useRef();
 
+  const {
+    watch,
+    handleSubmit,
+    clearErrors,
+    control,
+    setValue,
+    formState: { errors },
+    reset
+  } = useForm({
+    defaultValues: inititalValueForm
+  });
   const handleClose = (event, reason) => {
     if (reason && (reason == 'backdropClick' || reason === 'escapeKeyDown')) return;
     setListFilePreview([]);
     setListImageUpload([]);
     setFileUploadRequest([]);
-    setValidateForm(inititalValidateForm);
-    setValueForm(inititalValueForm);
+    reset();
     onClose();
   };
 
   const findByCode = async () => {
-    if (typeModal === 'EDIT') {
+    if (typeModal === 'EDIT' || typeModal === 'VIEW') {
       return;
     }
-    const codeReq = `${valueForm?.code}`.trim();
+    const codeReq = `${codeValue}`.trim();
     // setLoading(true);
     const res = await restApi.post(RouterApi.conceptFindByCode, { code: codeReq });
     // setLoading(false);
     if (res?.status === 200) {
       const { modelName, productName, plName, category } = res?.data;
-      setValidateForm((pre) => ({ ...pre, model: initValidate, item: initValidate }));
-      setValueForm((pre) => ({ ...pre, model: modelName, item: productName, plName: plName, category: category?.categoryId }));
+
+      setValue('model', modelName);
+      setValue('item', productName);
+      setValue('plName', plName);
+      setValue('category', category?.categoryId);
+
+      clearErrors(['model', 'item', 'plName', 'category']);
     }
   };
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (valueForm?.code) {
-        findByCode();
-      }
-    }, 1000); // 3000ms = 3s
 
-    // Cleanup the timer if the user types again within the 3s
-    return () => clearTimeout(timer);
-  }, [valueForm.code]);
+  // Theo dõi giá trị của code
+  const codeValue = watch('code');
+
+  useEffect(() => {
+    // Kiểm tra nếu length của code >= 11, gọi API
+    if (codeValue.length >= 11) {
+      findByCode();
+    }
+  }, [codeValue, setValue]);
 
   const getCategories = async () => {
     if (categories?.length > 0) {
@@ -161,7 +171,6 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
       const data = res?.data;
       const imageArr = [];
       const fileArr = [];
-      console.log('data', data);
 
       for (let index = 0; index < data.length; index++) {
         const element = data[index];
@@ -177,7 +186,6 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
       // data.map((item) => {
       //   console.log('item', item);
       // });
-      console.log('fileArr', fileArr);
 
       setListImageUpload(imageArr);
       setFileUploadRequest(fileArr);
@@ -186,13 +194,13 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
   useEffect(() => {
     if (open) {
       getCategories();
-      if (typeModal === 'EDIT' && selected) {
+      if (typeModal !== 'ADD' && selected) {
         getMedia(selected?.reportId);
-        setValueForm({
+        const fields = {
           shift: selected?.shift,
           author: selected?.author,
           week: selected?.week,
-          date: dayjs(selected?.time),
+          date: selected?.time ? dayjs(selected?.time) : null,
           category: selected?.category?.categoryId,
           ngName: selected?.nameNG || '',
           percentage: selected?.percentageNG || '',
@@ -204,13 +212,18 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
           attributable: selected?.attributable,
           item: selected?.item,
           representative: selected?.representative,
-          seowonStock: selected?.seowonStock ? formatNumberWithCommas(selected?.seowonStock) : '',
-          vendorStock: selected?.vendorStock ? formatNumberWithCommas(selected?.vendorStock) : '',
+          seowonStock: selected?.seowonStock ? formatNumberWithCommas(selected?.seowonStock.toString()) : '',
+          vendorStock: selected?.vendorStock ? formatNumberWithCommas(selected?.vendorStock.toString()) : '',
           tempSolution: selected?.tempSolution,
           techNg: selected?.techNG,
           remark: selected?.remark,
           requestDate: selected?.dateRequest ? dayjs(selected?.dateRequest) : null,
           replyDate: selected?.dateReply ? dayjs(selected?.dateReply) : null
+        };
+
+        // Duyệt qua tất cả các field và set giá trị
+        Object.entries(fields).forEach(([key, value]) => {
+          setValue(key, value); // setValue từ react-hook-form
         });
       }
     }
@@ -273,100 +286,83 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
     });
     setFileUploadRequest(newArr);
   };
-  const onChangeInput = (e) => {
-    const { value, name } = e?.target;
-    if (validateForm[name].error) {
-      setValidateForm((pre) => ({ ...pre, [name]: initValidate }));
-    }
-    setValueForm((prevValueForm) => ({
-      ...prevValueForm,
-      [name]: arrFieldNum?.includes(name) ? formatNumberWithCommas(value) : value
-    }));
-  };
-  const onChangeCode = (e) => {
-    const { value } = e?.target;
-    if (validateForm?.code?.error) {
-      setValidateForm((pre) => ({ ...pre, code: initValidate }));
-    }
-    setValueForm((prevValueForm) => ({
-      ...prevValueForm,
-      code: value
-    }));
-  };
   const onClickSave = async () => {
-    let check = false;
-    Object.keys(valueForm).map((key, index) => {
-      if (listObjDate?.includes(key)) {
-        if (!arrNoValidate.includes(key) && (!valueForm[key] || !valueForm[key]?.isValid())) {
-          check = true;
-          setValidateForm((pre) => ({ ...pre, [key]: { error: true, msg: 'This field is requried!' } }));
+    buttonSubmit.current.click();
+    // let check = false;
+    // Object.keys(valueForm).map((key, index) => {
+    //   if (listObjDate?.includes(key)) {
+    //     if (!arrNoValidate.includes(key) && (!valueForm[key] || !valueForm[key]?.isValid())) {
+    //       check = true;
+    //       setValidateForm((pre) => ({ ...pre, [key]: { error: true, msg: 'This field is requried!' } }));
+    //     }
+    //   } else {
+    //     if (`${valueForm[key]}`.trim() === '' && !arrNoValidate.includes(key)) {
+    //       check = true;
+    //       setValidateForm((pre) => ({ ...pre, [key]: { error: true, msg: 'This field is requried!' } }));
+    //     }
+    //   }
+    // });
+
+    // if (!check) {
+
+    // }
+  };
+  const onSaveData = (data) => {
+    ShowConfirm({
+      title: 'Create New',
+      message: 'Do you want to save changes?',
+      onOK: async () => {
+        const dataSend = {
+          ...data,
+          seowonStock: `${data?.seowonStock}`.replaceAll(',', ''),
+          vendorStock: `${data?.vendorStock}`.replaceAll(',', '')
+        };
+        if (typeModal === 'EDIT') {
+          dataSend['reportId'] = selected?.reportId;
+          dataSend['imagesDelete'] = listImageUpload.filter((item) => !item.isShow && item?.fileId);
+          dataSend['filesDelete'] = fileUploadRequest.filter((item) => !item.isShow && item?.fileId);
         }
-      } else {
-        if (`${valueForm[key]}`.trim() === '' && !arrNoValidate.includes(key)) {
-          check = true;
-          setValidateForm((pre) => ({ ...pre, [key]: { error: true, msg: 'This field is requried!' } }));
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(dataSend));
+        listImageUpload.map((file) => {
+          formData.append('images', file);
+        });
+        fileUploadRequest.map((file) => {
+          switch (file?.typeFile) {
+            case 'REQUEST':
+              formData.append('fileRequest', file);
+              break;
+            case 'REPLY':
+              formData.append('fileReply', file);
+              break;
+
+            default:
+              break;
+          }
+        });
+        let url = typeModal === 'EDIT' ? RouterApi.updateReportQC : RouterApi.addReportQC;
+        setLoading(true);
+        const res = await restApi.post(url, formData);
+        setLoading(false);
+        if (res?.status === 200) {
+          handleClose();
+          afterSave();
+          toast.success('Successfully Savechanged!');
+        } else {
+          toast.error(res?.data?.message || 'Server error!');
         }
       }
     });
-
-    if (!check) {
-      ShowConfirm({
-        title: 'Create New',
-        message: 'Do you want to save changes?',
-        onOK: async () => {
-          const dataSend = {
-            ...valueForm,
-            seowonStock: `${valueForm?.seowonStock}`.replaceAll(',', ''),
-            vendorStock: `${valueForm?.vendorStock}`.replaceAll(',', '')
-          };
-          if (typeModal === 'EDIT') {
-            dataSend['reportId'] = selected?.reportId;
-            dataSend['imagesDelete'] = listImageUpload.filter((item) => !item.isShow && item?.fileId);
-            dataSend['filesDelete'] = fileUploadRequest.filter((item) => !item.isShow && item?.fileId);
-          }
-          const formData = new FormData();
-          formData.append('data', JSON.stringify(dataSend));
-          listImageUpload.map((file) => {
-            formData.append('images', file);
-          });
-          fileUploadRequest.map((file) => {
-            switch (file?.typeFile) {
-              case 'REQUEST':
-                formData.append('fileRequest', file);
-                break;
-              case 'REPLY':
-                formData.append('fileReply', file);
-                break;
-
-              default:
-                break;
-            }
-          });
-          let url = typeModal === 'EDIT' ? RouterApi.updateReportQC : RouterApi.addReportQC;
-          setLoading(true);
-          const res = await restApi.post(url, formData);
-          setLoading(false);
-          if (res?.status === 200) {
-            handleClose();
-            afterSave();
-            toast.success('Successfully Savechanged!');
-          } else {
-            toast.error(res?.data?.message || 'Server error!');
-          }
-        }
-      });
-    }
   };
+
   const onChangeDate = (newValue) => {
     let week = valueForm.week;
     if (newValue?.isValid()) {
       const currentWeek = newValue.week();
       week = currentWeek < 10 ? `0${currentWeek}` : currentWeek;
     }
-    setValueForm((pre) => ({ ...pre, date: newValue, week: week }));
-    if (validateForm['date'].error) {
-      setValidateForm((pre) => ({ ...pre, date: initValidate }));
-    }
+    setValue('week', week);
+    setValue('date', newValue);
   };
   const onChangeInputFile = (e) => {
     const files = e.target.files;
@@ -391,36 +387,43 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
     e.target.files = null;
   };
   const getTitleFromImage = (index) => {
-    const find = listFilePreview?.find((item, i) => (i === index));
-
+    const find = listFilePreview?.find((item, i) => i === index);
     if (find) {
-
       return concatFileNameWithExtension(find?.fileName, find?.fileExtenstion);
     }
-    return ''
-
-  }
-
+    return '';
+  };
   return (
     <>
-      <PhotoProvider  maskOpacity={0.5} toolbarRender={({ rotate, onRotate, index }) => {
-        return (
-          <Stack direction={'row'} alignItems={'center'}>
-            <span style={{ marginRight: '10px' }}>{getTitleFromImage(index)}</span>
+      <PhotoProvider
+        maskOpacity={0.5}
+        toolbarRender={({ rotate, onRotate, index }) => {
+          return (
+            <Stack direction={'row'} alignItems={'center'}>
+              <span style={{ marginRight: '10px' }}>{getTitleFromImage(index)}</span>
 
-            <IconButton className="PhotoView-Slider__toolbarIcon color-icon" onClick={() => { onRotate(rotate - 90); getTitleFromImage(index) }} size="small">
-              <RotateLeftIcon />
-            </IconButton>
-            <IconButton className="PhotoView-Slider__toolbarIcon color-icon" onClick={() => onRotate(rotate + 90)} size="small">
-              <RotateRightIcon />
-            </IconButton>
-          </Stack>
-        );
-      }} maskClosable={true}>
+              <IconButton
+                className="PhotoView-Slider__toolbarIcon color-icon"
+                onClick={() => {
+                  onRotate(rotate - 90);
+                  getTitleFromImage(index);
+                }}
+                size="small"
+              >
+                <RotateLeftIcon />
+              </IconButton>
+              <IconButton className="PhotoView-Slider__toolbarIcon color-icon" onClick={() => onRotate(rotate + 90)} size="small">
+                <RotateRightIcon />
+              </IconButton>
+            </Stack>
+          );
+        }}
+        maskClosable={true}
+      >
         <BootstrapDialog fullScreen={isMobile} maxWidth={'md'} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
           <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
             <Stack direction={'row'} alignItems={'center'}>
-              {typeModal === 'ADD' ? 'Create New' : 'Edit Infomation'}
+              {typeModal === 'ADD' ? 'Create New' : typeModal === 'EDIT' ? 'Edit Infomation' : 'Detail'}
             </Stack>
             <IconButton
               aria-label="close"
@@ -436,446 +439,488 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
             </IconButton>
           </DialogTitle>
           <Divider />
-          <DialogContent sx={{...cssScrollbar}}>
-            <Box>
+          <DialogContent sx={{ ...cssScrollbar }}>
+            <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit((data) => onSaveData(data))}>
               <Grid container spacing={2}>
                 <Grid item xs={4.5}>
-                  <FormControl size="small">
-                    {/* <FormLabel id="demo-radio-buttons-group-label">Shift</FormLabel> */}
-                    <RadioGroup
-                      onChange={(event) => {
-                        setValueForm((pre) => ({ ...pre, shift: event.target.value }));
-                      }}
-                      value={valueForm?.shift}
-                      row
-                      aria-labelledby="demo-radio-buttons-group-label"
-                      defaultValue="D"
-                      name="radio-buttons-group"
-                    >
-                      <Stack direction={'row'} spacing={1} alignItems={'center'}>
-                        <span style={{ fontWeight: 'bold' }}>Shift:</span>
-                        <FormControlLabel value="D" control={<Radio />} label="Day" />
-                        <FormControlLabel value="N" control={<Radio />} label="Night" />
-                      </Stack>
-                    </RadioGroup>
-                  </FormControl>
+                  <Controller
+                    name="shift"
+                    control={control}
+                    rules={{ required: ' ' }}
+                    render={({ field }) => (
+                      <RadioGroup
+                        {...field}
+                        row
+                        aria-labelledby="demo-radio-buttons-group-label"
+                        name="radio-buttons-group"
+                        value={field.value}
+                        onChange={(e) => field.onChange(e.target.value)}
+                      >
+                        <Stack direction={'row'} spacing={1} alignItems={'center'}>
+                          <span style={{ fontWeight: 'bold' }}>Shift:</span>
+                          <FormControlLabel value="D" control={<Radio />} label="Day" />
+                          <FormControlLabel value="N" control={<Radio />} label="Night" />
+                        </Stack>
+                      </RadioGroup>
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={2}>
-                  <FormControl error={validateForm?.week?.error} fullWidth size="small">
-                    <TextField
-                      id="standard-basic"
-                      name="week"
-                      type="number"
-                      onChange={onChangeInput}
-                      value={valueForm?.week}
-                      error={validateForm?.week?.error}
-                      //   helperText={validateForm?.week?.msg}
-                      label="Week"
-                      placeholder="Week..."
-                      size="small"
-                      variant="outlined"
-                    />
-                  </FormControl>
+                  <Controller
+                    name="week"
+                    control={control}
+                    rules={{ required: ' ' }}
+                    render={({ field }) => <TextField size="small" {...field} label="Week" variant="outlined" error={!!errors.week} />}
+                  />
                 </Grid>
                 <Grid item xs={5.5}>
-                  <FormControl error={validateForm?.date?.error} fullWidth size="small">
-                    <DatePicker
-                      clearable={false}
-                      name="date"
-                      value={valueForm?.date}
-                      format="YYYY/MM/DD"
-                      views={['year', 'month', 'day']}
-                      slotProps={{
-                        textField: { size: 'small', helperText: validateForm?.date?.msg, error: validateForm?.date?.msg }
-                        //   popper: { placement: 'right-end' }
-                      }}
-                      onChange={onChangeDate}
-                      label="Date"
-                      placeholder="Date..."
-                      size="small"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.date?.msg}</FormHelperText> */}
+                  <Controller
+                    name="date"
+                    control={control}
+                    rules={{ required: ' ' }}
+                    render={({ field }) => (
+                      <DatePicker
+                        {...field}
+                        label="Date"
+                        value={field.value ? dayjs(field.value) : null}
+                        onChange={onChangeDate}
+                        format="YYYY/MM/DD"
+                        views={['year', 'month', 'day']}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            size: 'small',
+                            helperText: errors.date ? errors.date.message : '',
+                            error: !!errors.date
+                          }
+                        }}
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.category?.error} fullWidth size="small">
-                    <InputLabel error={validateForm?.category?.error} id="demo-simple-select-label">
-                      Category
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      label="Category"
-                      placeholder="Category..."
-                      id="demo-simple-select"
-                      value={valueForm?.category}
-                      // value={category}
-                      onChange={(e) => {
-                        if (validateForm['category'].error) {
-                          setValidateForm((pre) => ({ ...pre, category: initValidate }));
-                        }
-                        // if (validateCategory?.error) setValidateCategory(initValidate);
-                        setValueForm((pre) => ({ ...pre, category: e.target.value }));
-                      }}
-                    >
-                      {categories?.map((item) => (
-                        <MenuItem key={item?.categoryId} value={item?.categoryId}>
-                          {item?.categoryName}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {/* <FormHelperText>{validateForm?.category?.error}</FormHelperText> */}
+                  <FormControl size="small" fullWidth error={!!errors.category}>
+                    <InputLabel id="category-select-label">Category</InputLabel>
+                    <Controller
+                      name="category"
+                      control={control}
+                      rules={{ required: ' ' }}
+                      render={({ field }) => (
+                        <Select
+                          {...field}
+                          labelId="category-select-label"
+                          label="Category"
+                          value={field.value}
+                          onChange={(e) => {
+                            field.onChange(e.target.value); // Cập nhật giá trị cho react-hook-form
+                            // Nếu cần thêm logic validateForm bạn có thể xử lý tại đây
+                          }}
+                          disabled={typeModal === 'VIEW'}
+                        >
+                          {categories?.map((item) => (
+                            <MenuItem key={item?.categoryId} value={item?.categoryId}>
+                              {item?.categoryName}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
+                    />
                   </FormControl>
                 </Grid>
                 <Grid item xs={4}>
-                  <FormControl error={validateForm?.ngName?.error} fullWidth size="small" variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-gn">불량명(NG Name)</InputLabel>
-                    <OutlinedInput
-                      value={valueForm?.ngName}
-                      placeholder="불량명..."
-                      name="ngName"
-                      onChange={onChangeInput}
-                      id="outlined-adornment-gn"
-                      //   error={validateForm?.ngName?.error}
-                      //   helperText={validateForm?.ngName?.msg}
-                      aria-describedby="outlined-weight-helper-text"
-                      label="불량명(NG Name)"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText sx={{ color: 'red' }}>{validateForm?.ngName?.msg}</FormHelperText> */}
+                  <Controller
+                    name="ngName"
+                    control={control}
+                    rules={{ required: ' ' }}
+                    render={({ field }) => (
+                      <TextField
+                        placeholder="Tên lỗi..."
+                        size="small"
+                        {...field}
+                        label="불량명(Tên Lỗi)"
+                        variant="outlined"
+                        error={!!errors.ngName}
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={2}>
-                  <FormControl error={validateForm?.percentage?.error} fullWidth size="small" variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-password">불량율</InputLabel>
-                    <OutlinedInput
-                      value={valueForm?.percentage}
-                      placeholder="불량율..."
-                      name="percentage"
-                      onChange={onChangeInput}
-                      error={validateForm?.percentage?.error}
-                      //   helperText={validateForm?.percentage?.msg}
-                      id="outlined-adornment-password"
-                      endAdornment={<InputAdornment position="end">%</InputAdornment>}
-                      aria-describedby="outlined-weight-helper-text"
-                      label="불량율"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.percentage?.msg}</FormHelperText> */}
+                  <Controller
+                    name="percentage"
+                    control={control}
+                    rules={{
+                      required: ' ',
+                      pattern: {
+                        value: /^[0-9]+$/, // Regex chỉ chấp nhận số nguyên dương
+                        message: ' '
+                      }
+                    }}
+                    render={({ field }) => (
+                      <FormControl error={!!errors.percentage} fullWidth size="small" variant="outlined">
+                        <InputLabel htmlFor="outlined-adornment-password">Tỷ lệ</InputLabel>
+                        <OutlinedInput
+                          size="small"
+                          placeholder="Tỷ lệ..."
+                          name="percentage"
+                          {...field}
+                          error={!!errors.percentage}
+                          endAdornment={<InputAdornment position="end">%</InputAdornment>}
+                          label="Tỷ lệ"
+                        />
+                      </FormControl>
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.code?.error} fullWidth size="small">
-                    <TextField
-                      id="standard-basic"
-                      name="code"
-                      onChange={onChangeCode}
-                      value={valueForm?.code}
-                      error={validateForm?.code?.error}
-                      //   helperText={validateForm?.code?.msg}
-                      label="Code"
-                      placeholder="Code..."
-                      size="small"
-                      variant="outlined"
-                    />
-                  </FormControl>
+                  <Controller
+                    name="code"
+                    control={control}
+                    rules={{ required: ' ' }}
+                    render={({ field }) => (
+                      <TextField
+                        fullWidth
+                        placeholder="Code..."
+                        size="small"
+                        {...field}
+                        label="Code"
+                        variant="outlined"
+                        error={!!errors.code}
+                      />
+                    )}
+                  />
                 </Grid>
-                <Grid item xs={3}>
-                  <FormControl error={validateForm?.process?.error} fullWidth size="small">
+                <Grid item xs={3.5}>
+                  <FormControl error={!!errors.process} fullWidth size="small">
                     <InputLabel htmlFor="demo-simple-select-proces" id="demo-simple-select-label">
-                      공정(Process)
+                      부적합 통보(BP Thông Báo)
                     </InputLabel>
-                    <Select
-                      value={valueForm?.process}
-                      labelId="demo-simple-select-proces"
-                      label="공정(Process)"
-                      placeholder="공정(Process)"
-                      id="demo-simple-select-proces"
-                      onChange={(e) => {
-                        if (validateForm['process'].error) {
-                          setValidateForm((pre) => ({ ...pre, process: initValidate }));
-                        }
-                        //   if (validateCategory?.error) setValidateCategory(initValidate);
-                        setValueForm((pre) => ({ ...pre, process: e.target.value }));
-                      }}
-                    >
-                      {listProcess?.map((item) => (
-                        <MenuItem key={item?.processId} value={item?.processId}>
-                          {item?.processName}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {/* <FormHelperText>{validateForm?.process?.msg}</FormHelperText> */}
-                  </FormControl>
-                </Grid>
-                <Grid item xs={3}>
-                  <FormControl error={validateForm?.author?.error} fullWidth size="small">
-                    <TextField
-                      id="standard-basic"
-                      value={valueForm?.author}
-                      name="author"
-                      onChange={onChangeInput}
-                      error={validateForm?.author?.error}
-                      //   helperText={validateForm?.model?.msg}
-                      label="작성자"
-                      placeholder="author..."
-                      size="small"
-                      variant="outlined"
+                    <Controller
+                      name="process"
+                      control={control}
+                      rules={{ required: ' ' }}
+                      render={({ field }) => (
+                        <Select
+                          {...field}
+                          labelId="category-select-label"
+                          label="부적합 통보(BP Thông Báo)"
+                          value={field.value}
+                          onChange={(e) => {
+                            field.onChange(e.target.value); // Cập nhật giá trị cho react-hook-form
+                            // Nếu cần thêm logic validateForm bạn có thể xử lý tại đây
+                          }}
+                        >
+                          {listProcess?.map((item) => (
+                            <MenuItem key={item?.processId} value={item?.processId}>
+                              {item?.processName}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
                     />
                   </FormControl>
-                  {/* <FormHelperText>{validateForm?.model?.msg}</FormHelperText> */}
                 </Grid>
-
-                <Grid item xs={6}>
-                  <FormControl error={validateForm?.model?.error} fullWidth size="small">
-                    <TextField
-                      id="standard-basic"
-                      value={valueForm?.model}
-                      name="model"
-                      onChange={onChangeInput}
-                      error={validateForm?.model?.error}
-                      //   helperText={validateForm?.model?.msg}
-                      label="Model"
-                      placeholder="Model..."
-                      size="small"
-                      variant="outlined"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.model?.msg}</FormHelperText> */}
+                <Grid item xs={2.5}>
+                  <Controller
+                    name="author"
+                    control={control}
+                    rules={{ required: ' ' }}
+                    render={({ field }) => (
+                      <TextField
+                        fullWidth
+                        placeholder="Người đăng ký..."
+                        size="small"
+                        {...field}
+                        label="등록자"
+                        variant="outlined"
+                        error={!!errors.author}
+                      />
+                    )}
+                  />
                 </Grid>
 
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.supplier?.error} fullWidth size="small" variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-password">고객명(NCC)</InputLabel>
-                    <OutlinedInput
-                      placeholder="고객명(NCC)..."
-                      name="supplier"
-                      error={validateForm?.supplier?.error}
-                      //   helperText={validateForm?.supplier?.msg}
-                      onChange={onChangeInput}
-                      value={valueForm?.supplier}
-                      id="outlined-adornment-password"
-                      aria-describedby="outlined-weight-helper-text"
-                      label="고객명(NCC)"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.supplier?.msg}</FormHelperText> */}
+                  <Controller
+                    name="model"
+                    control={control}
+                    rules={{ required: ' ' }}
+                    render={({ field }) => (
+                      <TextField
+                        fullWidth
+                        placeholder="Model..."
+                        size="small"
+                        {...field}
+                        label="Model"
+                        variant="outlined"
+                        error={!!errors.model}
+                      />
+                    )}
+                  />
                 </Grid>
 
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.plName?.error} fullWidth size="small">
-                    <TextField
-                      id="standard-basic"
-                      value={valueForm?.plName}
-                      name="plName"
-                      onChange={onChangeInput}
-                      error={validateForm?.plName?.error}
-                      //   helperText={validateForm?.plName?.msg}
-                      label="PL/NAME"
-                      placeholder="PL/NAME..."
-                      size="small"
-                      variant="outlined"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.process?.msg}</FormHelperText> */}
+                  <Controller
+                    name="supplier"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <TextField
+                        fullWidth
+                        placeholder="Khách hàng..."
+                        size="small"
+                        {...field}
+                        label="고객(Khách hàng)"
+                        variant="outlined"
+                        error={!!errors.supplier}
+                      />
+                    )}
+                  />
                 </Grid>
 
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.attributable?.error} fullWidth size="small" variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-password">발생 귀책처(Attributable)</InputLabel>
-                    <OutlinedInput
-                      value={valueForm?.attributable}
-                      placeholder="발생 귀책처(Attributable)..."
-                      name="attributable"
-                      onChange={onChangeInput}
-                      error={validateForm?.attributable?.error}
-                      //   helperText={validateForm?.attributable?.msg}
-                      id="outlined-adornment-password"
-                      aria-describedby="outlined-weight-helper-text"
-                      label="발생 귀책처(Attributable)"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.process?.msg}</FormHelperText> */}
+                  <Controller
+                    name="plName"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <TextField
+                        fullWidth
+                        placeholder="PL/NAME..."
+                        size="small"
+                        {...field}
+                        label="PL/NAME"
+                        variant="outlined"
+                        error={!!errors.plName}
+                      />
+                    )}
+                  />
                 </Grid>
 
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.item?.error} fullWidth size="small">
-                    <TextField
-                      id="standard-item-basic"
-                      // value={code}
-                      value={valueForm?.item}
-                      name="item"
-                      onChange={onChangeInput}
-                      error={validateForm?.item?.error}
-                      //   helperText={validateForm?.item?.msg}
-                      label="Item"
-                      placeholder="Item..."
-                      size="small"
-                      variant="outlined"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.process?.msg}</FormHelperText> */}
+                  <Controller
+                    name="attributable"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <TextField
+                        fullWidth
+                        placeholder="귀책처(Chịu trách nhiệm)..."
+                        size="small"
+                        {...field}
+                        label="귀책처(Chịu trách nhiệm)"
+                        variant="outlined"
+                        error={!!errors.attributable}
+                      />
+                    )}
+                  />
                 </Grid>
 
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.representative?.error} fullWidth size="small" variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-password">공급 업체 담당자</InputLabel>
-                    <OutlinedInput
-                      value={valueForm?.representative}
-                      placeholder="Representative..."
-                      name="representative"
-                      error={validateForm?.representative?.error}
-                      //   helperText={validateForm?.representative?.msg}
-                      onChange={onChangeInput}
-                      id="outlined-adornment-password"
-                      aria-describedby="outlined-weight-helper-text"
-                      label="공급 업체 담당자"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.process?.msg}</FormHelperText> */}
+                  <Controller
+                    name="item"
+                    control={control}
+                    rules={{ required: ' ' }}
+                    render={({ field }) => (
+                      <TextField
+                        fullWidth
+                        placeholder="Item..."
+                        size="small"
+                        {...field}
+                        label="Item"
+                        variant="outlined"
+                        error={!!errors.item}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                <Grid item xs={6}>
+                  <Controller
+                    name="representative"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <TextField
+                        fullWidth
+                        placeholder="Đại diện nhà cung cấp..."
+                        size="small"
+                        {...field}
+                        label="공급 업체 담당자(Đại diện NCC)"
+                        variant="outlined"
+                        error={!!errors.representative}
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.seowonStock?.error} fullWidth size="small" variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-password">Seowon stock</InputLabel>
-                    <OutlinedInput
-                      value={valueForm?.seowonStock}
-                      placeholder="Seowon stock..."
-                      error={validateForm?.seowonStock?.error}
-                      //   helperText={validateForm?.seowonStock?.msg}
-                      name="seowonStock"
-                      onChange={(e) => {
-                        const re = /^[0-9\b,]+$/;
-                        if (e.target.value === '' || re.test(e.target.value)) {
-                          onChangeInput(e);
-                        }
-                      }}
-                      id="outlined-adornment-password"
-                      aria-describedby="outlined-weight-helper-text"
-                      label="Seowon stock"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.process?.msg}</FormHelperText> */}
+                  <Controller
+                    name="seowonStock"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <TextField
+                        type="text"
+                        fullWidth
+                        placeholder="Seowon stock..."
+                        size="small"
+                        {...field}
+                        label="Seowon stock"
+                        variant="outlined"
+                        value={field.value ? formatNumberWithCommas(field.value.toString()) : ''}
+                        onChange={(e) => {
+                          const inputValue = e.target.value.replace(/,/g, ''); // Xóa dấu phẩy cũ
+                          if (!isNaN(Number(inputValue)) || inputValue === '') {
+                            field.onChange(inputValue); // Cập nhật giá trị mới sau khi loại bỏ dấu phẩy
+                          }
+                        }}
+                        error={!!errors.seowonStock}
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.vendorStock?.error} fullWidth size="small" variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-password">Vendor stock</InputLabel>
-                    <OutlinedInput
-                      value={valueForm?.vendorStock}
-                      placeholder="Vendor stock..."
-                      error={validateForm?.vendorStock?.error}
-                      //   helperText={validateForm?.vendorStock?.msg}
-                      name="vendorStock"
-                      onChange={(e) => {
-                        const re = /^[0-9\b,]+$/;
-                        if (e.target.value === '' || re.test(e.target.value)) {
-                          onChangeInput(e);
-                        }
-                      }}
-                      id="outlined-adornment-password"
-                      aria-describedby="outlined-weight-helper-text"
-                      label="Vendor stock"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.process?.msg}</FormHelperText> */}
+                  <Controller
+                    name="vendorStock"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <TextField
+                        fullWidth
+                        placeholder="Vendor stock..."
+                        size="small"
+                        {...field}
+                        label="Vendor stock"
+                        variant="outlined"
+                        value={field.value ? formatNumberWithCommas(field.value.toString()) : ''}
+                        onChange={(e) => {
+                          const inputValue = e.target.value.replace(/,/g, ''); // Xóa dấu phẩy cũ
+                          if (!isNaN(Number(inputValue)) || inputValue === '') {
+                            field.onChange(inputValue); // Cập nhật giá trị mới sau khi loại bỏ dấu phẩy
+                          }
+                        }}
+                        error={!!errors.vendorStock}
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.techNg?.error} fullWidth size="small" variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-password">불량 원인 기술</InputLabel>
-                    <OutlinedInput
-                      value={valueForm?.techNg}
-                      multiline
-                      rows={2}
-                      placeholder="불량 원인 기술..."
-                      name="techNg"
-                      error={validateForm?.techNg?.error}
-                      //   helperText={validateForm?.techNg?.msg}
-                      onChange={onChangeInput}
-                      id="outlined-adornment-password"
-                      aria-describedby="outlined-weight-helper-text"
-                      label="불량 원인 기술"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.process?.msg}</FormHelperText> */}
+                  <Controller
+                    name="techNg"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <>
+                        <FormControl error={!!errors.techNg} fullWidth size="small" variant="outlined">
+                          <InputLabel htmlFor="outlined-adornment-password">불량원인 (Nguyên nhân lỗi)</InputLabel>
+                          <OutlinedInput
+                            {...field}
+                            multiline
+                            rows={2}
+                            placeholder="Nguyên nhân lỗi..."
+                            name="techNg"
+                            error={!!errors.techNg}
+                            label="불량원인 (Nguyên nhân lỗi)"
+                          />
+                        </FormControl>
+                      </>
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <FormControl error={validateForm?.tempSolution?.error} fullWidth size="small" variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-password">Temporary Solution</InputLabel>
-                    <OutlinedInput
-                      multiline
-                      value={valueForm?.tempSolution}
-                      rows={2}
-                      error={validateForm?.tempSolution?.error}
-                      //   helperText={validateForm?.tempSolution?.msg}
-                      placeholder="Temporary Solution..."
-                      name="tempSolution"
-                      onChange={onChangeInput}
-                      id="outlined-adornment-password"
-                      aria-describedby="outlined-weight-helper-text"
-                      label="Temporary Solution"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.process?.msg}</FormHelperText> */}
+                  <Controller
+                    name="tempSolution"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <>
+                        <FormControl error={!!errors.tempSolution} fullWidth size="small" variant="outlined">
+                          <InputLabel htmlFor="outlined-adornment-password">임시조치(Biện pháp)</InputLabel>
+                          <OutlinedInput
+                            {...field}
+                            multiline
+                            defaultValue={valueForm?.tempSolution}
+                            rows={2}
+                            error={!!errors.tempSolution}
+                            placeholder="Biện pháp..."
+                            name="tempSolution"
+                            label="임시조치(Biện pháp)"
+                          />
+                        </FormControl>
+                      </>
+                    )}
+                  />
                 </Grid>
 
                 <Grid item xs={12}>
-                  <FormControl error={validateForm?.remark?.error} fullWidth size="small" variant="outlined">
-                    <InputLabel htmlFor="outlined-adornment-password">Remark</InputLabel>
-                    <OutlinedInput
-                      error={validateForm?.remark?.error}
-                      //   helperText={validateForm?.remark?.msg}
-                      value={valueForm?.remark}
-                      multiline
-                      rows={3}
-                      placeholder="Remark..."
-                      name="remark"
-                      onChange={onChangeInput}
-                      id="outlined-adornment-password"
-                      aria-describedby="outlined-weight-helper-text"
-                      label="Remark"
-                    />
-                  </FormControl>
-                  {/* <FormHelperText>{validateForm?.process?.msg}</FormHelperText> */}
+                  <Controller
+                    name="remark"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <>
+                        <FormControl error={!!errors.remark} fullWidth size="small" variant="outlined">
+                          <InputLabel htmlFor="outlined-adornment-password">조치사항 (Hành động đã thực hiện)</InputLabel>
+                          <OutlinedInput
+                            {...field}
+                            disabled={typeModal === 'VIEW'}
+                            error={!!errors.remark}
+                            multiline
+                            rows={3}
+                            placeholder="Hành động đã thực hiện..."
+                            name="remark"
+                            label="조치사항 (Hành động đã thực hiện)"
+                          />
+                        </FormControl>
+                      </>
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <FormControl fullWidth size="small">
-                    <DatePicker
-                      value={valueForm?.requestDate}
-                      format="YYYY/MM/DD"
-                      views={['year', 'month', 'day']}
-                      slotProps={{
-                        textField: { size: 'small' }
-                        //   popper: { placement: 'right-end' }
-                      }}
-                      onChange={(newValue) => {
-                        if (validateForm['requestDate'].error) {
-                          setValidateForm((pre) => ({ ...pre, requestDate: initValidate }));
-                        }
-                        setValueForm((pre) => ({ ...pre, requestDate: newValue }));
-                      }}
-                      label="Request Date"
-                      placeholder="Request Date..."
-                      size="small"
-                    />
-                  </FormControl>
+                  <Controller
+                    name="requestDate"
+                    control={control}
+                    rules={{ required: ' ' }}
+                    render={({ field }) => (
+                      <DatePicker
+                        {...field}
+                        label="Request Date"
+                        value={field.value ? dayjs(field.value) : null}
+                        onChange={(newValue) => field.onChange(newValue)}
+                        format="YYYY/MM/DD"
+                        views={['year', 'month', 'day']}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            size: 'small',
+                            error: !!errors.requestDate
+                          }
+                        }}
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <FormControl fullWidth size="small">
-                    <DatePicker
-                      value={valueForm?.replyDate}
-                      format="YYYY/MM/DD"
-                      views={['year', 'month', 'day']}
-                      slotProps={{
-                        textField: { size: 'small' }
-                        //   popper: { placement: 'right-end' }
-                      }}
-                      onChange={(newValue) => {
-                        if (validateForm['replyDate'].error) {
-                          setValidateForm((pre) => ({ ...pre, replyDate: initValidate }));
-                        }
-                        setValueForm((pre) => ({ ...pre, replyDate: newValue }));
-                      }}
-                      label="Reply Date"
-                      placeholder="Reply Date..."
-                      size="small"
-                    />
-                  </FormControl>
+                  <Controller
+                    name="replyDate"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <DatePicker
+                        {...field}
+                        label="Reply Date"
+                        value={field.value ? dayjs(field.value) : null}
+                        onChange={(newValue) => field.onChange(newValue)}
+                        format="YYYY/MM/DD"
+                        views={['year', 'month', 'day']}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            size: 'small',
+                            error: !!errors.replyDate
+                          }
+                        }}
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6}>
                   <Box
@@ -897,7 +942,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                         variant="text"
                         startIcon={<IconUpload />}
                       >
-                        대책서 파일 첨부(Request File)
+                        부적합통보서 (QPN)
                       </Button>
                     </div>
                     {fileUploadRequest?.length > 0 &&
@@ -955,7 +1000,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                         variant="text"
                         startIcon={<IconUpload />}
                       >
-                        대책서 파일 첨부(Reply File)
+                        대책서 (đối sách cải tiến)
                       </Button>
                     </div>
                     {fileUploadRequest?.length > 0 &&
@@ -1073,22 +1118,27 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
 
                 {/* grid container */}
               </Grid>
+              <Button ref={buttonSubmit} hidden sx={{ display: 'none' }} type="submit" variant="contained">
+                Submit
+              </Button>
             </Box>
           </DialogContent>
           <DialogActions>
             <Button variant="custom" onClick={handleClose}>
               Close
             </Button>
-            <Button
-              variant="contained"
-              startIcon={<IconDeviceFloppy />}
-              autoFocus
-              onClick={() => {
-                onClickSave();
-              }}
-            >
-              Save changes
-            </Button>
+            {typeModal !== 'VIEW' && (
+              <Button
+                variant="contained"
+                startIcon={<IconDeviceFloppy />}
+                autoFocus
+                onClick={() => {
+                  onClickSave();
+                }}
+              >
+                Save
+              </Button>
+            )}
           </DialogActions>
         </BootstrapDialog>
       </PhotoProvider>

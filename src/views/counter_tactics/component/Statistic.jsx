@@ -1,16 +1,12 @@
 import { useState } from 'react';
-import { Box, Button, Skeleton, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
-import { getPercentage } from '../counter_tactis.service';
 import { DatePicker } from '@mui/x-date-pickers';
 import { IconFileSpreadsheet, IconSearch } from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import { useEffect } from 'react';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import { saveAs } from 'file-saver';
-import toast from 'react-hot-toast';
-
 const currentDate = dayjs();
 // Lấy ngày đầu tiên của tháng hiện tại
 const firstDayOfCurrentMonth = currentDate.startOf('month');
@@ -46,7 +42,7 @@ const Statistic = ({ listProcess, setLoading, dataStatistic, startDate, setStart
       const blob = new Blob([response.data], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
-      saveAs(blob, 'Report.xlsx');
+      saveAs(blob, 'Export_Statistic.xlsx');
     } else {
       alert('Download file fail!');
     }
@@ -108,7 +104,7 @@ const Statistic = ({ listProcess, setLoading, dataStatistic, startDate, setStart
             Excel
           </Button>
         </Stack>
-        <Box sx={{ backgroundColor: '#0055951f' }} mt={1}>
+        <Box mt={1}>
           <Stack width={'100%'} direction={'row'}>
             <Box width={'13%'} className="cell-head-custom">
               카테고리
@@ -118,11 +114,21 @@ const Statistic = ({ listProcess, setLoading, dataStatistic, startDate, setStart
             </Box>
             {dataStatistic?.length > 0 &&
               dataStatistic[0]?.processArr?.map((head, index) => (
-                <Box width={'10%'} key={index} className="cell-head-custom">
+                <Box width={'12%'} key={index} className="cell-head-custom">
                   {head?.processName}
                 </Box>
               ))}
-            <Box width={'10%'} sx={{ textAlign: 'center', border: '1px solid #333', fontWeight: 'bold', padding: '5px', color: '#005595' }}>
+            <Box
+              width={'10%'}
+              sx={{
+                textAlign: 'center',
+                border: '1px solid #ffff',
+                fontWeight: 'bold',
+                padding: '5px',
+                color: 'white',
+                backgroundColor: '#333'
+              }}
+            >
               Total
             </Box>
           </Stack>
@@ -135,8 +141,9 @@ const Statistic = ({ listProcess, setLoading, dataStatistic, startDate, setStart
                   borderBottom: '1px solid #333',
                   fontWeight: 'bold',
                   textAlign: 'center',
-                  lineHeight: '55px',
-                  color: '#005595'
+                  lineHeight: '77px',
+                  backgroundColor: item?.categoryName === 'Total' ? '#333' : 'rgba(0, 85, 149, 0.12)',
+                  color: item?.categoryName === 'Total' ? '#ffff' : '#005595'
                 }}
               >
                 {item?.categoryName}
@@ -144,86 +151,52 @@ const Statistic = ({ listProcess, setLoading, dataStatistic, startDate, setStart
               <Box width={'17%'} sx={{ borderLeft: '1px solid #333' }}>
                 <Box className="cell-custom">통보서(Thông báo)</Box>
                 <Box className="cell-custom">대책서(Đối sách)</Box>
-                <Box className="cell-custom">완료율(Tỷ lệ)</Box>
+                <Box
+                  sx={{borderLeft: item?.categoryName === 'Total' ?  '0.1px solid #ffff' : '', color: item?.categoryName === 'Total' ? '#ffff' : '', backgroundColor:  item?.categoryName === 'Total' ? '#333' : 'rgba(0, 85, 149, 0.12)' }}
+                  className="cell-custom"
+                >
+                  완료율(Tỷ lệ)
+                </Box>
               </Box>
               {item?.processArr &&
                 item?.processArr.map((processItem, index) => (
                   <Box
                     key={index}
-                    width={'10%'}
+                    width={'12%'}
                     sx={{
-                      borderLeft: '1px solid #333',
-                      color: item?.categoryId === 'TOTAL' ? '#005595' : '',
-                      fontWeight: item?.categoryId === 'TOTAL' ? 'bold' : ''
+                      borderLeft: '1px solid #333'
                     }}
                   >
-                    <Box className={'cell-custom'}>{processItem?.counterRequest}</Box>
-                    <Box className={'cell-custom'}>{processItem?.counterReply}</Box>
-                    <Box className={'cell-custom'}>{processItem?.percetageCel}%</Box>
+                    <Box className={'cell-custom'}>{processItem?.counterRequest === 0 ? '' : processItem?.counterRequest}</Box>
+                    <Box className={'cell-custom'}>{processItem?.counterReply === 0 ? '' : processItem?.counterReply}</Box>
+                    <Box
+                      sx={{
+                        borderLeft: item?.categoryName === 'Total' ?  '0.1px solid #ffff' : '',
+                        backgroundColor: item?.categoryName === 'Total' ? '#333' : 'rgba(0, 85, 149, 0.12)',
+                        color: item?.categoryName === 'Total' ? '#ffff' : ''
+                      }}
+                      className={'cell-custom'}
+                    >
+                      {processItem?.percetageCel}%
+                    </Box>
                   </Box>
                 ))}
-              <Box width={'10%'} sx={{ borderLeft: '1px solid #333', borderRight: '1px solid #333', fontWeight: 'bold', color: '#005595' }}>
+              <Box width={'10%'} sx={{ borderLeft: '1px solid #333', borderRight: '1px solid #333' }}>
                 <Box className={'cell-custom'}>{item?.sumRowRequest}</Box>
                 <Box className={'cell-custom'}>{item?.sumRowReply}</Box>
-                <Box className={'cell-custom'}>{item?.percentage}%</Box>
+                <Box
+                  sx={{
+                    borderLeft: item?.categoryName === 'Total' ?  '0.1px solid #ffff' : '',
+                    color: item?.categoryName === 'Total' ? '#ffff' : '',
+                    backgroundColor: item?.categoryName === 'Total' ? '#333' : 'rgba(0, 85, 149, 0.12)'
+                  }}
+                  className={'cell-custom'}
+                >
+                  {item?.percentage}%
+                </Box>
               </Box>
             </Stack>
           ))}
-          {/* <Stack key={'index'} sx={{ fontWeight: 'bold', color: '#005595' }} width={'100%'} direction={'row'}>
-            <Box
-              width={'13%'}
-              sx={{
-                borderLeft: '1px solid #333',
-                borderBottom: '1px solid #333',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                lineHeight: '55px',
-                color: '#005595'
-              }}
-            >
-              Total
-            </Box>
-            <Box width={'17%'} sx={{ borderLeft: '1px solid #333' }}>
-              <Box className="cell-custom">통보서(Thông báo)</Box>
-              <Box className="cell-custom">대책서(Đối sách)</Box>
-              <Box className="cell-custom">완료율(Tỷ lệ)</Box>
-            </Box>
-            <Box width={'10%'} sx={{ borderLeft: '1px solid #333' }}>
-              <Box className="cell-custom">{getSum(DATA.map((item) => item.iqc.request))}</Box>
-              <Box className="cell-custom">{getSum(DATA.map((item) => item.iqc.respose))}</Box>
-              <Box className="cell-custom">100%</Box>
-            </Box>
-            <Box width={'10%'} sx={{ borderLeft: '1px solid #333' }}>
-              <Box className="cell-custom">{getSum(DATA.map((item) => item.oqc.request))}</Box>
-              <Box className="cell-custom">{getSum(DATA.map((item) => item.oqc.respose))}</Box>
-              <Box className="cell-custom">100%</Box>
-            </Box>
-            <Box width={'10%'} sx={{ borderLeft: '1px solid #333' }}>
-              <Box className="cell-custom">2</Box>
-              <Box className="cell-custom">1</Box>
-              <Box className="cell-custom">50%</Box>
-            </Box>
-            <Box width={'10%'} sx={{ borderLeft: '1px solid #333' }}>
-              <Box className="cell-custom">3</Box>
-              <Box className="cell-custom">3</Box>
-              <Box className="cell-custom">100%</Box>
-            </Box>
-            <Box width={'10%'} sx={{ borderLeft: '1px solid #333' }}>
-              <Box className="cell-custom">3</Box>
-              <Box className="cell-custom">5</Box>
-              <Box className="cell-custom">60%</Box>
-            </Box>
-            <Box width={'10%'} sx={{ borderLeft: '1px solid #333' }}>
-              <Box className="cell-custom">2</Box>
-              <Box className="cell-custom">2</Box>
-              <Box className="cell-custom">100%</Box>
-            </Box>
-            <Box width={'10%'} sx={{ borderLeft: '1px solid #333', borderRight: '1px solid #333', fontWeight: 'bold', color: '#005595' }}>
-              <Box className="cell-custom">10</Box>
-              <Box className="cell-custom">10</Box>
-              <Box className="cell-custom">100%</Box>
-            </Box>
-          </Stack> */}
         </Box>
       </MainCard>
     </>

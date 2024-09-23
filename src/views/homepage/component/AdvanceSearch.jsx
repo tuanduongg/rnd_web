@@ -54,22 +54,6 @@ const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleCl
     };
 
     const onClose = () => {
-        // if (currentFilter?.personName || Array.isArray(currentFilter?.personName)) {
-        //     setPersonName(currentFilter?.personName || []);
-        // } else {
-        //     setPersonName([]);
-        // }
-        // if (currentFilter?.categoryFilter || Array.isArray(currentFilter?.categoryFilter)) {
-        //     setCategoryFiler(currentFilter?.categoryFilter || []);
-        // } else {
-        //     setPersonName([]);
-        // }
-        // setStartDate(currentFilter?.startDate);
-        // setEndDate(currentFilter?.endDate);
-        // setCodeFilter(currentFilter?.codeFilter);
-        // setPlNameFilter(currentFilter?.plNameFilter);
-        // setModelFilter(currentFilter?.modelFilter);
-        // setProductNameFilter(currentFilter?.productNameFilter);
         onCloseMenuFilter();
     }
     useEffect(() => {

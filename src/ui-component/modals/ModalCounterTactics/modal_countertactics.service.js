@@ -24,7 +24,7 @@ export const inititalValueForm = {
   techNg: '',
   remark: '',
   author: '',
-  requestDate: null,
+  requestDate: currentDate,
   replyDate: null
 };
 export const inititalValidateForm = {
