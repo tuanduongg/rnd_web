@@ -28,6 +28,13 @@ const customizationReducer = (state = initialState, action) => {
                 ...state,
                 isOpen: [id]
             };
+        case actionTypes.MENU_OPEN_ARR:
+            id = action.id;
+            localStorage.setItem('theme', JSON.stringify({ ...state, isOpen: id }));
+            return {
+                ...state,
+                isOpen: id
+            };
         case actionTypes.SET_MENU:
             localStorage.setItem('theme', JSON.stringify({ ...state, opened: action.opened }));
             return {

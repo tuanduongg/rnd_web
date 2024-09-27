@@ -193,7 +193,7 @@ const AccountPage = () => {
                 >
                   {users?.length > 0 ? (
                     users?.map((row, index) => (
-                      <StyledTableRow selected={selectedRow?.userId === row?.userId} onClick={() => setSelectedRow(row)} key={index}>
+                      <StyledTableRow sx={{cursor:'pointer'}}  selected={selectedRow?.userId === row?.userId} onClick={() => setSelectedRow(row)} key={index}>
                         <StyledTableCell align="center">{index + 1}</StyledTableCell>
                         <StyledTableCell align="left" component="th" scope="row">
                           {row?.fullName}

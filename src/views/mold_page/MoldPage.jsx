@@ -285,7 +285,7 @@ const MoldPage = () => {
                 >
                   {dataJIG?.length > 0 ? (
                     dataJIG?.map((row, index) => (
-                      <StyledTableRow selected={selectedRow?.assetNo === row?.assetNo} onClick={() => setSelectedRow(row)} key={index}>
+                      <StyledTableRow sx={{cursor:'pointer'}}  selected={selectedRow?.assetNo === row?.assetNo} onClick={() => setSelectedRow(row)} key={index}>
                         <StyledTableCell align="center">{page * rowsPerPage + index + 1}</StyledTableCell>
                         <StyledTableCell align="center" component="th" scope="row">
                           {row?.assetNo}

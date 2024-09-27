@@ -2,7 +2,6 @@ import {
   InputAdornment,
   Button,
   FormControl,
-  Grid,
   IconButton,
   OutlinedInput,
   Paper,
@@ -16,40 +15,26 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography,
-  useTheme,
-  Tooltip,
-  InputLabel,
-  Select,
   ListItemText,
   Checkbox,
   MenuItem,
-  MenuList,
-  Divider,
   Menu,
-  ImageListItem,
-  ImageList,
   Box,
   Chip
 } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 import {
   IconPlus,
-  IconInfoCircle,
   IconSearch,
   IconEdit,
   IconTrash,
   IconEye,
   IconFileSpreadsheet,
-  IconFilterCheck,
   IconAdjustmentsAlt
 } from '@tabler/icons-react';
 import { useState } from 'react';
-import { getShift, ITEM_HEIGHT, itemData, LIST_COL, srcset } from './tablelist.service';
-import { IconCheck } from '@tabler/icons-react';
-import { IconPhotoScan } from '@tabler/icons-react';
+import { getShift, itemData, LIST_COL } from './tablelist.service';
 import ModalShowPhoto from 'ui-component/modals/ModalShowPhoto/ModalShowPhoto';
-import { IconFile } from '@tabler/icons-react';
 import IMAGE_EMPTYDATA from 'assets/images/backgrounds/empty-box.png';
 import config from 'config';
 import { cssScrollbar, formatDateFromDB, formatNumberWithCommas } from 'utils/helper';
@@ -59,10 +44,7 @@ import toast from 'react-hot-toast';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import { useEffect } from 'react';
 import ModalCounterTactics from 'ui-component/modals/ModalCounterTactics/ModalCounterTactics';
-import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { IconFilterFilled } from '@tabler/icons-react';
-import { IconFilter } from '@tabler/icons-react';
 import MoreSearch from './MoreSearch';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -490,7 +472,7 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
                 </TableRow>
               ) : (
                 reports.map((item, index) => (
-                  <StyledTableRow onClick={() => setSelectedRow(item)} selected={selectedRow?.reportId === item?.reportId} key={index}>
+                  <StyledTableRow sx={{cursor:'pointer'}}  onClick={() => setSelectedRow(item)} selected={selectedRow?.reportId === item?.reportId} key={index}>
                     {currentShowCol?.includes('#') && <StyledTableCell align="center">{index + 1}</StyledTableCell>}
                     {currentShowCol?.includes('time') && (
                       <StyledTableCell align="center">

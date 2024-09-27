@@ -454,16 +454,16 @@ const HomePage = () => {
 
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                      <Chip
-                        key={index}
-                        sx={{ marginRight: '5px', marginTop: '5px' }}
-                        variant="outlined"
-                        label={chip?.label}
-                        onDelete={() => {
-                          onDeleteChip(chip?.onDelete);
-                        }}
-                      />
-                    ))
+                    <Chip
+                      key={index}
+                      sx={{ marginRight: '5px', marginTop: '5px' }}
+                      variant="outlined"
+                      label={chip?.label}
+                      onDelete={() => {
+                        onDeleteChip(chip?.onDelete);
+                      }}
+                    />
+                  ))
                   : null}
               </Grid>
               <Grid item sx={{ textAlign: 'right' }} xs={4}>
@@ -559,6 +559,7 @@ const HomePage = () => {
                   {concepts?.length > 0 ? (
                     concepts?.map((row, index) => (
                       <StyledTableRow
+                        sx={{ cursor: 'pointer' }}
                         selected={selectedRow?.conceptId === row?.conceptId}
                         onClick={() => setSelectedRow(row)}
                         key={row.conceptId}

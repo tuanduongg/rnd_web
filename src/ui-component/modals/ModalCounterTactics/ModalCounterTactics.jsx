@@ -6,6 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { styled } from '@mui/material/styles';
 import * as Yup from 'yup';
+import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 import {
   Box,
   Divider,
@@ -814,7 +815,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                           <OutlinedInput
                             {...field}
                             multiline
-                            rows={2}
+                            rows={3}
                             placeholder="Nguyên nhân lỗi..."
                             name="techNg"
                             error={!!errors.techNg}
@@ -838,7 +839,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                             {...field}
                             multiline
                             defaultValue={valueForm?.tempSolution}
-                            rows={2}
+                            rows={3}
                             error={!!errors.tempSolution}
                             placeholder="Biện pháp..."
                             name="tempSolution"

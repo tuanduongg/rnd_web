@@ -41,6 +41,21 @@ export const RouterApi = {
   deleteJIG: '/jig/delete',
   updateJIG: '/jig/update',
 
+
+  allCompany: '/company/all',
+  addCompany: '/company/add',
+  updateCompany: '/company/update',
+
+
+  allModelMold: '/model-mold/all',
+  addModelMold: '/model-mold/add',
+  updateModelMold: '/model-mold/update',
+
+  allOutputJig: '/output-jig/all',
+  addOutputJig: '/output-jig/add',
+  updateOutputJig: '/output-jig/update',
+  deleteOutputJig: '/output-jig/delete',
+
   reportQCExportList: '/report-qc/exportExcel-report',
 
   findInOutJigByJig: '/inout-jig/findByJig'

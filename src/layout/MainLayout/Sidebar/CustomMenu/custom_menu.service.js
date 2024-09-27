@@ -1,8 +1,9 @@
 import HomeIcon from '@mui/icons-material/Home';
-import PersonIcon from '@mui/icons-material/Person';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import { IconDashboard, IconHome, IconChecklist, IconLicense, IconUser, IconBrandCodepen } from '@tabler/icons-react';
-const icons = { IconDashboard, IconHome, IconChecklist, IconLicense, IconUser, IconBrandCodepen, HomeIcon, PersonIcon,ReceiptLongIcon };
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+const icons = { FactCheckIcon, HomeIcon, ManageAccountsIcon, ReceiptIcon, SpaceDashboardIcon };
 
 import React from 'react';
 import { ConfigRouter } from 'routes/ConfigRouter';
@@ -24,50 +25,70 @@ export function hasChildren(item) {
 
   return true;
 }
+
+export const findParentIds = (menu, targetId) => {
+  const result = [];
+
+  const recursiveSearch = (items, currentPath) => {
+    for (const item of items) {
+      const newPath = [...currentPath, item.id];
+
+      if (item.id === targetId) {
+        result.push(...currentPath); // Chỉ thêm các ID cha
+        return true; // Kết thúc tìm kiếm khi tìm thấy ID
+      }
+
+      if (item.items && item.items.length > 0) {
+        if (recursiveSearch(item.items, newPath)) {
+          return true; // Kết thúc tìm kiếm
+        }
+      }
+    }
+    return false; // Không tìm thấy ID trong nhánh này
+  };
+
+  recursiveSearch(menu, []);
+  return result;
+};
+
+
 export const menu = [
   {
     id: ConfigRouter.aprrovalPage,
-    icon: icons.ReceiptLongIcon,
+    icon: icons.FactCheckIcon,
     title: 'Approval Status',
     items: []
   },
   {
-    icon: icons.IconLicense,
+    icon: icons.ReceiptIcon,
     id: ConfigRouter.qc,
     title: '대책서(QPN)',
     items: [
-      //   {
-      //     title: 'Technical Analysis',
-      //     items: [
-      //     //   {
-      //     //     title: 'The Dow Theory',
-      //     //     to: '/thedowtheory'
-      //     //   },
-      //     //   {
-      //     //     title: 'Charts & Chart Patterns',
-      //     //     to: '/chart'
-      //     //   },
-      //     //   {
-      //     //     title: 'Trend & Trend Lines',
-      //     //     to: '/trendlines'
-      //     //   },
-      //     //   {
-      //     //     title: 'Support & Resistance',
-      //     //     to: '/sandr'
-      //     //   }
-      //     ]
-      //   },
+
     ]
   },
   {
-    icon: icons.IconBrandCodepen,
+    icon: icons.SpaceDashboardIcon,
     id: ConfigRouter.managementMold,
     title: 'Mold',
-    items: []
+    items: [
+      // {
+      //   id: ConfigRouter.managementMold,
+      //   title: 'List',
+      //   items: [
+      //   ]
+      // },
+      // {
+      //   id: ConfigRouter.settingMold,
+      //   title: 'Settings',
+      //   items: [
+      //   ]
+      // },
+    ]
   },
   {
     id: ConfigRouter.accPage,
-    icon: icons.PersonIcon,
+    icon: icons.ManageAccountsIcon,
     title: 'Account & Role'
   }
 ];
