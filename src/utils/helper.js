@@ -1,7 +1,15 @@
 import config from 'config';
+import dayjs from 'dayjs';
 import { ConfigRouter } from 'routes/ConfigRouter';
 import authReducer from 'store/authReducer';
 import { initialState } from 'store/customizationReducer';
+
+const currentDate = dayjs();
+// Lấy ngày đầu tiên của tháng hiện tại
+export const START_OF_CURRENT_MONTH = currentDate.startOf('month');
+
+// Lấy ngày cuối của thangs hiện tại
+export const END_OF_CURRENT_MONTH = currentDate.endOf('month');
 
 function stringToColor(string) {
   let hash = 0;
@@ -59,6 +67,14 @@ export function getCookie(name) {
   }
   return null;
 }
+export const getDataUserFromLocal = () => {
+  const dataStr = localStorage.getItem('DATA_USER');
+  if (dataStr) {
+    return JSON.parse(dataStr);
+  }
+  return null;
+};
+
 export const delete_cookie = (name) => {
   document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 };
@@ -83,6 +99,24 @@ export function formatBytes(bytes, decimals = 2) {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}
+
+export function getDepartmentEditMold(num) {
+  let text = '';
+  switch (num) { //phat trien
+    case 1:
+      text = '개발수정';
+      
+      break;
+      case 2: // san xuat
+      
+      text = '양산수정';
+      break;
+  
+    default:
+      break;
+  }
+  return text;
 }
 
 export function addZero(num) {
@@ -188,19 +222,19 @@ export const concatFileNameWithExtension = (fileName, extenstion) => {
 };
 
 export const cssScrollbar = {
-  '&::-webkit-scrollbar': {
-    width: '0.5em', // Narrower scrollbar width
-    height: '0.6em' // Shorter scrollbar height
-  },
-  '&::-webkit-scrollbar-track': {
-    boxShadow: 'inset 0 0 6px rgba(0,0,0,0.00)',
-    webkitBoxShadow: 'inset 0 0 6px rgba(0,0,0,0.00)'
-  },
-  '&::-webkit-scrollbar-thumb': {
-    backgroundColor: '#bdbdbd',
-    borderRadius: '20px' // Sets border radius for thumb
-  },
-  '&::-webkit-scrollbar-thumb:hover': {
-    backgroundColor: '#818181'
-  }
+  // '&::-webkit-scrollbar': {
+  //   width: '0.5em', // Narrower scrollbar width
+  //   height: '0.6em' // Shorter scrollbar height
+  // },
+  // '&::-webkit-scrollbar-track': {
+  //   boxShadow: 'inset 0 0 6px rgba(0,0,0,0.00)',
+  //   webkitBoxShadow: 'inset 0 0 6px rgba(0,0,0,0.00)'
+  // },
+  // '&::-webkit-scrollbar-thumb': {
+  //   backgroundColor: '#bdbdbd',
+  //   borderRadius: '20px' // Sets border radius for thumb
+  // },
+  // '&::-webkit-scrollbar-thumb:hover': {
+  //   backgroundColor: '#818181'
+  // }
 };

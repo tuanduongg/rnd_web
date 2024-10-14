@@ -6,7 +6,7 @@ import MuiChip from '@mui/material/Chip';
 
 // ==============================|| CHIP ||============================== //
 
-const Chip = ({ chipcolor, disabled, sx = {}, variant, ...others }) => {
+const CustomChip = ({ chipcolor, disabled, sx = {}, variant, ...others }) => {
   const theme = useTheme();
 
   let defaultSX = {
@@ -93,6 +93,27 @@ const Chip = ({ chipcolor, disabled, sx = {}, variant, ...others }) => {
             }
           });
       break;
+    case 'grey':
+      variant === 'outlined'
+        ? (outlineSX = {
+            color: 'grey.dark',
+            bgcolor: 'transparent',
+            border: '1px solid',
+            borderColor: 'grey.main',
+            ':hover': {
+              color: 'grey.dark',
+              bgcolor: 'grey.light'
+            }
+          })
+        : (defaultSX = {
+            color: 'grey.dark',
+            bgcolor: 'grey.light',
+            ':hover': {
+              color: 'grey.light',
+              bgcolor: 'grey.dark'
+            }
+          });
+      break;
     case 'orange':
       variant === 'outlined'
         ? (outlineSX = {
@@ -168,11 +189,11 @@ const Chip = ({ chipcolor, disabled, sx = {}, variant, ...others }) => {
   return <MuiChip {...others} sx={SX} />;
 };
 
-Chip.propTypes = {
+CustomChip.propTypes = {
   sx: PropTypes.object,
   chipcolor: PropTypes.string,
   variant: PropTypes.string,
   disabled: PropTypes.bool
 };
 
-export default Chip;
+export default CustomChip;

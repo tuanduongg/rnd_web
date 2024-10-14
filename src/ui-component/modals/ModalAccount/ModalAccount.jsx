@@ -28,10 +28,11 @@ import Loading from 'ui-component/Loading';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import { IconDeviceFloppy } from '@tabler/icons-react';
 import { isMobile } from 'react-device-detect';
+import toast from 'react-hot-toast';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
-    borderBottom:'none',
+    borderBottom: 'none'
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1)
@@ -45,15 +46,15 @@ const regexNoDiacritics = /^[a-zA-Z0-9-_]+$/;
 function isValidUsername(username) {
   if (!regexNoDiacritics.test(username)) {
     if (/[^\u0000-\u007F]/.test(username)) {
-      return "Tên tài khoản chứa dấu tiếng Việt hoặc ký tự đặc biệt";
+      return 'Tên tài khoản chứa dấu tiếng Việt hoặc ký tự đặc biệt';
     }
-    return "Tên tài khoản chứa ký tự không hợp lệ";
+    return 'Tên tài khoản chứa ký tự không hợp lệ';
   }
-  return "Tên tài khoản hợp lệ";
+  return 'Tên tài khoản hợp lệ';
 }
 
 const initvalidate = { error: false, msg: '' };
-export default function ModalAccount({ open, onClose, afterSave, setSnackBar, selected, typeModal }) {
+export default function ModalAccount({ open, onClose, afterSave, selected, typeModal }) {
   const theme = useTheme();
   const [personName, setPersonName] = useState([]);
   const [fullName, setFullName] = useState('');
@@ -66,6 +67,7 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar, se
   const [validatePassword, setValidatePassword] = useState(initvalidate);
   const [validateRole, setValidateRole] = useState(initvalidate);
   const [isRoot, setIsRoot] = useState(false);
+  const [isKorean, setIsKorean] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleClose = (event, reason) => {
@@ -74,6 +76,7 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar, se
     setUsername('');
     setPassword('');
     setIsRoot(false);
+    setIsKorean(false);
     setValidateFullName(initvalidate);
     setValidateUserName(initvalidate);
     setValidatePassword(initvalidate);
@@ -95,10 +98,11 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar, se
     setLoading(false);
     if (response?.status === 200) {
       const data = response?.data;
-      setFullName(data?.fullName)
-      setUsername(data?.userName)
-      setIsRoot(data?.isRoot)
-      setRole(data?.role?.roleId)
+      setFullName(data?.fullName);
+      setUsername(data?.userName);
+      setIsKorean(data?.isKorean);
+      setIsRoot(data?.isRoot);
+      setRole(data?.role?.roleId);
     }
   };
   useEffect(() => {
@@ -155,7 +159,6 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar, se
         check = true;
         setValidateUserName({ error: true, msg: 'Username contains Vietnamese characters or special characters!' });
       } else {
-
         check = true;
         setValidateUserName({ error: true, msg: 'Username contains invalid characters!' });
       }
@@ -180,14 +183,15 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar, se
             userName,
             role,
             password,
-            isRoot
+            isRoot,
+            isKorean
           });
           if (res?.status === 200) {
             afterSave();
             handleClose();
-            setSnackBar({ open: true, message: 'Saved changes successful!', type: true });
+            toast.success('Saved changes successful!');
           } else {
-            setSnackBar({ open: true, message: res?.data?.message || 'Server Error!', type: false });
+            toast.error(res?.data?.message || 'Server Error!');
           }
         }
       });
@@ -196,8 +200,8 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar, se
   return (
     <>
       <BootstrapDialog fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-        <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px'}} id="customized-dialog-title">
-          { typeModal === 'ADD' ? 'Create New User' : 'Update User'}
+        <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
+          {typeModal === 'ADD' ? 'Create New User' : 'Update User'}
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -272,7 +276,9 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar, se
                   }}
                 >
                   {roles?.map((role) => (
-                    <MenuItem key={role?.roleId} value={role?.roleId}>{role?.roleName}</MenuItem>
+                    <MenuItem key={role?.roleId} value={role?.roleId}>
+                      {role?.roleName}
+                    </MenuItem>
                   ))}
                 </Select>
                 <FormHelperText>{validateRole?.msg}</FormHelperText>
@@ -290,6 +296,18 @@ export default function ModalAccount({ open, onClose, afterSave, setSnackBar, se
                   />
                 }
                 label="Admin"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isKorean}
+                    value={isKorean}
+                    onChange={(e) => {
+                      setIsKorean(!isKorean);
+                    }}
+                  />
+                }
+                label="Korean Account"
               />
             </Grid>
           </Grid>

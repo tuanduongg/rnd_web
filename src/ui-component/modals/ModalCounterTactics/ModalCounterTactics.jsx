@@ -97,11 +97,10 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
   const [categories, setCategories] = useState([]);
   const [valueForm, setValueForm] = useState(inititalValueForm);
   const [typeFileUpload, seTypeFileUpload] = useState('');
-  const [validateForm, setValidateForm] = useState(inititalValidateForm);
   const inputImageRef = useRef();
   const inputFileRef = useRef();
   const buttonSubmit = useRef();
-
+  const pasteAreaRef = useRef(null); // Ref đến vùng cụ thể để paste
   const {
     watch,
     handleSubmit,
@@ -144,13 +143,21 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
 
   // Theo dõi giá trị của code
   const codeValue = watch('code');
+  const dateValue = watch('date');
 
   useEffect(() => {
-    // Kiểm tra nếu length của code >= 11, gọi API
+    if (dateValue?.isValid()) {
+      const currentWeek = dateValue.week();
+      const week = currentWeek < 10 ? `0${currentWeek}` : currentWeek;
+      setValue('week', week);
+    }
+  }, [dateValue]);
+  useEffect(() => {
+    // Kiểm tra nếu length của code >= 10, gọi API
     if (codeValue.length >= 11) {
       findByCode();
     }
-  }, [codeValue, setValue]);
+  }, [codeValue]);
 
   const getCategories = async () => {
     if (categories?.length > 0) {
@@ -246,30 +253,37 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
     setListFilePreview(newArr);
   }, [listImageUpload]);
   const onDeleteImage = (e, index) => {
-    const newArr = listImageUpload.map((item, i) => {
-      if (i === index) {
-        item['isShow'] = false;
+    const fileDelete = listImageUpload[index];
+    let newArr = [];
+    if (fileDelete?.fileId) {
+      newArr = listImageUpload.map((item, i) => {
+        if (i === index) {
+          item['isShow'] = false;
+        }
         return item;
-      }
-      return item;
-    });
+      });
+    } else {
+      newArr = listImageUpload.filter((item, i) => i !== index);
+    }
     setListImageUpload(newArr);
   };
   const onChangeInputImage = (e) => {
     const files = e.target.files;
-    const numFile = listImageUpload.filter((item) => item?.isShow).length + files?.length;
-    if (files?.length > config?.maxFileUpload || numFile > config?.maxFileUpload) {
-      e.target.value = null;
-      e.target.files = null;
-      toast.error(`Allow upload max: ${config?.maxFileUpload} files!`);
-      return;
-    }
+    // const numFile = listImageUpload.filter((item) => item?.isShow).length + files?.length;
+    // if (files?.length > config?.maxFileUpload || numFile > config?.maxFileUpload) {
+    //   e.target.value = null;
+    //   e.target.files = null;
+    //   toast.error(`Allow upload max: ${config?.maxFileUpload} files!`);
+    //   return;
+    // }
+
     const arrNewFile = [];
     for (let index = 0; index < files.length; index++) {
       const element = files[index];
       element['isShow'] = true;
       arrNewFile.push(element);
     }
+    console.log('arrNewFile', arrNewFile);
     setListImageUpload((pre) => pre.concat(arrNewFile));
     e.target.value = null;
     e.target.files = null;
@@ -279,12 +293,18 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
   };
 
   const onDeleteFileUpload = (e, index) => {
-    const newArr = fileUploadRequest.map((item, i) => {
-      if (i === index) {
-        item['isShow'] = false;
-      }
-      return item;
-    });
+    const fileDelete = fileUploadRequest[index];
+    let newArr = [];
+    if (fileDelete?.fileId) {
+      newArr = fileUploadRequest.map((item, i) => {
+        if (i === index) {
+          item['isShow'] = false;
+        }
+        return item;
+      });
+    } else {
+      newArr = fileUploadRequest.filter((item, i) => i !== index);
+    }
     setFileUploadRequest(newArr);
   };
   const onClickSave = async () => {
@@ -355,26 +375,48 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
       }
     });
   };
+  const handlePasteImage = async (event) => {
+    if (document.activeElement === pasteAreaRef.current) {
+      const clipboardItems = event.clipboardData.items;
+      for (let i = 0; i < clipboardItems.length; i++) {
+        const item = clipboardItems[i];
 
-  const onChangeDate = (newValue) => {
-    let week = valueForm.week;
-    if (newValue?.isValid()) {
-      const currentWeek = newValue.week();
-      week = currentWeek < 10 ? `0${currentWeek}` : currentWeek;
+        if (item.type.indexOf('image') !== -1) {
+          const file = item.getAsFile();
+          file['isShow'] = true;
+          setListImageUpload((pre) => [...pre, file]);
+        }
+      }
     }
-    setValue('week', week);
-    setValue('date', newValue);
+  };
+  const onClickAddImages = () => {
+    inputImageRef?.current.click();
+    // handlePasteImage();
+  };
+  useEffect(() => {
+    window.addEventListener('paste', handlePasteImage);
+
+    return () => {
+      window.removeEventListener('paste', handlePasteImage);
+    };
+  }, []);
+  const handleFocusBoxPaste = () => {
+    // Chỉ lắng nghe sự kiện paste khi vùng này có focus
+  };
+
+  const handleBlurBoxPaste = () => {
+    // Ngừng lắng nghe sự kiện paste khi vùng này mất focus
   };
   const onChangeInputFile = (e) => {
     const files = e.target.files;
-    const numFile = fileUploadRequest.filter((item) => item?.isShow)?.length + files?.length;
+    // const numFile = fileUploadRequest.filter((item) => item?.isShow)?.length + files?.length;
 
-    if (files?.length > config?.maxFileUpload || numFile > config?.maxFileUpload) {
-      e.target.value = null;
-      e.target.files = null;
-      toast.error(`Allow upload max: ${config?.maxFileUpload} files!`);
-      return;
-    }
+    // if (files?.length > config?.maxFileUpload || numFile > config?.maxFileUpload) {
+    //   e.target.value = null;
+    //   e.target.files = null;
+    //   toast.error(`Allow upload max: ${config?.maxFileUpload} files!`);
+    //   return;
+    // }
 
     const arrNewFile = [];
     for (let index = 0; index < files.length; index++) {
@@ -484,14 +526,14 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                         {...field}
                         label="Date"
                         value={field.value ? dayjs(field.value) : null}
-                        onChange={onChangeDate}
+                        onChange={(newValue) => field.onChange(newValue)}
                         format="YYYY/MM/DD"
                         views={['year', 'month', 'day']}
                         slotProps={{
                           textField: {
                             fullWidth: true,
                             size: 'small',
-                            helperText: errors.date ? errors.date.message : '',
+                            // helperText: errors.date ? errors.date.message : '',
                             error: !!errors.date
                           }
                         }}
@@ -552,7 +594,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                     rules={{
                       required: ' ',
                       pattern: {
-                        value: /^[0-9]+$/, // Regex chỉ chấp nhận số nguyên dương
+                        value: /^[0-9]+(\.[0-9]+)?$/, // Chấp nhận số nguyên hoặc số thập phân dương
                         message: ' '
                       }
                     }}
@@ -838,7 +880,6 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                           <OutlinedInput
                             {...field}
                             multiline
-                            defaultValue={valueForm?.tempSolution}
                             rows={3}
                             error={!!errors.tempSolution}
                             placeholder="Biện pháp..."
@@ -859,16 +900,16 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                     render={({ field }) => (
                       <>
                         <FormControl error={!!errors.remark} fullWidth size="small" variant="outlined">
-                          <InputLabel htmlFor="outlined-adornment-password">조치사항 (Hành động đã thực hiện)</InputLabel>
+                          <InputLabel htmlFor="outlined-adornment-password">조치사항 (Đã thực hiện)</InputLabel>
                           <OutlinedInput
                             {...field}
                             disabled={typeModal === 'VIEW'}
                             error={!!errors.remark}
                             multiline
                             rows={3}
-                            placeholder="Hành động đã thực hiện..."
+                            placeholder="Đã thực hiện..."
                             name="remark"
-                            label="조치사항 (Hành động đã thực hiện)"
+                            label="조치사항 (Đã thực hiện)"
                           />
                         </FormControl>
                       </>
@@ -1042,6 +1083,8 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
 
                 <Grid item xs={12}>
                   <Box
+                    ref={pasteAreaRef}
+                    tabIndex={0} // Make Box focusable
                     width={'100%'}
                     display={listFilePreview?.length > 0 ? 'block' : 'flex'}
                     alignItems={'center'}
@@ -1050,30 +1093,27 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                     border={'1px dotted #aaa'}
                   >
                     {listFilePreview?.length <= 0 && (
-                      <Button
-                        onClick={() => {
-                          inputImageRef?.current.click();
-                        }}
-                        startIcon={<IconPhotoPlus />}
-                        size="large"
-                        color="primary"
-                      >
-                        Add image(NG)
-                      </Button>
+                      <Tooltip title="Click để tải ảnh lên từ thiết bị hoặc click vào khoảng trắng và dán ảnh đã sao chép">
+                        <Button onClick={onClickAddImages} startIcon={<IconPhotoPlus />} size="large" color="primary">
+                          Add image(NG)
+                        </Button>
+                      </Tooltip>
                     )}
                     <ImageList cols={3} variant="quilted" rowHeight={121}>
                       {listFilePreview?.length <= 0 ? null : (
                         <ImageListItem>
                           <Box display="flex" alignContent={'center'} justifyContent={'center'} width={'100%'} height={'100%'}>
-                            <IconButton
-                              onClick={() => {
-                                inputImageRef?.current.click();
-                              }}
-                              color="primary"
-                              size="large"
-                            >
-                              <IconPlus style={{ width: '60px', height: '60px' }} />
-                            </IconButton>
+                            <Tooltip title="Click để tải ảnh lên từ thiết bị hoặc click vào khoảng trắng và dán ảnh đã sao chép">
+                              <IconButton
+                                onClick={() => {
+                                  inputImageRef?.current.click();
+                                }}
+                                color="primary"
+                                size="large"
+                              >
+                                <IconPlus style={{ width: '60px', height: '60px' }} />
+                              </IconButton>
+                            </Tooltip>
                           </Box>
                         </ImageListItem>
                       )}

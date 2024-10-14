@@ -63,11 +63,7 @@ const AccountPage = () => {
   const [typeModal, setTypeModal] = useState('ADD');
   const [search, setSearch] = useState('');
   const theme = useTheme();
-  const [snackBar, setSnackBar] = useState({
-    open: false,
-    message: '',
-    type: true
-  });
+
   const getUsers = async () => {
     const res = await restApi.post(RouterApi.userAll, { search: '' });
     if (res?.status === 200) {
@@ -182,6 +178,7 @@ const AccountPage = () => {
                     <StyledTableCell align="left">Full Name</StyledTableCell>
                     <StyledTableCell align="left">User Name</StyledTableCell>
                     <StyledTableCell align="center">Role</StyledTableCell>
+                    <StyledTableCell align="right">Korean(ACC)</StyledTableCell>
                     <StyledTableCell align="right">Admin</StyledTableCell>
                   </TableRow>
                 </TableHead>
@@ -200,6 +197,7 @@ const AccountPage = () => {
                         </StyledTableCell>
                         <StyledTableCell align="left">{row?.userName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.role?.roleName}</StyledTableCell>
+                        <StyledTableCell align="right">{row?.isKorean && <IconCheck />}</StyledTableCell>
                         <StyledTableCell align="right">{row?.isRoot && <IconCheck />}</StyledTableCell>
                       </StyledTableRow>
                     ))
@@ -217,29 +215,9 @@ const AccountPage = () => {
           </MainCard>
         </Grid>
       </Grid>
-      <Snackbar
-        autoHideDuration={6000}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        open={snackBar?.open}
-        onClose={() => {
-          setSnackBar({ open: false, message: '', type: snackBar?.type });
-        }}
-      >
-        <Alert
-          onClose={() => {
-            setSnackBar({ open: false, message: '', type: snackBar?.type });
-          }}
-          severity={snackBar?.type ? 'success' : 'error'}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {snackBar?.message}
-        </Alert>
-      </Snackbar>
       <ModalAccount
         typeModal={typeModal}
         selected={selectedRow}
-        setSnackBar={setSnackBar}
         afterSave={() => {
           getUsers();
         }}

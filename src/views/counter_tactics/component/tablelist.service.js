@@ -1,12 +1,12 @@
 export const LIST_COL = [
   { canHide: false, align: 'center', name: '#', id: '#', width: 20 },
-  { canHide: false, align: 'center', name: 'Time', id: 'time', width: 100 },
+  { canHide: false, align: 'center', name: 'Time', id: 'time', width: 120 },
   { canHide: false, align: 'center', name: 'Category', id: 'category', width: 100 },
   { canHide: false, align: 'center', name: 'Model', id: 'model', width: 120 },
   { canHide: false, align: 'center', name: 'Code', id: 'code', width: 120 },
   { canHide: true, align: 'center', name: 'Item', id: 'item', width: 150 },
   { canHide: true, align: 'center', name: 'P/L Name', id: 'PL_name', width: 100 },
-  { canHide: false, align: 'center', name: '불량명<br/>(Tên Lỗi)', id: 'NG_name', width: 120 },
+  { canHide: false, align: 'center', name: '불량명<br/>(Tên Lỗi)', id: 'NG_name', width: 115 },
   { canHide: false, align: 'center', name: 'Tỷ lệ', id: 'percentage', width: 100 },
   { canHide: true, align: 'center', name: '고객<br/>(Khách hàng)', id: 'supplier', width: 130 },
   { canHide: false, align: 'center', name: '부적합 통보<br/>(BP)', id: 'stage', width: 100 },
@@ -20,7 +20,7 @@ export const LIST_COL = [
   { canHide: false, align: 'center', name: '요청 일자<br/>(Request Date)', id: 'requestDate', width: 150 },
   // { canHide: false, align: 'center', name: '첨부자료<br/>(File)', id: 'file', width: 100 },
   { canHide: false, align: 'center', name: '회신 일자<br/>(Reply Date)', id: 'replyDate', width: 150 },
-  { canHide: false, align: 'center', name: '등록자<br/>(Người đăng ký)', id: 'author', width: 150 },
+  { canHide: true, align: 'center', name: '등록자<br/>(Người đăng ký)', id: 'author', width: 150 },
   { canHide: true, align: 'center', name: '조치사항<br/>(Hành động đã thực hiện)', id: 'remark', width: 200 }
 ];
 

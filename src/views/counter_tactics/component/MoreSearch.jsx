@@ -110,7 +110,7 @@ const MoreSearch = ({ anchorEl, open, onCloseMenuFilter, categories, processes, 
                     typeof value === 'string' ? value.split(',') : value
                   );
                 }}
-                input={<OutlinedInput label="Tag" />}
+                input={<OutlinedInput label="Category" />}
                 renderValue={(selected) => {
                   let result = selected
                     ?.map((id) => {
@@ -196,7 +196,7 @@ const MoreSearch = ({ anchorEl, open, onCloseMenuFilter, categories, processes, 
                     typeof value === 'string' ? value.split(',') : value
                   );
                 }}
-                input={<OutlinedInput label="Tag" />}
+                input={<OutlinedInput label="Process" />}
                 renderValue={(selected) => {
                   let result = selected
                     ?.map((id) => {

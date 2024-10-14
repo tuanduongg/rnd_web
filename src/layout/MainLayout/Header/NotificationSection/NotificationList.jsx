@@ -18,7 +18,7 @@ import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
 
 // project-import
-import Chip from 'ui-component/extended/Chip';
+import Chip from 'ui-component/extended/CustomChip';
 
 // assets
 import { IconBrandTelegram, IconBuildingStore, IconMailbox, IconPhoto } from '@tabler/icons-react';

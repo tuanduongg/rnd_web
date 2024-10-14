@@ -377,7 +377,7 @@ export default function ModalShowPhoto({ open, onClose, valueTabProp, selected, 
                       <Typography minWidth={150} mr={2} fontSize={'0.875rem'} variant="subtitle2">
                         불량원인<br />(Nguyên nhân lỗi)
                       </Typography>
-                      <Typography variant="h5">{selected?.techNG}</Typography>
+                      <Typography whiteSpace={"pre-line"} variant="h5">{selected?.techNG}</Typography>
                     </Stack>
                     <Divider />
                   </Stack>
@@ -388,7 +388,7 @@ export default function ModalShowPhoto({ open, onClose, valueTabProp, selected, 
                       <Typography minWidth={150} mr={2} fontSize={'0.875rem'} variant="subtitle2">
                         임시조치<br />(Biện pháp)
                       </Typography>
-                      <Typography variant="h5">{selected?.tempSolution}</Typography>
+                      <Typography whiteSpace={"pre-line"} variant="h5">{selected?.tempSolution}</Typography>
                     </Stack>
                     <Divider />
                   </Stack>
@@ -399,7 +399,7 @@ export default function ModalShowPhoto({ open, onClose, valueTabProp, selected, 
                       <Typography minWidth={150} mr={2} fontSize={'0.875rem'} variant="subtitle2">
                         조치사항 <br />(Đã thực hiện)
                       </Typography>
-                      <Typography variant="h5">{selected?.remark}</Typography>
+                      <Typography whiteSpace={"pre-line"} variant="h5">{selected?.remark}</Typography>
                     </Stack>
                     <Divider />
                   </Stack>

@@ -23,28 +23,19 @@ import {
   Chip
 } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
-import {
-  IconPlus,
-  IconSearch,
-  IconEdit,
-  IconTrash,
-  IconEye,
-  IconFileSpreadsheet,
-  IconAdjustmentsAlt
-} from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconEdit, IconTrash, IconEye, IconFileSpreadsheet, IconAdjustmentsAlt, IconColumns } from '@tabler/icons-react';
 import { useState } from 'react';
 import { getShift, itemData, LIST_COL } from './tablelist.service';
 import ModalShowPhoto from 'ui-component/modals/ModalShowPhoto/ModalShowPhoto';
 import IMAGE_EMPTYDATA from 'assets/images/backgrounds/empty-box.png';
 import config from 'config';
-import { cssScrollbar, formatDateFromDB, formatNumberWithCommas } from 'utils/helper';
+import { cssScrollbar, END_OF_CURRENT_MONTH, formatDateFromDB, formatNumberWithCommas, START_OF_CURRENT_MONTH } from 'utils/helper';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import toast from 'react-hot-toast';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import { useEffect } from 'react';
 import ModalCounterTactics from 'ui-component/modals/ModalCounterTactics/ModalCounterTactics';
-import dayjs from 'dayjs';
 import MoreSearch from './MoreSearch';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -73,20 +64,12 @@ LIST_COL.map((col) => {
     listColDefault.push(col?.id);
   }
 });
-const currentDate = dayjs();
-// Lấy ngày đầu tiên của tháng hiện tại
-const firstDayOfCurrentMonth = currentDate.startOf('month');
 
-// Lấy ngày đầu tiên của tháng trước
-const firstDayOfLastMonth = firstDayOfCurrentMonth.subtract(1, 'month');
-
-// Lấy ngày đầu tiên của tháng sau
-const firstDayOfNextMonth = firstDayOfCurrentMonth.add(1, 'month');
 const initFilter = {
   process: [],
   category: [],
-  startDate: firstDayOfLastMonth,
-  endDate: firstDayOfNextMonth
+  startDate: START_OF_CURRENT_MONTH,
+  endDate: END_OF_CURRENT_MONTH
 };
 
 const TableList = ({ setLoading, listProcess, statistic, role }) => {
@@ -103,8 +86,8 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [typeModal, setTypeModal] = useState('ADD');
-  const [startDate, setStartDate] = useState(firstDayOfLastMonth);
-  const [endDate, setEndDate] = useState(firstDayOfNextMonth);
+  const [startDate, setStartDate] = useState(START_OF_CURRENT_MONTH);
+  const [endDate, setEndDate] = useState(END_OF_CURRENT_MONTH);
   const [categories, setCategories] = useState([]);
   const [currentFilter, setCurrentFilter] = useState(initFilter);
   const [arrChipFilter, setArrChipFilter] = useState([]);
@@ -116,10 +99,12 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
   const getAllReportQC = async () => {
     setLoading(true);
     const res = await restApi.post(RouterApi.allReportQC, {
+      ...currentFilter,
       search,
       page,
       rowsPerPage,
-      ...currentFilter
+      startDate: currentFilter?.startDate?.startOf('day').format('YYYY-MM-DD HH:mm:ss'),
+      endDate: currentFilter?.endDate?.endOf('day').format('YYYY-MM-DD HH:mm:ss')
     });
     setLoading(false);
     if (res?.status === 200) {
@@ -153,7 +138,7 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
         break;
     }
   };
-  
+
   useEffect(() => {
     if (currentFilter) {
       const arrChipResult = [];
@@ -266,8 +251,8 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
         search,
         page,
         rowsPerPage,
-        startDate: startDate?.hour(0).minute(0).second(0),
-        endDate: endDate?.hour(23).minute(59).second(59),
+        startDate: currentFilter?.startDate?.startOf('day').format('YYYY-MM-DD HH:mm:ss'),
+        endDate: currentFilter?.endDate?.endOf('day').format('YYYY-MM-DD HH:mm:ss'),
         category
       },
       {
@@ -285,7 +270,7 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
       const day = date.getDate();
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
-      saveAs(blob, `Export_List_${minus}${hour}${year}${month}${day}.xlsx`);
+      saveAs(blob, `Export_List_${hour}${minus}_${year}${month}${day}.xlsx`);
     } else {
       toast.error('Download file fail!');
     }
@@ -313,7 +298,13 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
     getAllReportQC();
   };
   const onClickAdvanceSearch = (data) => {
-    setCurrentFilter({ ...data });
+    console.log('data', data);
+    setCurrentFilter({
+      process: data?.process,
+      category: data?.category,
+      startDate: data?.startDate,
+      endDate: data?.endDate
+    });
   };
   const handleChangeRowsPerPage = (event) => {
     setSelectedRow(null);
@@ -323,7 +314,7 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
 
   return (
     <>
-      <MainCard contentSX={{ padding: '10px' }}>
+      <MainCard contentSX={{ padding: '10px !important' }}>
         {/* <Stack spacing={2} direction={'row'} alignItems={'center'} justifyContent={'space-between'} mb={2}> */}
         <Stack spacing={1} direction="row" alignItems={'center'} justifyContent="space-between">
           <Stack spacing={1} direction="row" alignItems={'center'} justifyContent="flex-start">
@@ -379,7 +370,13 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
         {/* </Stack> */}
         <Stack mt={1.5} mb={1.5} direction={'row'} justifyContent={'flex-end'} spacing={4}>
           <Stack direction="row" justifyContent="space-between" spacing={1}>
-            <Button disabled={reports?.length === 0} onClick={onClickExportExcel} startIcon={<IconFileSpreadsheet />} size="small" variant="outlined">
+            <Button
+              disabled={reports?.length === 0}
+              onClick={onClickExportExcel}
+              startIcon={<IconFileSpreadsheet />}
+              size="small"
+              variant="outlined"
+            >
               Excel
             </Button>
             {role?.create && (
@@ -472,12 +469,17 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
                 </TableRow>
               ) : (
                 reports.map((item, index) => (
-                  <StyledTableRow sx={{cursor:'pointer'}}  onClick={() => setSelectedRow(item)} selected={selectedRow?.reportId === item?.reportId} key={index}>
-                    {currentShowCol?.includes('#') && <StyledTableCell align="center">{index + 1}</StyledTableCell>}
+                  <StyledTableRow
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => setSelectedRow(item)}
+                    selected={selectedRow?.reportId === item?.reportId}
+                    key={index}
+                  >
+                    {currentShowCol?.includes('#') && <StyledTableCell align="center">{page * rowsPerPage + index + 1}</StyledTableCell>}
                     {currentShowCol?.includes('time') && (
                       <StyledTableCell align="center">
                         <div>
-                          {getShift(item?.shift)} - {item?.week ? `w${item.week}` : ''}
+                          {getShift(item?.shift)} - {item?.week ? `W${item.week}` : ''}
                         </div>
                         <div>{item?.time ? formatDateFromDB(item?.time, false) : ''}</div>
                       </StyledTableCell>
@@ -569,6 +571,7 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
             aria-controls={open ? 'demo-positioned-menu' : undefined}
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
+            startIcon={<IconColumns />}
             onClick={handleClick}
           >
             Show colums

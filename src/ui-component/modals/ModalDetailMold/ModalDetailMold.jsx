@@ -19,8 +19,15 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { isMobile } from 'react-device-detect';
-import { cssScrollbar, formatDateFromDB } from 'utils/helper';
-import { IconCaretDown } from '@tabler/icons-react';
+import { cssScrollbar, formatDateFromDB, getDepartmentEditMold } from 'utils/helper';
+import { IconCaretDown, IconFileSpreadsheet } from '@tabler/icons-react';
+import { IconHistory } from '@tabler/icons-react';
+import ModalHistory from '../ModalHistory/ModalHistory';
+import { useEffect, useState } from 'react';
+import restApi from 'utils/restAPI';
+import { RouterApi } from 'utils/router-api';
+import toast from 'react-hot-toast';
+import { saveAs } from 'file-saver';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -28,8 +35,8 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     borderBottom: 'none'
   },
   '.MuiPaper-root': {
-    maxWidth: '700px',
-    minWidth: '500px'
+    // maxWidth: '0px',
+    minWidth: '660px'
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1)
@@ -39,7 +46,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: '10px 15px'
   }
 }));
-const getChipStatus = (status,sx={}) => {
+const getChipStatus = (status, sx = {}) => {
   let text = '';
   let color = '';
   switch (status) {
@@ -48,7 +55,7 @@ const getChipStatus = (status,sx={}) => {
       color = 'info';
       break;
     case 'USE':
-      text = '양산';
+      text = '양산중';
       color = 'success';
       break;
     case 'STOP':
@@ -59,19 +66,59 @@ const getChipStatus = (status,sx={}) => {
     default:
       return '';
   }
-  return (<Chip sx={sx} variant={color === 'success' ? 'filled' : "outlined"} label={text} size="small" color={color} />);
-
-}
+  return <Chip sx={sx} variant={color === 'success' ? 'filled' : 'outlined'} label={text} size="small" color={color} />;
+};
 const getChip = (text, color) => {
-  return (
-    text ? <Chip sx={{ marginLeft: '10px' }} size='small' label={text} variant='outlined' color={color} /> : null
-  )
-}
-export default function ModalDetailMold({ open, onClose, selected }) {
-
+  return text ? <Chip sx={{ marginLeft: '10px' }} size="small" label={text} variant="outlined" color={color} /> : null;
+};
+export default function ModalDetailMold({ open, onClose, selected, setLoading }) {
+  const [openModalHis, setOpenModalHis] = useState(false);
+  const [dataHistoryTryNo, setDataHistoryTryNo] = useState([]);
   const handleClose = (event, reason) => {
     if (reason && (reason == 'backdropClick' || reason === 'escapeKeyDown')) return;
+    setDataHistoryTryNo([]);
     onClose();
+  };
+
+  const getAllHistoryTryNo = async () => {
+    setLoading(true);
+    const res = await restApi.post(RouterApi?.outputJigHistoryTryNo, { outputJigID: selected?.outputJigID });
+    setLoading(false);
+    if (res?.status === 200) {
+      setDataHistoryTryNo(res?.data);
+    }
+  };
+  const onChangeExpandedHistoryTryNo = (e, expanded) => {
+    if (expanded && dataHistoryTryNo?.length < 1) {
+      getAllHistoryTryNo();
+    }
+  };
+  const onClickExportExcelReport = async () => {
+    setLoading(true);
+    const response = await restApi.post(
+      RouterApi.outputJigExportID,
+      {
+        outputJigID: selected?.outputJigID
+      },
+      {
+        responseType: 'arraybuffer'
+      }
+    );
+    setLoading(false);
+    if (response?.status === 200) {
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const date = new Date();
+      const hour = date.getHours();
+      const minus = date.getMinutes();
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      saveAs(blob, `Export_${hour}_${minus}_${year}${month}${day}.xlsx`);
+    } else {
+      toast.error('Download file fail!');
+    }
   };
 
   return (
@@ -82,8 +129,8 @@ export default function ModalDetailMold({ open, onClose, selected }) {
             {'Detail '}
             {getChip(selected?.model?.model, 'primary')}
             {getChip(selected?.model?.type, 'primary')}
-            {getChip(selected?.moldNo, 'info')}
-            {getChip(selected?.tryNo, 'secondary')}
+            {getChip(selected?.moldNo ? `#${selected?.moldNo}` : '', 'info')}
+            {getChip(selected?.historyTryNo[0]?.tryNum ? `T${selected?.historyTryNo[0]?.tryNum}` : '', 'secondary')}
           </Stack>
           <IconButton
             aria-label="close"
@@ -99,15 +146,9 @@ export default function ModalDetailMold({ open, onClose, selected }) {
           </IconButton>
         </DialogTitle>
         <Divider />
-        <DialogContent sx={{ ...cssScrollbar }}>
-
-          
+        <DialogContent sx={{ ...cssScrollbar, overflowX: 'hidden' }}>
           <Accordion defaultExpanded sx={{ backgroundColor: '#fafafa' }}>
-            <AccordionSummary
-              expandIcon={<IconCaretDown />}
-              aria-controls="panel1-content"
-              id="panel1-header"
-            >
+            <AccordionSummary expandIcon={<IconCaretDown />} aria-controls="panel1-content" id="panel1-header">
               <Typography color={'primary'} variant="h5">
                 &bull; 일반 정보(Thông tin chung)
               </Typography>
@@ -150,30 +191,26 @@ export default function ModalDetailMold({ open, onClose, selected }) {
                 </Stack>
                 <Divider />
                 <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
-                  <Typography fontSize={'0.875rem'}  variant="subtitle2">
+                  <Typography fontSize={'0.875rem'} variant="subtitle2">
                     Mold No.
                   </Typography>
-                  <Typography color={'primary'} fontWeight={'bold'} variant="h5">{selected?.moldNo}</Typography>
+                  <Typography color={'primary'} fontWeight={'bold'} variant="h5">
+                    {selected?.moldNo ? `#${selected?.moldNo}` : ''}
+                  </Typography>
                 </Stack>
                 <Divider />
                 <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
                   <Typography fontSize={'0.875rem'} variant="subtitle2">
                     양산적용(Trạng thái)
                   </Typography>
-                  <Typography variant="h5">{getChipStatus(selected?.productionStatus,{ marginBottom: '5px'})}</Typography>
+                  <Typography variant="h5">{getChipStatus(selected?.productionStatus, { marginBottom: '5px' })}</Typography>
                 </Stack>
                 <Divider />
               </Stack>
-
-
             </AccordionDetails>
           </Accordion>
           <Accordion defaultExpanded sx={{ backgroundColor: '#fafafa' }}>
-            <AccordionSummary
-              expandIcon={<IconCaretDown />}
-              aria-controls="panel2content"
-              id="panel2-header"
-            >
+            <AccordionSummary expandIcon={<IconCaretDown />} aria-controls="panel2content" id="panel2-header">
               <Typography color={'primary'} variant="h5">
                 &bull; 금형 출고(Giao khuôn)
               </Typography>
@@ -185,7 +222,7 @@ export default function ModalDetailMold({ open, onClose, selected }) {
                     제작업체(NSX)
                   </Typography>
                   <Typography variant="h5">
-                    <Tooltip placement='right' title={selected?.manufacturer?.companyName}>
+                    <Tooltip placement="right" title={selected?.manufacturer?.companyName}>
                       {selected?.manufacturer?.companyCode}
                     </Tooltip>
                   </Typography>
@@ -196,8 +233,7 @@ export default function ModalDetailMold({ open, onClose, selected }) {
                     발송지역(Nơi VC)
                   </Typography>
                   <Typography variant="h5">
-                    <Tooltip placement='right' title={selected?.shipArea?.companyName}>
-
+                    <Tooltip placement="right" title={selected?.shipArea?.companyName}>
                       {selected?.shipArea?.companyCode}
                     </Tooltip>
                   </Typography>
@@ -214,13 +250,7 @@ export default function ModalDetailMold({ open, onClose, selected }) {
             </AccordionDetails>
           </Accordion>
           <Accordion defaultExpanded sx={{ backgroundColor: '#fafafa' }}>
-
-            <AccordionSummary
-
-              expandIcon={<IconCaretDown />}
-              aria-controls="panel2content"
-              id="panel2-header"
-            >
+            <AccordionSummary expandIcon={<IconCaretDown />} aria-controls="panel2content" id="panel2-header">
               <Typography color={'primary'} variant="h5">
                 &bull; 금형 입고(Kho Khuôn)
               </Typography>
@@ -232,7 +262,7 @@ export default function ModalDetailMold({ open, onClose, selected }) {
                     양산업체(Cty SX)
                   </Typography>
                   <Typography variant="h5">
-                    <Tooltip placement='right' title={selected?.massCompany?.companyName}>
+                    <Tooltip placement="right" title={selected?.massCompany?.companyName}>
                       {selected?.massCompany?.companyCode}
                     </Tooltip>
                   </Typography>
@@ -240,7 +270,7 @@ export default function ModalDetailMold({ open, onClose, selected }) {
                 <Divider />
                 <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
                   <Typography fontSize={'0.875rem'} variant="subtitle2">
-                    양산업체입고(Thời gian)
+                    양산업체입고
                   </Typography>
                   <Typography variant="h5">{formatDateFromDB(selected?.shipMassCompany, false)}</Typography>
                 </Stack>
@@ -249,13 +279,7 @@ export default function ModalDetailMold({ open, onClose, selected }) {
             </AccordionDetails>
           </Accordion>
           <Accordion defaultExpanded sx={{ backgroundColor: '#fafafa' }}>
-
-            <AccordionSummary
-
-              expandIcon={<IconCaretDown />}
-              aria-controls="panel2content"
-              id="panel2-header"
-            >
+            <AccordionSummary expandIcon={<IconCaretDown />} aria-controls="panel2content" id="panel2-header">
               <Typography color={'primary'} variant="h5">
                 &bull; 금형 수리(Sửa Chữa Khuôn)
               </Typography>
@@ -267,8 +291,8 @@ export default function ModalDetailMold({ open, onClose, selected }) {
                     수정업체(Nơi sửa)
                   </Typography>
                   <Typography variant="h5">
-                    <Tooltip placement='right' title={selected?.modificationCompany?.companyName}>
-                      {selected?.modificationCompany?.companyCode}
+                    <Tooltip placement="right" title={selected?.historyTryNo[0]?.modificationCompany?.companyName}>
+                      {selected?.historyTryNo[0]?.modificationCompany?.companyCode}
                     </Tooltip>
                   </Typography>
                 </Stack>
@@ -277,53 +301,190 @@ export default function ModalDetailMold({ open, onClose, selected }) {
                   <Typography fontSize={'0.875rem'} variant="subtitle2">
                     수리 출고(Xuất kho sửa)
                   </Typography>
-                  <Typography variant="h5">{formatDateFromDB(selected?.outputEdit, false)}</Typography>
+                  <Typography variant="h5">{formatDateFromDB(selected?.historyTryNo[0]?.outputEdit, false)}</Typography>
                 </Stack>
                 <Divider />
                 <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
                   <Typography fontSize={'0.875rem'} variant="subtitle2">
-                    입고 계획(Xuất tới)
+                    입고 계획(K.Hoach sửa xong)
                   </Typography>
-                  <Typography variant="h5">
-                    <Tooltip placement='right' title={selected?.wearingPlan?.companyName}>
-                      {selected?.wearingPlan?.companyCode}
-                    </Tooltip>
-                  </Typography>
+                  <Typography variant="h5">{formatDateFromDB(selected?.historyTryNo[0]?.wearingPlan, false)}</Typography>
                 </Stack>
                 <Divider />
                 <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
                   <Typography fontSize={'0.875rem'} variant="subtitle2">
-                    입고 완료(Thời gian)
+                    입고 완료(T.tế sửa xong)
                   </Typography>
-                  <Typography variant="h5">{formatDateFromDB(selected?.receivingCompleted, false)}</Typography>
+                  <Typography variant="h5">{formatDateFromDB(selected?.historyTryNo[0]?.receivingCompleted, false)}</Typography>
                 </Stack>
                 <Divider />
                 <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
                   <Typography fontSize={'0.875rem'} variant="subtitle2">
                     TRY NO.
                   </Typography>
-                  <Typography color={'primary'}  fontWeight={'bold'} variant="h5">{selected?.tryNo}</Typography>
+                  <Typography color={'primary'} fontWeight={'bold'} variant="h5">
+                    {selected?.historyTryNo[0]?.tryNum ? `T${selected?.historyTryNo[0]?.tryNum}` : ''}
+                  </Typography>
                 </Stack>
                 <Divider />
                 <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
-                  <Typography fontSize={'0.875rem'} variant="subtitle2">
-                    수정내역(Lịch sử chỉnh sửa)
+                  <Typography minWidth={170} fontSize={'0.875rem'} variant="subtitle2">
+                    수정내역(Nội dung sửa)
                   </Typography>
-                  <Typography variant="h5">{selected?.historyEdit}</Typography>
+                  <Typography variant="h5">{selected?.historyTryNo[0]?.remark ? `${selected?.historyTryNo[0]?.remark}` : ''}</Typography>
                 </Stack>
                 <Divider />
-
               </Stack>
             </AccordionDetails>
           </Accordion>
+          <Accordion onChange={onChangeExpandedHistoryTryNo} sx={{ backgroundColor: '#fafafa' }}>
+            <AccordionSummary expandIcon={<IconCaretDown />} aria-controls="panel2content" id="panel2-header">
+              <Typography color={'primary'} variant="h5">
+                &bull; History(TRY NO.)
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack>
+                <Grid pt={1} pb={1} container>
+                  <Grid textAlign={'center'} item xs={1}>
+                    <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                      Try No.
+                    </Typography>
+                  </Grid>
+                  <Grid textAlign={'center'} item xs={1.5}>
+                    <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                      수정업체
+                      <br />
+                      (Nơi sửa)
+                    </Typography>
+                  </Grid>
+                  <Grid textAlign={'center'} item xs={2}>
+                    <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                      수리 출고
+                      <br />
+                      (Xuất kho)
+                    </Typography>
+                  </Grid>
+                  <Grid textAlign={'center'} item xs={2}>
+                    <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                      입고 계획
+                      <br />
+                      (K.H xong)
+                    </Typography>
+                  </Grid>
+                  <Grid textAlign={'center'} item xs={2}>
+                    <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                      입고 완료
+                      <br />
+                      (T.tế xong)
+                    </Typography>
+                  </Grid>
+                  <Grid textAlign={'center'} item xs={1.5}>
+                    <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                      수정
+                    </Typography>
+                  </Grid>
+                  <Grid textAlign={'center'} item xs={2}>
+                    <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                      수정내역
+                      <br />
+                      (Nội dung)
+                    </Typography>
+                  </Grid>
+                  {/* <Grid textAlign={'right'} item xs={1}>
+                    <Typography textAlign={'right'} fontSize={'0.875rem'} variant="subtitle2">
+                      Time
+                    </Typography>
+                  </Grid> */}
+                </Grid>
+                <Divider />
+                {dataHistoryTryNo?.length > 0
+                  ? dataHistoryTryNo.map(
+                      (his) =>
+                        his?.tryNum && (
+                          <>
+                            <Grid pt={1} pb={1} container>
+                              <Grid item xs={1}>
+                                <Typography
+                                  color={his?.currentTry ? 'primary' : ''}
+                                  textAlign={'center'}
+                                  fontSize={'0.875rem'}
+                                  variant="h5"
+                                >
+                                  {his?.tryNum ? `T${his?.tryNum}` : ''}
+                                </Typography>
+                              </Grid>
 
+                              <Grid item xs={1.5}>
+                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                  <Tooltip title={his?.modificationCompany?.companyName}>{his?.modificationCompany?.companyCode}</Tooltip>
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={2}>
+                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                  {his?.outputEdit ? formatDateFromDB(his?.outputEdit, false) : null}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={2}>
+                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                  {his?.wearingPlan ? formatDateFromDB(his?.wearingPlan, false) : null}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={2}>
+                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                  {his?.receivingCompleted ? formatDateFromDB(his?.receivingCompleted, false) : null}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={1.5}>
+                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                  {getDepartmentEditMold(his?.departEdit)}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={2}>
+                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                  {his?.remark}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                            <Divider />
+                          </>
+                        )
+                    )
+                  : null}
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
         </DialogContent>
         <DialogActions>
-          <Button variant="custom" onClick={handleClose}>
-            Close
-          </Button>
+          <Stack width={'100%'} direction={'row'} justifyContent={'space-between'}>
+            <Stack direction={'row'} spacing={2}>
+              <Button onClick={onClickExportExcelReport} startIcon={<IconFileSpreadsheet />} size="small" variant="outlined">
+                Excel
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<IconHistory />}
+                onClick={() => {
+                  setOpenModalHis(true);
+                }}
+              >
+                History
+              </Button>
+            </Stack>
+            <Button variant="custom" onClick={handleClose}>
+              Close
+            </Button>
+          </Stack>
         </DialogActions>
       </BootstrapDialog>
+      <ModalHistory
+        typeModal={'MOLD'}
+        selected={selected}
+        open={openModalHis}
+        onClose={() => {
+          setOpenModalHis(false);
+        }}
+      />
     </>
   );
 }

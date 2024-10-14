@@ -5,7 +5,25 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { styled } from '@mui/material/styles';
-import { Alert, FormControl, Grid, IconButton, Paper, Portal, Snackbar, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, TextField, Tooltip, useTheme } from '@mui/material';
+import {
+  Alert,
+  FormControl,
+  Grid,
+  IconButton,
+  Paper,
+  Portal,
+  Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  tableCellClasses,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  useTheme
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
 import restApi from 'utils/restAPI';
@@ -17,22 +35,21 @@ import { formatDateFromDB } from 'utils/helper';
 import { IconEye, IconUser } from '@tabler/icons-react';
 import IMAGE_EMPTYDATA from '../../../assets/images/backgrounds/empty-box.png';
 
-
 const renderHistoryText = (str) => {
   if (!str) return '';
   // Xoá ' - ' nếu nó đứng đầu
-  if (str.startsWith(" - ")) {
+  if (str.startsWith(' - ')) {
     str = str.substring(3);
-  } else if (str.startsWith("  - ")) {
+  } else if (str.startsWith('  - ')) {
     str = str.substring(4);
   }
   // Thay thế tất cả các ' - ' khác thành <br>
-  let replacedStr = str.replace(/ - /g, "<br>");
-  return replacedStr
-}
+  let replacedStr = str.replace(/ - /g, '<br>');
+  return replacedStr;
+};
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
-    borderBottom:'none',
+    borderBottom: 'none',
     padding: theme.spacing(2)
   },
   '& .MuiDialogActions-root': {
@@ -40,7 +57,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
   '& .MuiDialogTitle-root': {
     padding: '10px 15px'
-  },
+  }
 }));
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -62,7 +79,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   }
 }));
 const initvalidate = { error: false, msg: '' };
-export default function ModalHistory({ open, onClose, selected }) {
+export default function ModalHistory({ open, onClose, selected, typeModal }) {
   const [histories, setHistories] = useState([]);
   const theme = useTheme();
 
@@ -71,19 +88,34 @@ export default function ModalHistory({ open, onClose, selected }) {
     onClose();
   };
   const getHistory = async () => {
-    const res = await restApi.post(RouterApi.conceptHistory, { conceptId: selected?.conceptId });
-    if (res?.status === 200) {
-      setHistories(res?.data)
+    let url = '';
+    let body = {};
+    switch (typeModal) {
+      case 'CONCEPT':
+        url = RouterApi.conceptHistory;
+        body['conceptId'] = selected?.conceptId;
+        break;
+      case 'MOLD':
+        url = RouterApi.outputJigHistory;
+        body['outputJigID'] = selected?.outputJigID;
+        break;
+
+      default:
+        break;
     }
-  }
+    const res = await restApi.post(url, body);
+    if (res?.status === 200) {
+      setHistories(res?.data);
+    }
+  };
+
   useEffect(() => {
-    if (selected?.conceptId && open) {
+    if (open) {
       getHistory();
     }
   }, [open]);
   return (
     <>
-
       <BootstrapDialog maxWidth={'lg'} fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
           History
@@ -103,7 +135,7 @@ export default function ModalHistory({ open, onClose, selected }) {
         <DialogContent dividers>
           <Grid container spacing={2}>
             <Grid item xs={24}>
-              <TableContainer sx={{ marginTop: '15px',maxHeight:{xs:'100vh',sm:'60vh'} }} component={Paper}>
+              <TableContainer sx={{ marginTop: '15px', maxHeight: { xs: '100vh', sm: '60vh' } }} component={Paper}>
                 <Table stickyHeader aria-label="customized table">
                   <TableHead>
                     <TableRow>
@@ -120,23 +152,21 @@ export default function ModalHistory({ open, onClose, selected }) {
                       '.MuiTableRow-root.Mui-selected:hover': { backgroundColor: config.colorSelected }
                     }}
                   >
-                    {histories?.length > 0 ? histories?.map((row, index) => (
-                      <StyledTableRow
-                        key={row.conceptId}
-                      >
-                        <StyledTableCell align="center">{index + 1}</StyledTableCell>
-                        <StyledTableCell >{row?.historyType}</StyledTableCell>
-                        <StyledTableCell scope="row">
-                          {row?.historyUsername}
-                        </StyledTableCell>
-                        <StyledTableCell align="center" scope="row">
-                          {row?.historyTime ? formatDateFromDB(row?.historyTime) : null}
-                        </StyledTableCell>
-                        <StyledTableCell>
-                          <span dangerouslySetInnerHTML={{ __html: renderHistoryText(row?.historyRemark) }}></span>
-                        </StyledTableCell>
-                      </StyledTableRow>
-                    )) : (
+                    {histories?.length > 0 ? (
+                      histories?.map((row, index) => (
+                        <StyledTableRow key={row.conceptId}>
+                          <StyledTableCell align="center">{index + 1}</StyledTableCell>
+                          <StyledTableCell>{row?.historyType}</StyledTableCell>
+                          <StyledTableCell scope="row">{row?.historyUsername}</StyledTableCell>
+                          <StyledTableCell align="center" scope="row">
+                            {row?.historyTime ? formatDateFromDB(row?.historyTime) : null}
+                          </StyledTableCell>
+                          <StyledTableCell>
+                            <span dangerouslySetInnerHTML={{ __html: renderHistoryText(row?.historyRemark) }}></span>
+                          </StyledTableCell>
+                        </StyledTableRow>
+                      ))
+                    ) : (
                       <TableRow sx={{ textAlign: 'center' }}>
                         <StyledTableCell colSpan={10} align="center">
                           <img src={IMAGE_EMPTYDATA} width={70} height={70} alt="image" />

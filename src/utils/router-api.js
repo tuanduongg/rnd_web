@@ -47,6 +47,7 @@ export const RouterApi = {
   updateCompany: '/company/update',
 
 
+  findByCategoryModelMold: '/model-mold/findByCategory',
   allModelMold: '/model-mold/all',
   addModelMold: '/model-mold/add',
   updateModelMold: '/model-mold/update',
@@ -55,6 +56,13 @@ export const RouterApi = {
   addOutputJig: '/output-jig/add',
   updateOutputJig: '/output-jig/update',
   deleteOutputJig: '/output-jig/delete',
+  changeStatusOutputJig: '/output-jig/change-status',
+  exportExcelOutputJig: '/output-jig/export-excel',
+  outputJigExportID: '/output-jig/export-excel-id',
+  outputJigHistory: '/output-jig/history',
+
+  outputJigHistoryTryNo: '/history-try-no/find-by-outputjig',
+
 
   reportQCExportList: '/report-qc/exportExcel-report',
 

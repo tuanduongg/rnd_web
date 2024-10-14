@@ -31,7 +31,7 @@ import { styled } from '@mui/material/styles';
 import { IconPlus, IconEdit, IconCheck, IconUser } from '@tabler/icons-react';
 import SubCard from 'ui-component/cards/SubCard';
 import ModalConcept from 'ui-component/modals/ModalConcept/ModalConcept';
-import { cssScrollbar, formatDateFromDB } from 'utils/helper';
+import { cssScrollbar, END_OF_CURRENT_MONTH, formatDateFromDB, START_OF_CURRENT_MONTH } from 'utils/helper';
 import dayjs from 'dayjs';
 import Loading from 'ui-component/Loading';
 import { useTheme } from '@mui/material/styles';
@@ -49,23 +49,11 @@ import AdvanceSearch from './component/AdvanceSearch';
 import AllInboxIcon from '@mui/icons-material/AllInbox';
 
 // ==============================|| SAMPLE PAGE ||============================== //
-const currentDate = dayjs();
-// Lấy ngày đầu tiên của tháng hiện tại
-const firstDayOfCurrentMonth = currentDate.startOf('month');
-
-// Lấy ngày đầu tiên của tháng trước
-const firstDayOfLastMonth = firstDayOfCurrentMonth.subtract(1, 'month');
-
-// Lấy ngày đầu tiên của tháng sau
-const firstDayOfNextMonth = firstDayOfCurrentMonth.add(1, 'month');
-
-// const firstDayOfNextMonth = currentDate.add(10, 'day');
-// const firstDayOfLastMonth = currentDate.subtract(20, 'day');
 const initFilter = {
   personName: [],
   categoryFilter: [],
-  startDate: firstDayOfLastMonth,
-  endDate: firstDayOfNextMonth,
+  startDate: START_OF_CURRENT_MONTH,
+  endDate: END_OF_CURRENT_MONTH,
   codeFilter: '',
   plNameFilter: '',
   modelFilter: '',
@@ -439,31 +427,18 @@ const HomePage = () => {
           <MainCard contentSX={{ padding: '10px !important' }}>
             <Grid container spacing={1}>
               <Grid item xs={8}>
-                {/* <Button
-                  sx={{ marginRight: '10px' }}
-                  aria-controls={open ? 'basic-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? 'true' : undefined}
-                  onClick={handleOpenMenu}
-                  variant="text"
-                  size="small"
-                  startIcon={<IconFilter />}
-                >
-                  Filter
-                </Button> */}
-
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                    <Chip
-                      key={index}
-                      sx={{ marginRight: '5px', marginTop: '5px' }}
-                      variant="outlined"
-                      label={chip?.label}
-                      onDelete={() => {
-                        onDeleteChip(chip?.onDelete);
-                      }}
-                    />
-                  ))
+                      <Chip
+                        key={index}
+                        sx={{ marginRight: '5px', marginTop: '5px' }}
+                        variant="outlined"
+                        label={chip?.label}
+                        onDelete={() => {
+                          onDeleteChip(chip?.onDelete);
+                        }}
+                      />
+                    ))
                   : null}
               </Grid>
               <Grid item sx={{ textAlign: 'right' }} xs={4}>
@@ -651,6 +626,7 @@ const HomePage = () => {
       />
       {loading && <Loading open={loading} />}
       <ModalHistory
+        typeModal={'CONCEPT'}
         selected={selectedRow}
         open={openModalHistory}
         onClose={() => {

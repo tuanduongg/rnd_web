@@ -1,7 +1,4 @@
-import {
-  Grid,
-  useTheme
-} from '@mui/material';
+import { Grid, useTheme } from '@mui/material';
 import './counter_tactics.css';
 import Statistic from './component/Statistic';
 import TableList from './component/TableList';
@@ -10,17 +7,8 @@ import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import Loading from 'ui-component/Loading';
 import { getPercentage } from './counter_tactis.service';
-import dayjs from 'dayjs';
+import { END_OF_CURRENT_MONTH, START_OF_CURRENT_MONTH } from 'utils/helper';
 
-const currentDate = dayjs();
-// Lấy ngày đầu tiên của tháng hiện tại
-const firstDayOfCurrentMonth = currentDate.startOf('month');
-
-// Lấy ngày đầu tiên của tháng trước
-const firstDayOfLastMonth = firstDayOfCurrentMonth.subtract(1, 'month');
-
-// Lấy ngày đầu tiên của tháng sau
-const firstDayOfNextMonth = firstDayOfCurrentMonth.add(1, 'month');
 // ==============================|| SAMPLE PAGE ||============================== //
 
 const CounterTacticsPage = () => {
@@ -30,14 +18,14 @@ const CounterTacticsPage = () => {
   const [role, setRole] = useState(null);
   const [listProcess, setListProcess] = useState([]);
   const [dataStatistic, setDataStatistic] = useState([]);
-  const [startDate, setStartDate] = useState(firstDayOfLastMonth);
-  const [endDate, setEndDate] = useState(firstDayOfNextMonth);
+  const [startDate, setStartDate] = useState(START_OF_CURRENT_MONTH);
+  const [endDate, setEndDate] = useState(END_OF_CURRENT_MONTH);
 
   const statistic = async () => {
     setLoading(true);
     const res = await restApi.post(RouterApi.statisticReportQC, {
-      startDate: startDate?.hour(0).minute(0).second(0),
-      endDate: endDate?.hour(23).minute(59).second(59)
+      startDate: startDate?.startOf('day').format('YYYY-MM-DD HH:mm:ss'),
+      endDate: endDate?.endOf('day').format('YYYY-MM-DD HH:mm:ss')
     });
     setShowSkeleton(false);
     setLoading(false);
