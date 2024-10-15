@@ -438,7 +438,7 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
         </Stack>
         <TableContainer
           sx={{
-            height: `calc(100vh - 240px)`,
+            height: `calc(100vh - 270px)`,
             ...cssScrollbar
           }}
           component={Paper}

@@ -7,12 +7,14 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { styled } from '@mui/material/styles';
 import {
   Alert,
+  Chip,
   FormControl,
   Grid,
   IconButton,
   Paper,
   Portal,
   Snackbar,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -32,8 +34,10 @@ import { isMobile } from 'react-device-detect';
 import { useEffect } from 'react';
 import config from 'config';
 import { formatDateFromDB } from 'utils/helper';
-import { IconEye, IconUser } from '@tabler/icons-react';
+import { IconEye, IconFileSpreadsheet, IconUser } from '@tabler/icons-react';
 import IMAGE_EMPTYDATA from '../../../assets/images/backgrounds/empty-box.png';
+import toast from 'react-hot-toast';
+import { minWidth } from '@mui/system';
 
 const renderHistoryText = (str) => {
   if (!str) return '';
@@ -50,7 +54,8 @@ const renderHistoryText = (str) => {
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     borderBottom: 'none',
-    padding: theme.spacing(2)
+    padding: theme.spacing(2),
+    minWidth:'600px'
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1)
@@ -78,6 +83,10 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     border: 0
   }
 }));
+
+const getChip = (text, color) => {
+  return text ? <Chip sx={{ marginLeft: '10px' }} size="small" label={text} variant="outlined" color={color} /> : null;
+};
 const initvalidate = { error: false, msg: '' };
 export default function ModalHistory({ open, onClose, selected, typeModal }) {
   const [histories, setHistories] = useState([]);
@@ -114,11 +123,50 @@ export default function ModalHistory({ open, onClose, selected, typeModal }) {
       getHistory();
     }
   }, [open]);
+
+  const onClickExportExcelReport = async () => {
+    // setLoading(true);
+    const response = await restApi.post(
+      RouterApi.outputJigExportHistory,
+      {
+        outputJigID: selected?.outputJigID
+      },
+      {
+        responseType: 'arraybuffer'
+      }
+    );
+    // setLoading(false);
+    if (response?.status === 200) {
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const date = new Date();
+      const hour = date.getHours();
+      const minus = date.getMinutes();
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      saveAs(blob, `History_${selected?.model?.model}_${selected?.model?.type}_${selected?.moldNo}.xlsx`);
+    } else {
+      toast.error('Download file fail!');
+    }
+  };
+console.log('selected',selected);
+
   return (
     <>
       <BootstrapDialog maxWidth={'lg'} fullScreen={isMobile} onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
           History
+          {getChip(selected?.model?.model, 'primary')}
+          {getChip(selected?.model?.type, 'primary')}
+          {getChip(selected?.model?.description, 'primary')}
+          {getChip(selected?.moldNo ? `#${selected?.moldNo}` : '', 'info')}
+
+
+          {getChip(selected?.category?.categoryName, 'primary')}
+          {getChip(selected?.modelName, 'primary')}
+          {getChip(selected?.code, 'success')}
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -181,9 +229,14 @@ export default function ModalHistory({ open, onClose, selected, typeModal }) {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button variant="custom" onClick={handleClose}>
-            Close
-          </Button>
+          <Stack direction={'row'} justifyContent={ typeModal === 'MOLD' ? 'space-between' : 'flex-end'} width={'100%'}>
+            {typeModal === 'MOLD' && (<Button onClick={onClickExportExcelReport} startIcon={<IconFileSpreadsheet />} size="small" variant="outlined">
+              Excel
+            </Button>)}
+            <Button variant="custom" onClick={handleClose}>
+              Close
+            </Button>
+          </Stack>
         </DialogActions>
       </BootstrapDialog>
     </>

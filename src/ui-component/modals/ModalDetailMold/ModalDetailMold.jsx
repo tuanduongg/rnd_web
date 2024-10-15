@@ -46,13 +46,28 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: '10px 15px'
   }
 }));
+
 const getChipStatus = (status, sx = {}) => {
   let text = '';
   let color = '';
+
+
   switch (status) {
+    case 'RISK':
+      text = 'Risk양산';
+      color = 'secondary';
+      break;
+    case 'DEV_EDIT':
+      text = '개발수정';
+      color = 'warning';
+      break;
+    case 'EDIT':
+      text = '양산수정';
+      color = 'orange';
+      break;
     case 'DEV':
       text = '개발중';
-      color = 'info';
+      color = 'primary';
       break;
     case 'USE':
       text = '양산중';
@@ -67,6 +82,7 @@ const getChipStatus = (status, sx = {}) => {
       return '';
   }
   return <Chip sx={sx} variant={color === 'success' ? 'filled' : 'outlined'} label={text} size="small" color={color} />;
+  // return <Typography sx={sx} color={color} >{text}</Typography>;
 };
 const getChip = (text, color) => {
   return text ? <Chip sx={{ marginLeft: '10px' }} size="small" label={text} variant="outlined" color={color} /> : null;
@@ -147,13 +163,11 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ ...cssScrollbar, overflowX: 'hidden' }}>
-          <Accordion defaultExpanded sx={{ backgroundColor: '#fafafa' }}>
-            <AccordionSummary expandIcon={<IconCaretDown />} aria-controls="panel1-content" id="panel1-header">
-              <Typography color={'primary'} variant="h5">
+          <Stack direction={'row'} spacing={1}>
+            <Box width={'50%'} sx={{ backgroundColor: '#fafafa' }} p={1}>
+              <Typography mb={2} color={'primary'} variant="h5">
                 &bull; 일반 정보(Thông tin chung)
               </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
               <Stack>
                 <Stack direction={'row'} justifyContent={'space-between'}>
                   <Typography fontSize={'0.875rem'} variant="subtitle2">
@@ -184,10 +198,10 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
                 </Stack>
                 <Divider />
                 <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
-                  <Typography fontSize={'0.875rem'} variant="subtitle2">
+                  <Typography fontSize={'0.875rem'} minWidth={100} variant="subtitle2">
                     Description
                   </Typography>
-                  <Typography variant="h5">{selected?.model?.description}</Typography>
+                  <Typography textAlign={'right'} variant="h5">{selected?.model?.description}</Typography>
                 </Stack>
                 <Divider />
                 <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
@@ -207,78 +221,72 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
                 </Stack>
                 <Divider />
               </Stack>
-            </AccordionDetails>
-          </Accordion>
-          <Accordion defaultExpanded sx={{ backgroundColor: '#fafafa' }}>
-            <AccordionSummary expandIcon={<IconCaretDown />} aria-controls="panel2content" id="panel2-header">
-              <Typography color={'primary'} variant="h5">
-                &bull; 금형 출고(Giao khuôn)
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Stack>
-                <Stack direction={'row'} justifyContent={'space-between'}>
-                  <Typography fontSize={'0.875rem'} variant="subtitle2">
-                    제작업체(NSX)
-                  </Typography>
-                  <Typography variant="h5">
-                    <Tooltip placement="right" title={selected?.manufacturer?.companyName}>
-                      {selected?.manufacturer?.companyCode}
-                    </Tooltip>
-                  </Typography>
+            </Box>
+            <Stack width={'50%'} sx={{ backgroundColor: '#fafafa' }} spacing={1}>
+              <Box p={1}>
+                <Typography mb={2} color={'primary'} variant="h5">
+                  &bull; 금형 출고(Giao khuôn)
+                </Typography>
+                <Stack>
+                  <Stack direction={'row'} justifyContent={'space-between'}>
+                    <Typography fontSize={'0.875rem'} variant="subtitle2">
+                      제작업체(NSX)
+                    </Typography>
+                    <Typography variant="h5">
+                      <Tooltip placement="right" title={selected?.manufacturer?.companyName}>
+                        {selected?.manufacturer?.companyCode}
+                      </Tooltip>
+                    </Typography>
+                  </Stack>
+                  <Divider />
+                  <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
+                    <Typography fontSize={'0.875rem'} variant="subtitle2">
+                      발송지역(Nơi VC)
+                    </Typography>
+                    <Typography variant="h5">
+                      <Tooltip placement="right" title={selected?.shipArea?.companyName}>
+                        {selected?.shipArea?.companyCode}
+                      </Tooltip>
+                    </Typography>
+                  </Stack>
+                  <Divider />
+                  <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
+                    <Typography minWidth={50} fontSize={'0.875rem'} variant="subtitle2">
+                      출고 계획(Thời gian)
+                    </Typography>
+                    <Typography variant="h5">{formatDateFromDB(selected?.shipDate, false)}</Typography>
+                  </Stack>
+                  <Divider />
                 </Stack>
-                <Divider />
-                <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
-                  <Typography fontSize={'0.875rem'} variant="subtitle2">
-                    발송지역(Nơi VC)
-                  </Typography>
-                  <Typography variant="h5">
-                    <Tooltip placement="right" title={selected?.shipArea?.companyName}>
-                      {selected?.shipArea?.companyCode}
-                    </Tooltip>
-                  </Typography>
+              </Box>
+              <Box p={1}>
+                <Typography color={'primary'} mb={1.5} variant="h5">
+                  &bull; 금형 입고(Kho Khuôn)
+                </Typography>
+                <Stack>
+                  <Stack direction={'row'} justifyContent={'space-between'}>
+                    <Typography fontSize={'0.875rem'} variant="subtitle2">
+                      양산업체(Cty SX)
+                    </Typography>
+                    <Typography variant="h5">
+                      <Tooltip placement="right" title={selected?.massCompany?.companyName}>
+                        {selected?.massCompany?.companyCode}
+                      </Tooltip>
+                    </Typography>
+                  </Stack>
+                  <Divider />
+                  <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
+                    <Typography fontSize={'0.875rem'} variant="subtitle2">
+                      양산업체입고
+                    </Typography>
+                    <Typography variant="h5">{formatDateFromDB(selected?.shipMassCompany, false)}</Typography>
+                  </Stack>
+                  <Divider />
                 </Stack>
-                <Divider />
-                <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
-                  <Typography minWidth={50} fontSize={'0.875rem'} variant="subtitle2">
-                    출고 계획(Thời gian)
-                  </Typography>
-                  <Typography variant="h5">{formatDateFromDB(selected?.shipDate, false)}</Typography>
-                </Stack>
-                <Divider />
-              </Stack>
-            </AccordionDetails>
-          </Accordion>
-          <Accordion defaultExpanded sx={{ backgroundColor: '#fafafa' }}>
-            <AccordionSummary expandIcon={<IconCaretDown />} aria-controls="panel2content" id="panel2-header">
-              <Typography color={'primary'} variant="h5">
-                &bull; 금형 입고(Kho Khuôn)
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Stack>
-                <Stack direction={'row'} justifyContent={'space-between'}>
-                  <Typography fontSize={'0.875rem'} variant="subtitle2">
-                    양산업체(Cty SX)
-                  </Typography>
-                  <Typography variant="h5">
-                    <Tooltip placement="right" title={selected?.massCompany?.companyName}>
-                      {selected?.massCompany?.companyCode}
-                    </Tooltip>
-                  </Typography>
-                </Stack>
-                <Divider />
-                <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
-                  <Typography fontSize={'0.875rem'} variant="subtitle2">
-                    양산업체입고
-                  </Typography>
-                  <Typography variant="h5">{formatDateFromDB(selected?.shipMassCompany, false)}</Typography>
-                </Stack>
-                <Divider />
-              </Stack>
-            </AccordionDetails>
-          </Accordion>
-          <Accordion defaultExpanded sx={{ backgroundColor: '#fafafa' }}>
+              </Box>
+            </Stack>
+          </Stack>
+          <Accordion defaultExpanded sx={{ backgroundColor: '#fafafa', marginTop: '16px' }}>
             <AccordionSummary expandIcon={<IconCaretDown />} aria-controls="panel2content" id="panel2-header">
               <Typography color={'primary'} variant="h5">
                 &bull; 금형 수리(Sửa Chữa Khuôn)
@@ -400,56 +408,56 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
                 <Divider />
                 {dataHistoryTryNo?.length > 0
                   ? dataHistoryTryNo.map(
-                      (his) =>
-                        his?.tryNum && (
-                          <>
-                            <Grid pt={1} pb={1} container>
-                              <Grid item xs={1}>
-                                <Typography
-                                  color={his?.currentTry ? 'primary' : ''}
-                                  textAlign={'center'}
-                                  fontSize={'0.875rem'}
-                                  variant="h5"
-                                >
-                                  {his?.tryNum ? `T${his?.tryNum}` : ''}
-                                </Typography>
-                              </Grid>
-
-                              <Grid item xs={1.5}>
-                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
-                                  <Tooltip title={his?.modificationCompany?.companyName}>{his?.modificationCompany?.companyCode}</Tooltip>
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={2}>
-                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
-                                  {his?.outputEdit ? formatDateFromDB(his?.outputEdit, false) : null}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={2}>
-                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
-                                  {his?.wearingPlan ? formatDateFromDB(his?.wearingPlan, false) : null}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={2}>
-                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
-                                  {his?.receivingCompleted ? formatDateFromDB(his?.receivingCompleted, false) : null}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={1.5}>
-                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
-                                  {getDepartmentEditMold(his?.departEdit)}
-                                </Typography>
-                              </Grid>
-                              <Grid item xs={2}>
-                                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
-                                  {his?.remark}
-                                </Typography>
-                              </Grid>
+                    (his) =>
+                      his?.tryNum && (
+                        <>
+                          <Grid pt={1} pb={1} container>
+                            <Grid item xs={1}>
+                              <Typography
+                                color={his?.currentTry ? 'primary' : ''}
+                                textAlign={'center'}
+                                fontSize={'0.875rem'}
+                                variant="h5"
+                              >
+                                {his?.tryNum ? `T${his?.tryNum}` : ''}
+                              </Typography>
                             </Grid>
-                            <Divider />
-                          </>
-                        )
-                    )
+
+                            <Grid item xs={1.5}>
+                              <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                <Tooltip title={his?.modificationCompany?.companyName}>{his?.modificationCompany?.companyCode}</Tooltip>
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={2}>
+                              <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                {his?.outputEdit ? formatDateFromDB(his?.outputEdit, false) : null}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={2}>
+                              <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                {his?.wearingPlan ? formatDateFromDB(his?.wearingPlan, false) : null}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={2}>
+                              <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                {his?.receivingCompleted ? formatDateFromDB(his?.receivingCompleted, false) : null}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={1.5}>
+                              <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                {getDepartmentEditMold(his?.departEdit)}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={2}>
+                              <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                                {his?.remark}
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                          <Divider />
+                        </>
+                      )
+                  )
                   : null}
               </Stack>
             </AccordionDetails>

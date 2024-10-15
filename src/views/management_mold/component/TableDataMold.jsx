@@ -238,7 +238,7 @@ const TableDataMold = ({ categories, setLoading, role }) => {
           aria-haspopup="true"
           aria-expanded={openMenuStatus ? 'true' : undefined}
           onClick={handleOpenMenuStatus}
-          
+
           variant={'filled'}
           label={
             <>
@@ -671,16 +671,16 @@ const TableDataMold = ({ categories, setLoading, role }) => {
           <Grid item xs={8}>
             {arrChipFilter?.length > 0
               ? arrChipFilter.map((chip, index) => (
-                  <Chip
-                    key={index}
-                    sx={{ marginRight: '5px', marginTop: '5px' }}
-                    variant="outlined"
-                    label={chip?.label}
-                    onDelete={() => {
-                      onDeleteChip(chip?.onDelete);
-                    }}
-                  />
-                ))
+                <Chip
+                  key={index}
+                  sx={{ marginRight: '5px', marginTop: '5px' }}
+                  variant="outlined"
+                  label={chip?.label}
+                  onDelete={() => {
+                    onDeleteChip(chip?.onDelete);
+                  }}
+                />
+              ))
               : null}
           </Grid>
           <Grid item sx={{ textAlign: 'right' }} xs={4}>
@@ -776,6 +776,7 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                           left: 0,
                           transform: `translateY(${virtualRow.start}px)`,
                           height: `${virtualRow.size}px`,
+                          maxWidth: `100%`,
                           width: `100%`,
                           display: 'flex' // Bố trí flex
                         }}
@@ -875,7 +876,7 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                             }}
                             align="center"
                           >
-                            {item?.model?.description}
+                            {item?.model?.description ? limitCharacter(item?.model?.description,24,true) : ''}
                           </StyledTableCell>
                         )}
                         {currentShowCol?.includes('moldNo') && (

@@ -10,7 +10,7 @@ export const RouterApi = {
   checkRole: '/user/checkRole',
   roleAll: '/role/all',
   cateConceptAll: '/category-concept/all',
-
+  
   conceptAdd: '/concept/add',
   conceptFindByCode: '/concept/findByCode',
   conceptUpdate: '/concept/update',
@@ -21,10 +21,11 @@ export const RouterApi = {
   conceptAccept: '/concept/accept',
   conceptDownload: '/concept/download',
   conceptDownloadMultiple: '/concept/download-multiple',
-
+  
   processAll: '/process/all',
-
+  
   getImagesByReportQC: '/file-report-qc/findByReportId',
+  fileReportQCCheckFile: '/file-report-qc/check-file',
 
   addReportQC: '/report-qc/add',
   updateReportQC: '/report-qc/update',
@@ -60,11 +61,14 @@ export const RouterApi = {
   exportExcelOutputJig: '/output-jig/export-excel',
   outputJigExportID: '/output-jig/export-excel-id',
   outputJigHistory: '/output-jig/history',
+  outputJigExportHistory: '/output-jig/export-history',
 
   outputJigHistoryTryNo: '/history-try-no/find-by-outputjig',
 
 
   reportQCExportList: '/report-qc/exportExcel-report',
 
-  findInOutJigByJig: '/inout-jig/findByJig'
+  findInOutJigByJig: '/inout-jig/findByJig',
+
+  notificationAll: '/notification/all'
 };

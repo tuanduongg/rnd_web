@@ -47,6 +47,7 @@ import { IconAdjustmentsAlt } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
 import AdvanceSearch from './component/AdvanceSearch';
 import AllInboxIcon from '@mui/icons-material/AllInbox';
+import CustomChip from 'ui-component/extended/CustomChip';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const initFilter = {
@@ -429,16 +430,16 @@ const HomePage = () => {
               <Grid item xs={8}>
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                      <Chip
-                        key={index}
-                        sx={{ marginRight: '5px', marginTop: '5px' }}
-                        variant="outlined"
-                        label={chip?.label}
-                        onDelete={() => {
-                          onDeleteChip(chip?.onDelete);
-                        }}
-                      />
-                    ))
+                    <Chip
+                      key={index}
+                      sx={{ marginLeft: '10px',marginRight: '5px', marginTop: '5px' }}
+                      variant="outlined"
+                      label={chip?.label}
+                      onDelete={() => {
+                        onDeleteChip(chip?.onDelete);
+                      }}
+                    />
+                  ))
                   : null}
               </Grid>
               <Grid item sx={{ textAlign: 'right' }} xs={4}>
@@ -484,7 +485,7 @@ const HomePage = () => {
                 maxHeight:
                   !role || (!role?.create && !role?.update && !role?.accept && !role?.delete)
                     ? `calc(100vh - 250px)`
-                    : `calc(100vh - 215px)`,
+                    : `calc(100vh - 320px)`,
                 ...cssScrollbar
               }}
               component={Paper}

@@ -25,13 +25,15 @@ import { SET_BORDER_RADIUS, SET_FONT_FAMILY, SET_OPEN_DRAWE_RIGHT } from 'store/
 import { gridSpacing } from 'store/constant';
 
 // assets
-import { IconRefresh, IconSettings } from '@tabler/icons-react';
+import { IconFolderCheck, IconRefresh, IconSettings } from '@tabler/icons-react';
 import LinearProgressWithLabel from './component/LinearWithLabel';
 import { Box, Stack } from '@mui/material';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import { formatBytes } from 'utils/helper';
 import Loading from 'ui-component/Loading';
+import { IconListCheck } from '@tabler/icons-react';
+import toast from 'react-hot-toast';
 
 // concat 'px'
 function valueText(value) {
@@ -58,6 +60,16 @@ const Customization = () => {
     const handleBorderRadius = (event, newValue) => {
         setBorderRadius(newValue);
     };
+    const checkFile = async () => {
+        setLoading(true);
+        const res = await restApi.get(RouterApi.fileReportQCCheckFile);
+        setLoading(false);
+        if (res?.status === 200) {
+            toast.success('Successful!')
+        } else {
+            toast.error(res?.data?.message || 'You do not have permission to access it!')
+        }
+    }
     const getStorage = async () => {
         setLoading(true);
         const res = await restApi.get(RouterApi.userGetStorage);
@@ -109,6 +121,10 @@ const Customization = () => {
 
     const handleToggle = () => {
         dispatch({ type: SET_OPEN_DRAWE_RIGHT, openRightDrawer: false });
+    };
+    const onClickCheckFileExisted = () => {
+        // getStorage();
+        checkFile()
     };
     const onClickRefresh = () => {
         getStorage();
@@ -238,9 +254,16 @@ const Customization = () => {
                             {/* border radius */}
                             <SubCard title={<Stack direction={'row'} alignItems={'center'}>
                                 Your storage
-                                <IconButton onClick={onClickRefresh} size='small' color='primary'>
-                                    <IconRefresh />
-                                </IconButton>
+                                <Tooltip title="Refresh">
+                                    <IconButton onClick={onClickRefresh} size='small' color='primary'>
+                                        <IconRefresh />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Check for files that do not exist in the directory">
+                                    <IconButton onClick={onClickCheckFileExisted} size='small' color='primary'>
+                                        <IconFolderCheck />
+                                    </IconButton>
+                                </Tooltip>
                             </Stack>}>
                                 <Grid item xs={12} container spacing={2} alignItems="center" >
                                     <Typography ml={2} pt={1} pb={1} variant='h6' component={'h6'}>{formatBytes(size)} of {formatBytes(oneTB)} are used</Typography>

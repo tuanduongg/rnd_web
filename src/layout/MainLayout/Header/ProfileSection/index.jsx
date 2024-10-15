@@ -129,7 +129,7 @@ const ProfileSection = () => {
             sx={{
               ...theme.typography.mediumAvatar,
               margin: '8px 0 8px 8px !important',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
             ref={anchorRef}
             aria-controls={open ? 'menu-list-grow' : undefined}

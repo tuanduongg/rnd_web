@@ -24,13 +24,14 @@ import AnimateButton from 'ui-component/extended/AnimateButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-import { Alert, Snackbar, TextField } from '@mui/material';
+import { Alert, Divider, Snackbar, TextField } from '@mui/material';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import { useNavigate } from 'react-router-dom';
 import { SET_DATA_USER, SET_TOKEN } from 'store/authAction';
 import { ConfigRouter } from 'routes/ConfigRouter';
 import { setCookie } from 'utils/helper';
+import { IconTool } from '@tabler/icons-react';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
@@ -145,6 +146,7 @@ const AuthLogin = ({ ...others }) => {
                 </Button>
               </AnimateButton>
             </Box>
+            {/* <Alert severity="error" icon={<IconTool/>} sx={{marginTop:'15px'}}>Hệ thống sẽ bảo trì vào thời gian từ 00h - 2h ngày 12/12/2023</Alert> */}
           </form>
         )}
       </Formik>

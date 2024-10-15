@@ -45,14 +45,16 @@ export function stringAvatar(name) {
   if (name.includes(' ')) {
     return {
       sx: {
-        bgcolor: '#fafafa'
+        bgcolor: '#fafafa',
+        color:'#005595'
       },
       children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`
     };
   }
   return {
     sx: {
-      bgcolor: '#fafafa'
+      bgcolor: '#fafafa',
+      color:'#005595'
     },
     children: `${name.at(0)}`
   };
