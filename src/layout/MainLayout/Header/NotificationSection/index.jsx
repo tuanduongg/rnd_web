@@ -166,17 +166,16 @@ const NotificationSection = () => {
                                             <Grid container alignItems="center" justifyContent="space-between" sx={{ pt: 2, px: 2 }}>
                                                 <Grid item>
                                                     <Badge badgeContent={notifications?.length} showZero color="warning">
-                                                        <Typography variant="subtitle1">Notification</Typography>
+                                                        <Typography color={'primary'} variant="subtitle1">Notification</Typography>
                                                     </Badge>
                                                 </Grid>
-
                                             </Grid>
                                         </Grid>
                                         <Grid item xs={12}>
                                             <Box
                                                 style={{ height: '100%', maxHeight: 'calc(100vh - 250px)', overflowX: 'hidden' }}
                                             >
-                                                <NotificationList notifications={notifications}/>
+                                                <NotificationList notifications={notifications} />
                                             </Box>
                                         </Grid>
                                     </Grid>

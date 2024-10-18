@@ -151,7 +151,6 @@ export default function ModalHistory({ open, onClose, selected, typeModal }) {
       toast.error('Download file fail!');
     }
   };
-console.log('selected',selected);
 
   return (
     <>

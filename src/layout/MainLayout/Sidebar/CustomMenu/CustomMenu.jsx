@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import { hasChildren, menu, findParentIds } from './custom_menu.service';
+import { hasChildren, menu, findParentIds, setTitleTab } from './custom_menu.service';
 import { Collapse, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { IconLink } from '@tabler/icons-react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,6 +18,8 @@ export default function CustomMenu() {
   useEffect(() => {
     const find = Object.values(ConfigRouter).find((item) => item === pathname);
     if (find) {
+      setTitleTab(find)
+
       dispatch({ type: MENU_OPEN, id: find });
       const finds = findParentIds(menu, find);
       if (finds?.length > 0) {

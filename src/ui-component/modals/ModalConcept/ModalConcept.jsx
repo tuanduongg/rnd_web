@@ -47,6 +47,7 @@ import './modal_concept.css';
 import { IconCloudUpload } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
 
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),

@@ -24,9 +24,13 @@ import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import 'file-icons-js/css/style.css';
 import './listfile.css';
+import { useDispatch } from 'react-redux';
+import { updateDownloadProgress, addDownload, toggleMenu, downloadSuccessful } from 'store/downloadSlice';
+import toast from 'react-hot-toast';
 
 const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) => {
   const theme = useTheme();
+  const dispatch = useDispatch();
   const [listFile, setListFile] = useState([]);
   const [loadingID, setLoadingID] = useState([]);
   const handleToggle = (value) => () => {
@@ -78,7 +82,8 @@ const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) 
   }
 
   const onClickDownLoad = async (value) => {
-    const { fileId, fileName, fileExtenstion, fileUrl } = value;
+    const { fileId, fileName, fileExtenstion, fileUrl, fileSize } = value;
+    dispatch(addDownload({ id: fileId, name: showNameFile(value?.fileName, value?.fileExtenstion), progress: true }));
     setLoadingID(loadingID.concat(fileId));
     const url = import.meta.env.VITE_APP_API_URL_UPLOAD + fileUrl;
     const file = `${fileName}${fileExtenstion ? '.' + fileExtenstion : ''}`;
@@ -86,21 +91,24 @@ const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) 
       RouterApi.conceptDownload,
       { fileId: fileId },
       {
-        responseType: 'blob' // important for handling binary data
+        responseType: 'blob',// important for handling binary data,
       }
     );
     const listLoading = loadingID.filter((item) => item?.fileId !== fileId);
     setLoadingID(listLoading);
     setLoading(false);
     if (response?.status === 200) {
+
       const blob = response.data;
       const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${fileName}${fileExtenstion ? '.' + fileExtenstion : ''}`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      dispatch(downloadSuccessful({ id: fileId, progress: false, link: url }));
+      toast.success('Downloaded successfully!')
+      // const link = document.createElement('a');
+      // link.href = url;
+      // link.setAttribute('download', `${fileName}${fileExtenstion ? '.' + fileExtenstion : ''}`);
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link);
     } else {
       alert('Download file fail!');
     }

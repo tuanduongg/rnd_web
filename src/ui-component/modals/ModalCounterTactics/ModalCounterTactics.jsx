@@ -30,7 +30,7 @@ import {
   Typography
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { IconDeviceFloppy, IconPlus, IconUpload } from '@tabler/icons-react';
+import { IconDeviceFloppy, IconInfoCircle, IconPlus, IconUpload } from '@tabler/icons-react';
 import { isMobile } from 'react-device-detect';
 import { useTheme } from '@mui/material/styles';
 import { useState } from 'react';
@@ -60,6 +60,7 @@ import toast from 'react-hot-toast';
 import { ShowConfirm } from 'ui-component/ShowDialog';
 import dayjs from 'dayjs';
 import { useForm, Controller } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -101,6 +102,8 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
   const inputFileRef = useRef();
   const buttonSubmit = useRef();
   const pasteAreaRef = useRef(null); // Ref đến vùng cụ thể để paste
+  const customization = useSelector((state) => state.customization);
+
   const {
     watch,
     handleSubmit,
@@ -485,7 +488,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
           <DialogContent sx={{ ...cssScrollbar }}>
             <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit((data) => onSaveData(data))}>
               <Grid container spacing={2}>
-                <Grid item xs={4.5}>
+                <Grid item xs={4.5} >
                   <Controller
                     name="shift"
                     control={control}
@@ -494,12 +497,14 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                       <RadioGroup
                         {...field}
                         row
+
+                        sx={{ border: '1px solid #bdbdbd', paddingLeft: 2, borderRadius: `${customization.borderRadius}px`, backgroundColor: '#f8fafc' }}
                         aria-labelledby="demo-radio-buttons-group-label"
                         name="radio-buttons-group"
                         value={field.value}
                         onChange={(e) => field.onChange(e.target.value)}
                       >
-                        <Stack direction={'row'} spacing={1} alignItems={'center'}>
+                        <Stack maxHeight={38} direction={'row'} spacing={1} alignItems={'center'}>
                           <span style={{ fontWeight: 'bold' }}>Shift:</span>
                           <FormControlLabel value="D" control={<Radio />} label="Day" />
                           <FormControlLabel value="N" control={<Radio />} label="Night" />
@@ -570,7 +575,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                     />
                   </FormControl>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={3.5}>
                   <Controller
                     name="ngName"
                     control={control}
@@ -587,7 +592,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                     )}
                   />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={2.5}>
                   <Controller
                     name="percentage"
                     control={control}
@@ -606,6 +611,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                           placeholder="Tỷ lệ..."
                           name="percentage"
                           {...field}
+                          fullWidth
                           error={!!errors.percentage}
                           endAdornment={<InputAdornment position="end">%</InputAdornment>}
                           label="Tỷ lệ"
@@ -625,7 +631,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                         placeholder="Code..."
                         size="small"
                         {...field}
-                        label="Code"
+                        label={'Code'}
                         variant="outlined"
                         error={!!errors.code}
                       />
@@ -967,6 +973,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                 <Grid item xs={6}>
                   <Box
                     border={'1px dotted #aaa'}
+                    borderRadius={`${customization.borderRadius}px`}
                     minHeight={50}
                     justifyContent={'center'}
                     alignItems={'center'}
@@ -993,7 +1000,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                           fileRequest?.isShow &&
                           fileRequest?.typeFile === 'REQUEST' && (
                             <Stack
-                              sx={{ boxShadow: 'rgba(0, 0, 0, 0.05) 0px 0px 0px 1px', padding: '5px 0px' }}
+                              sx={{ boxShadow: 'rgba(0, 0, 0, 0.05) 0px 0px 0px 1px', padding: '5px 0px', borderRadius: `${customization.borderRadius}px` }}
                               mt={1}
                               direction={'row'}
                               alignItems={'center'}
@@ -1004,7 +1011,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                                   className={getIcon(fileRequest) + ' icon-file-in-modal'}
                                   style={{ fontSize: '33px', minWidth: '40px' }}
                                 />
-                                <Typography variant="h6">
+                                <Typography sx={{ wordBreak: 'break-all' }} variant="h6">
                                   {fileRequest?.fileName
                                     ? concatFileNameWithExtension(fileRequest?.fileName, fileRequest?.fileExtenstion)
                                     : fileRequest?.name}
@@ -1025,6 +1032,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                 <Grid item xs={6}>
                   <Box
                     border={'1px dotted #aaa'}
+                    borderRadius={`${customization.borderRadius}px`}
                     minHeight={50}
                     justifyContent={'center'}
                     alignItems={'center'}
@@ -1042,7 +1050,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                         variant="text"
                         startIcon={<IconUpload />}
                       >
-                        대책서 (đối sách cải tiến)
+                        대책서 (đối sách)
                       </Button>
                     </div>
                     {fileUploadRequest?.length > 0 &&
@@ -1051,7 +1059,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                           fileRequest?.isShow &&
                           fileRequest?.typeFile === 'REPLY' && (
                             <Stack
-                              sx={{ boxShadow: 'rgba(0, 0, 0, 0.05) 0px 0px 0px 1px', padding: '5px 0px' }}
+                              sx={{ boxShadow: 'rgba(0, 0, 0, 0.05) 0px 0px 0px 1px', padding: '5px 0px', borderRadius: `${customization.borderRadius}px` }}
                               mt={1}
                               direction={'row'}
                               alignItems={'center'}
@@ -1062,7 +1070,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                                   className={getIcon(fileRequest) + ' icon-file-in-modal'}
                                   style={{ fontSize: '33px', minWidth: '40px' }}
                                 />
-                                <Typography variant="h6">
+                                <Typography sx={{ wordBreak: 'break-all' }} variant="h6">
                                   {fileRequest?.fileName
                                     ? concatFileNameWithExtension(fileRequest?.fileName, fileRequest?.fileExtenstion)
                                     : fileRequest?.name}
@@ -1091,6 +1099,7 @@ export default function ModalCounterTactics({ open, onClose, afterSave, typeModa
                     justifyContent={'center'}
                     minHeight={100}
                     border={'1px dotted #aaa'}
+                    borderRadius={`${customization.borderRadius}px`}
                   >
                     {listFilePreview?.length <= 0 && (
                       <Tooltip title="Click để tải ảnh lên từ thiết bị hoặc click vào khoảng trắng và dán ảnh đã sao chép">

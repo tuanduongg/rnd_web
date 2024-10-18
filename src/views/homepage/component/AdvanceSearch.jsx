@@ -25,6 +25,7 @@ import { IconX } from '@tabler/icons-react';
 import { IconPlus, IconEdit, IconCheck, IconFilter, IconSearch, IconCircleCheckFilled, IconCircleCheck, IconUser, IconEye } from '@tabler/icons-react';
 
 import { DatePicker } from "@mui/x-date-pickers";
+import { END_OF_CURRENT_MONTH, START_OF_CURRENT_MONTH } from "utils/helper";
 
 
 const currentDate = dayjs();
@@ -42,15 +43,15 @@ const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleCl
 
     const [categoryFilter, setCategoryFiler] = useState([]);
 
-    const [startDate, setStartDate] = useState(firstDayOfLastMonth);
+    const [startDate, setStartDate] = useState(START_OF_CURRENT_MONTH);
 
-    const [endDate, setEndDate] = useState(firstDayOfNextMonth);
+    const [endDate, setEndDate] = useState(END_OF_CURRENT_MONTH);
 
     const onClickResetAll = () => {
         setPersonName([]);
         setCategoryFiler([]);
-        setStartDate(firstDayOfLastMonth);
-        setEndDate(firstDayOfNextMonth);
+        setStartDate(START_OF_CURRENT_MONTH);
+        setEndDate(END_OF_CURRENT_MONTH);
     };
 
     const onClose = () => {
@@ -98,6 +99,13 @@ const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleCl
                         <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
                             <InputLabel htmlFor="demo-multiple-checkbox">카테고리(Category)</InputLabel>
                             <Select
+                                MenuProps={{
+                                    PaperProps: {
+                                        style: {
+                                            maxHeight: 500, // Set max height to 200px
+                                        },
+                                    },
+                                }}
                                 label="카테고리(Category)"
                                 // labelId="demo-multiple-checkbox-label"
                                 id="demo-multiple-checkbox"
@@ -112,7 +120,7 @@ const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleCl
                                         typeof value === 'string' ? value.split(',') : value
                                     );
                                 }}
-                                input={<OutlinedInput label="Tag" />}
+                                input={<OutlinedInput label="카테고리(Category)" />}
                                 renderValue={(selected) => {
                                     let result = selected
                                         ?.map((id) => {
@@ -178,6 +186,13 @@ const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleCl
                         <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
                             <InputLabel id="demo-simple-select-label">등록자(Registrant)</InputLabel>
                             <Select
+                                MenuProps={{
+                                    PaperProps: {
+                                        style: {
+                                            maxHeight: 300, // Set max height to 200px
+                                        },
+                                    },
+                                }}
                                 id="demo-simple-select"
                                 labelId="demo-simple-select-label"
                                 label="등록자(Registrant)"
@@ -192,7 +207,7 @@ const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleCl
                                         typeof value === 'string' ? value.split(',') : value
                                     );
                                 }}
-                                input={<OutlinedInput label="Tag" />}
+                                input={<OutlinedInput label="등록자(Registrant)" />}
                                 renderValue={(selected) => {
                                     let result = selected
                                         ?.map((id) => {

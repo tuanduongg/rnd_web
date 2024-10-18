@@ -26,6 +26,7 @@ import { IconX } from '@tabler/icons-react';
 import { IconSearch } from '@tabler/icons-react';
 
 import { DatePicker } from '@mui/x-date-pickers';
+import { END_OF_CURRENT_MONTH, START_OF_CURRENT_MONTH } from 'utils/helper';
 
 const currentDate = dayjs();
 // Lấy ngày đầu tiên của tháng hiện tại
@@ -41,15 +42,15 @@ const MoreSearch = ({ anchorEl, open, onCloseMenuFilter, categories, processes, 
 
   const [categoryFilter, setCategoryFiler] = useState([]);
 
-  const [startDate, setStartDate] = useState(firstDayOfLastMonth);
+  const [startDate, setStartDate] = useState(START_OF_CURRENT_MONTH);
 
-  const [endDate, setEndDate] = useState(firstDayOfNextMonth);
+  const [endDate, setEndDate] = useState(END_OF_CURRENT_MONTH);
 
   const onClickResetAll = () => {
     setProcess([]);
     setCategoryFiler([]);
-    setStartDate(firstDayOfLastMonth);
-    setEndDate(firstDayOfNextMonth);
+    setStartDate(START_OF_CURRENT_MONTH);
+    setEndDate(END_OF_CURRENT_MONTH);
   };
 
   useEffect(() => {
@@ -78,7 +79,7 @@ const MoreSearch = ({ anchorEl, open, onCloseMenuFilter, categories, processes, 
         MenuListProps={{
           'aria-labelledby': 'basic-button'
         }}
-        // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+      // anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         <Paper sx={{ width: '100%', maxWidth: { xs: 340, sm: 400 }, padding: '10px' }}>
           {/* <Grid container spacing={2}>

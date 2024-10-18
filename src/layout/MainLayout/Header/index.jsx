@@ -15,6 +15,7 @@ import { BrowserView, MobileView } from 'react-device-detect';
 // assets
 import { IconLayoutSidebarLeftCollapseFilled, IconLayoutSidebarRightCollapseFilled, IconMenu2 } from '@tabler/icons-react';
 import { useSelector } from 'react-redux';
+import DownloadSection from './DownloadSection';
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
@@ -90,6 +91,7 @@ const Header = ({ handleLeftDrawerToggle }) => {
             <Box sx={{ flexGrow: 1 }} />
 
             {/* notification & profile */}
+            <DownloadSection/>
             <NotificationSection />
             <ProfileSection />
         </>

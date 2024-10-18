@@ -2,6 +2,6 @@
   color: white;
 }
 .iconcustom::before {
-  font-size: 30px !important;
+  font-size: 25px !important;
   margin-right: 10px;
 }

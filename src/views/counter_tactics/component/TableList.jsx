@@ -85,6 +85,7 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
   const [total, setTotal] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
+  const [lengthColShow, setLengthColShow] = useState(0);
   const [typeModal, setTypeModal] = useState('ADD');
   const [startDate, setStartDate] = useState(START_OF_CURRENT_MONTH);
   const [endDate, setEndDate] = useState(END_OF_CURRENT_MONTH);
@@ -183,6 +184,12 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
       getAllReportQC();
     }
   }, [currentFilter]);
+
+  useEffect(() => {
+    const data = currentShowCol?.filter((item) => item);
+    setLengthColShow(data?.length)
+  }, [currentShowCol]);
+
   useEffect(() => {
     getCategories();
   }, []);
@@ -320,16 +327,16 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
           <Stack spacing={1} direction="row" alignItems={'center'} justifyContent="flex-start">
             {arrChipFilter?.length > 0
               ? arrChipFilter.map((chip, index) => (
-                  <Chip
-                    key={index}
-                    sx={{ marginRight: '5px', marginTop: '5px' }}
-                    variant="outlined"
-                    label={chip?.label}
-                    onDelete={() => {
-                      onDeleteChip(chip?.onDelete);
-                    }}
-                  />
-                ))
+                <Chip
+                  key={index}
+                  sx={{ marginRight: '5px', marginTop: '5px' }}
+                  variant="outlined"
+                  label={chip?.label}
+                  onDelete={() => {
+                    onDeleteChip(chip?.onDelete);
+                  }}
+                />
+              ))
               : null}
           </Stack>
 
@@ -359,7 +366,7 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
                     </IconButton>
                   </InputAdornment>
                 }
-                // label="Search"
+              // label="Search"
               />
             </FormControl>
             <Button onClick={onClickSearch} startIcon={<IconSearch />} size="medium" variant="contained">
@@ -462,7 +469,7 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
             >
               {reports?.length <= 0 ? (
                 <TableRow sx={{ textAlign: 'center' }}>
-                  <StyledTableCell colSpan={currentShowCol?.length} align="center">
+                  <StyledTableCell colSpan={lengthColShow} align="center">
                     <img src={IMAGE_EMPTYDATA} width={70} height={70} alt="image" />
                     <div>NO DATA</div>
                   </StyledTableCell>
@@ -645,13 +652,14 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
         afterSave={() => {
           statistic();
           getAllReportQC();
+          setSelectedRow(null);
         }}
         typeModal={typeModal}
         selected={selectedRow}
         setLoading={setLoading}
         open={openModal}
         onClose={() => {
-          setSelectedRow(null);
+
           setTypeModal('ADD');
           setOpenModal(false);
         }}

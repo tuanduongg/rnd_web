@@ -52,6 +52,17 @@ export const findParentIds = (menu, targetId) => {
 };
 
 
+export const setTitleTab = (id) => {
+
+  if (id) {
+    const find = menu.find((item) => item?.id === id);
+    if (find) {
+
+      window.document.title = 'HANOI SEWONINTECH' + ' - ' + find?.title;
+    }
+  }
+}
+
 export const menu = [
   {
     id: ConfigRouter.aprrovalPage,

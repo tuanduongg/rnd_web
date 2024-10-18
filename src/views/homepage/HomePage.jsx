@@ -46,8 +46,6 @@ import { IconSearch } from '@tabler/icons-react';
 import { IconAdjustmentsAlt } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
 import AdvanceSearch from './component/AdvanceSearch';
-import AllInboxIcon from '@mui/icons-material/AllInbox';
-import CustomChip from 'ui-component/extended/CustomChip';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const initFilter = {

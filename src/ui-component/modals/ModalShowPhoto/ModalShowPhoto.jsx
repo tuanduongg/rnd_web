@@ -57,7 +57,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 const getChip = (text, color) => {
   return (
-    text ? <Chip sx={{marginLeft:'10px'}} size='small' label={text} variant='outlined' color={color} /> : null
+    text ? <Chip sx={{ marginLeft: '10px' }} size='small' label={text} variant='outlined' color={color} /> : null
   )
 }
 export const VALUE_TAB = {
@@ -115,8 +115,8 @@ export default function ModalShowPhoto({ open, onClose, valueTabProp, selected, 
         <DialogTitle sx={{ m: 0, p: 2, fontSize: '18px' }} id="customized-dialog-title">
           <Stack direction={'row'} alignItems={'center'}>
             {'Detail '}
-              {getChip(selected?.category?.categoryName, 'primary')}
-              {getChip(selected?.code, 'success')}
+            {getChip(selected?.category?.categoryName, 'primary')}
+            {getChip(selected?.code, 'success')}
           </Stack>
           <IconButton
             aria-label="close"
@@ -153,39 +153,40 @@ export default function ModalShowPhoto({ open, onClose, valueTabProp, selected, 
             </AccordionSummary>
             <AccordionDetails>
               <Grid container spacing={3}>
-                <Grid item xs={5}>
+                <Grid item xs={12}>
                   <Stack>
-                    <Stack direction={'row'} justifyContent={'space-between'}>
-                      <Typography fontSize={'0.875rem'} variant="subtitle2">
-                        Shift
-                      </Typography>
-                      <Typography variant="h5">{getShift(selected?.shift)}</Typography>
-                    </Stack>
-                    <Divider />
-                    <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
-                      <Typography fontSize={'0.875rem'} variant="subtitle2">
-                        Week
-                      </Typography>
-                      <Typography variant="h5">{selected?.week}</Typography>
-                    </Stack>
-                    <Divider />
-                    <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
-                      <Typography fontSize={'0.875rem'} variant="subtitle2">
-                        Date
-                      </Typography>
-                      <Typography variant="h5">{formatDateFromDB(selected?.time, false)}</Typography>
-                    </Stack>
-                    <Divider />
-                    <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
-                      <Typography fontSize={'0.875rem'} variant="subtitle2">
-                        등록자(Người đăng ký)
-                      </Typography>
-                      <Typography variant="h5">{selected?.author}</Typography>
+                    <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'}>
+
+                      <Stack alignItems={'center'} direction={'row'} justifyContent={'space-between'}>
+
+                        <Typography fontSize={'0.875rem'} sx={{marginRight:'5px'}} variant="subtitle2">
+                          Shift:
+                        </Typography>
+                        <Typography variant="h5">{getShift(selected?.shift)}</Typography>
+                      </Stack>
+                      <Stack alignItems={'center'} direction={'row'} justifyContent={'space-between'}>
+                        <Typography fontSize={'0.875rem'} sx={{marginRight:'5px'}} variant="subtitle2">
+                          Week:
+                        </Typography>
+                        <Typography variant="h5">{selected?.week}</Typography>
+                      </Stack>
+                      <Stack alignItems={'center'} direction={'row'} justifyContent={'space-between'}>
+                        <Typography fontSize={'0.875rem'} sx={{marginRight:'5px'}} variant="subtitle2">
+                          Date:
+                        </Typography>
+                        <Typography variant="h5">{formatDateFromDB(selected?.time, false)}</Typography>
+                      </Stack>
+                      <Stack alignItems={'center'} direction={'row'} justifyContent={'space-between'}>
+                        <Typography fontSize={'0.875rem'} sx={{marginRight:'5px'}} variant="subtitle2">
+                          등록자(Người đăng ký):
+                        </Typography>
+                        <Typography variant="h5">{selected?.author}</Typography>
+                      </Stack>
                     </Stack>
                     <Divider />
                   </Stack>
                 </Grid>
-                <Grid item xs={7}>
+                <Grid item xs={12}>
                   <Stack>
                     <Stack direction={'row'} justifyContent={'space-between'}>
                       <Typography fontSize={'0.875rem'} variant="subtitle2">

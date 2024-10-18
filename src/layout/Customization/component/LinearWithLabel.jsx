@@ -7,7 +7,7 @@ export default function LinearProgressWithLabel(props) {
                 <LinearProgress variant="determinate" {...props} />
             </Box>
             <Box sx={{ minWidth: 35 }}>
-                <Typography variant="body2" color="text.primary">{`${props.value?.toFixed(4)}%`}</Typography>
+                <Typography variant="body2" color="text.primary">{`${props.value}%`}</Typography>
             </Box>
         </Box>
     );

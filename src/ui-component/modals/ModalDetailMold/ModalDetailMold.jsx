@@ -28,6 +28,8 @@ import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import toast from 'react-hot-toast';
 import { saveAs } from 'file-saver';
+import IMAGE_EMPTYDATA from 'assets/images/backgrounds/empty-box.png';
+
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -96,6 +98,14 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
     onClose();
   };
 
+  useEffect(() => {
+
+    if (open && selected) {
+      getAllHistoryTryNo()
+    }
+  }, [open])
+
+
   const getAllHistoryTryNo = async () => {
     setLoading(true);
     const res = await restApi.post(RouterApi?.outputJigHistoryTryNo, { outputJigID: selected?.outputJigID });
@@ -147,6 +157,7 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
             {getChip(selected?.model?.type, 'primary')}
             {getChip(selected?.moldNo ? `#${selected?.moldNo}` : '', 'info')}
             {getChip(selected?.historyTryNo[0]?.tryNum ? `T${selected?.historyTryNo[0]?.tryNum}` : '', 'secondary')}
+            {getChipStatus(selected?.productionStatus, { marginLeft: '10px' })}
           </Stack>
           <IconButton
             aria-label="close"
@@ -163,7 +174,7 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ ...cssScrollbar, overflowX: 'hidden' }}>
-          <Stack direction={'row'} spacing={1}>
+          {/* <Stack direction={'row'} spacing={1}>
             <Box width={'50%'} sx={{ backgroundColor: '#fafafa' }} p={1}>
               <Typography mb={2} color={'primary'} variant="h5">
                 &bull; 일반 정보(Thông tin chung)
@@ -213,13 +224,7 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
                   </Typography>
                 </Stack>
                 <Divider />
-                <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
-                  <Typography fontSize={'0.875rem'} variant="subtitle2">
-                    양산적용(Trạng thái)
-                  </Typography>
-                  <Typography variant="h5">{getChipStatus(selected?.productionStatus, { marginBottom: '5px' })}</Typography>
-                </Stack>
-                <Divider />
+
               </Stack>
             </Box>
             <Stack width={'50%'} sx={{ backgroundColor: '#fafafa' }} spacing={1}>
@@ -296,6 +301,13 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
               <Stack>
                 <Stack direction={'row'} justifyContent={'space-between'}>
                   <Typography fontSize={'0.875rem'} variant="subtitle2">
+                    양산적용(Trạng thái)
+                  </Typography>
+                  <Typography variant="h5">{getChipStatus(selected?.productionStatus, { marginBottom: '5px' })}</Typography>
+                </Stack>
+                <Divider />
+                <Stack mt={2} direction={'row'} justifyContent={'space-between'}>
+                  <Typography fontSize={'0.875rem'} variant="subtitle2">
                     수정업체(Nơi sửa)
                   </Typography>
                   <Typography variant="h5">
@@ -344,8 +356,8 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
                 <Divider />
               </Stack>
             </AccordionDetails>
-          </Accordion>
-          <Accordion onChange={onChangeExpandedHistoryTryNo} sx={{ backgroundColor: '#fafafa' }}>
+          </Accordion> */}
+          {/* <Accordion onChange={onChangeExpandedHistoryTryNo} sx={{ backgroundColor: '#fafafa' }}>
             <AccordionSummary expandIcon={<IconCaretDown />} aria-controls="panel2content" id="panel2-header">
               <Typography color={'primary'} variant="h5">
                 &bull; History(TRY NO.)
@@ -399,11 +411,6 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
                       (Nội dung)
                     </Typography>
                   </Grid>
-                  {/* <Grid textAlign={'right'} item xs={1}>
-                    <Typography textAlign={'right'} fontSize={'0.875rem'} variant="subtitle2">
-                      Time
-                    </Typography>
-                  </Grid> */}
                 </Grid>
                 <Divider />
                 {dataHistoryTryNo?.length > 0
@@ -461,7 +468,120 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
                   : null}
               </Stack>
             </AccordionDetails>
-          </Accordion>
+          </Accordion> */}
+          <Stack>
+            <Grid pt={1} pb={1} container>
+              <Grid textAlign={'center'} item xs={1}>
+                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                  Try No.
+                </Typography>
+              </Grid>
+              <Grid textAlign={'center'} item xs={1.5}>
+                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                  수정업체
+                  <br />
+                  (Nơi sửa)
+                </Typography>
+              </Grid>
+              <Grid textAlign={'center'} item xs={2}>
+                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                  수리 출고
+                  <br />
+                  (Xuất kho)
+                </Typography>
+              </Grid>
+              <Grid textAlign={'center'} item xs={2}>
+                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                  입고 계획
+                  <br />
+                  (K.H xong)
+                </Typography>
+              </Grid>
+              <Grid textAlign={'center'} item xs={2}>
+                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                  입고 완료
+                  <br />
+                  (T.tế xong)
+                </Typography>
+              </Grid>
+              <Grid textAlign={'center'} item xs={1.5}>
+                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                  수정
+                </Typography>
+              </Grid>
+              <Grid textAlign={'center'} item xs={2}>
+                <Typography textAlign={'center'} fontSize={'0.875rem'} variant="subtitle2">
+                  수정내역
+                  <br />
+                  (Nội dung)
+                </Typography>
+              </Grid>
+              {/* <Grid textAlign={'right'} item xs={1}>
+                    <Typography textAlign={'right'} fontSize={'0.875rem'} variant="subtitle2">
+                      Time
+                    </Typography>
+                  </Grid> */}
+            </Grid>
+            <Divider />
+            {dataHistoryTryNo?.length > 0
+              ? dataHistoryTryNo.map(
+                (his) =>
+                  his?.tryNum && (
+                    <>
+                      <Grid pt={1} pb={1} container>
+                        <Grid item xs={1}>
+                          <Typography
+                            color={his?.currentTry ? 'primary' : ''}
+                            textAlign={'center'}
+                            fontSize={'0.875rem'}
+                            variant="h5"
+                          >
+                            {his?.tryNum ? `T${his?.tryNum}` : ''}
+                          </Typography>
+                        </Grid>
+
+                        <Grid item xs={1.5}>
+                          <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                            <Tooltip title={his?.modificationCompany?.companyName}>{his?.modificationCompany?.companyCode}</Tooltip>
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={2}>
+                          <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                            {his?.outputEdit ? formatDateFromDB(his?.outputEdit, false) : null}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={2}>
+                          <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                            {his?.wearingPlan ? formatDateFromDB(his?.wearingPlan, false) : null}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={2}>
+                          <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                            {his?.receivingCompleted ? formatDateFromDB(his?.receivingCompleted, false) : null}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={1.5}>
+                          <Typography fontWeight={'bold'} textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                            {getDepartmentEditMold(his?.departEdit)}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={2}>
+                          <Typography textAlign={'center'} fontSize={'0.875rem'} variant="h5">
+                            {his?.remark}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                      <Divider />
+                    </>
+                  )
+              )
+              : (
+                <Box textAlign={'center'}>
+                  <img src={IMAGE_EMPTYDATA} width={70} height={70} alt="image" />
+                  <div>NO DATA</div>
+                </Box>
+              )}
+          </Stack>
         </DialogContent>
         <DialogActions>
           <Stack width={'100%'} direction={'row'} justifyContent={'space-between'}>

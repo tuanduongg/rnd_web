@@ -108,7 +108,7 @@ const MainLayout = () => {
       </Main>
       <Customization />
       <Toaster
-        position="bottom-right"
+        position="top-center"
         toastOptions={{
           duration: 3000, // Set duration in milliseconds
           // Tùy chỉnh duration cho từng loại toast
