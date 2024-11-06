@@ -2,16 +2,17 @@ import { Chip } from '@mui/material';
 
 export const LIST_COL_MOLD = [
   { canHide: false, align: 'center', name: '#', id: '#', width: 20 },
-  { canHide: false, align: 'center', name: 'Category', id: 'category', width: 100  },
-  { canHide: false, align: 'center', name: 'Project', id: 'project', width: 100,sx:{marginRight:'10px'} },
+  { canHide: false, align: 'center', name: 'Category', id: 'category', width: 100 },
+  { canHide: false, align: 'center', name: 'Project', id: 'project', width: 100, sx: { marginRight: '10px' } },
   { canHide: false, align: 'center', name: ' 구분', id: 'type', width: 100 },
   { canHide: false, align: 'center', name: 'Model', id: 'model', width: 100 },
-  { canHide: true, align: 'center', name: 'Description', id: 'description', width: 150 },
+  // { canHide: true, align: 'center', name: 'Description', id: 'description', width: 150 },
   { canHide: false, align: 'center', name: 'Mold No.', id: 'moldNo', width: 100 },
   { canHide: true, align: 'center', name: '제작업체<br/>NSX', id: 'manufacturer', width: 100 },
   { canHide: true, align: 'center', name: '발송지역<br/>Nơi VC', id: 'shipArea', width: 120 },
   { canHide: true, align: 'center', name: '출고 계획<br/>T.Gian VC', id: 'shipDate', width: 100 },
   { canHide: true, align: 'center', name: '양산업체<br/>Cty SX', id: 'massCompany', width: 100 },
+  { canHide: true, align: 'center', name: '개발등록<br/>(RnD)', id: 'developDate', width: 100 },
   { canHide: true, align: 'center', name: '양산업체입고<br/>Thời gian', id: 'shipMassCompany', width: 110 },
   { canHide: true, align: 'center', name: '수정업체<br/>Nơi sửa', id: 'modificationCompany', width: 100 },
   { canHide: true, align: 'center', name: '수리 출고<br/>X.Kho sửa', id: 'outputEdit', width: 100 },
@@ -32,7 +33,20 @@ export const LIST_STATUS = [
 
 export const limitCharacter = (text, count, insertDots) => {
   if (text) {
-    return text.slice(0, count) + (text.length > count && insertDots ? '...' : '');
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+      if (i <= count) {
+        let char = text.charAt(i);        
+        result += char;
+      }
+    }
+    console.log("result?.length",result?.length);
+    
+    if(result?.length === count+1){
+      return result + (insertDots ? '...' : '');
+    }
+    return result;
+    // return text.slice(0, count) + (text.length > count && insertDots ? '...' : '');
   }
   return '';
 };

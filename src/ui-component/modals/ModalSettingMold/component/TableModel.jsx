@@ -34,6 +34,7 @@ import { ShowConfirm } from 'ui-component/ShowDialog';
 import toast from 'react-hot-toast';
 import { RouterApi } from 'utils/router-api';
 import restApi from 'utils/restAPI';
+import { IconFileSpreadsheet } from '@tabler/icons-react';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -121,6 +122,29 @@ const TableModel = ({
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPageModel(parseInt(event.target.value, 10));
     setPageModel(0);
+  };
+  const onClickExportExcel = async () => {
+    const response = await restApi.post(
+      RouterApi.exportExcelModelMold,
+      {},
+      {
+        responseType: 'arraybuffer'
+      }
+    );
+    if (response?.status === 200) {
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const date = new Date();
+      const hour = date.getHours();
+      const minus = date.getMinutes();
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      saveAs(blob, `Export_Model_${hour}${minus}_${year}${month}${day}.xlsx`);
+    } else {
+      toast.error('Download file fail!');
+    }
   };
 
   const onClickCancel = (item) => {
@@ -224,7 +248,10 @@ const TableModel = ({
         </Box>
       )}
       <SubCard sx={{ marginTop: '15px', padding: '10px' }}>
-        <Stack direction={'row'} justifyContent={'flex-end'}>
+        <Stack direction={'row'} justifyContent={'space-between'} spacing={2}>
+          <Button onClick={onClickExportExcel} startIcon={<IconFileSpreadsheet />} size="small" variant="outlined">
+            Excel
+          </Button>
           <FormControl size="small" variant="outlined">
             <OutlinedInput
               defaultValue={searchModel}

@@ -25,17 +25,20 @@ export default defineConfig({
         //   }
         // ]
     },
+    build: {
+        chunkSizeWarningLimit: 1600,
+      },
     server: {
         // this ensures that the browser opens upon server start
         open: true,
         // this sets a default port to 3000
-        port: process.env?.VITE_APP_PORT ?? 5001,
+        port: process.env?.VITE_APP_PORT ?? 5000,
         host: true,
     },
     preview: {
         // this ensures that the browser opens upon preview start
         open: true,
         // this sets a default port to 3000
-        port: process.env?.VITE_APP_PORT ?? 5001
+        port: process.env?.VITE_APP_PORT ?? 5000
     }
 });

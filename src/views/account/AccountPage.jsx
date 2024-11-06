@@ -49,9 +49,11 @@ import ModalAccount from 'ui-component/modals/ModalAccount/ModalAccount';
 import IMAGE_EMPTYDATA from '../../assets/images/backgrounds/empty-box.png';
 import { padding } from '@mui/system';
 import { cssScrollbar } from 'utils/helper';
+import { IconLockCog } from '@tabler/icons-react';
+import ModalRole from 'ui-component/modals/ModalRole/ModalRole';
 
 // ==============================|| SAMPLE PAGE ||============================== //
-const names = ['ACC', 'RUBBER', 'CONVERTING', 'INJECTION', 'METAL KEY 5개중 택'];
+
 const AccountPage = () => {
   const auth = useSelector((state) => state.auth);
   const [page, setPage] = useState(0);
@@ -62,7 +64,9 @@ const AccountPage = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [typeModal, setTypeModal] = useState('ADD');
   const [search, setSearch] = useState('');
+  const [openModalRole, setOpenModalRole] = useState(false);
   const theme = useTheme();
+  const [roles, setRoles] = useState([]);
 
   const getUsers = async () => {
     const res = await restApi.post(RouterApi.userAll, { search: '' });
@@ -73,7 +77,18 @@ const AccountPage = () => {
   useEffect(() => {
     onSearch(search);
   }, [listUser]);
+
+  const getAllRole = async () => {
+    const response = await restApi.get(RouterApi.roleAll);
+    if (response?.status === 200) {
+      setRoles(response?.data);
+    }
+  };
+  const afterSaveRole = () => {
+    getAllRole();
+  };
   useEffect(() => {
+    getAllRole();
     getUsers();
   }, []);
 
@@ -91,7 +106,11 @@ const AccountPage = () => {
   const onSearch = (value) => {
     const userNew = listUser.filter((item) => {
       const newSearch = value.trim().toLocaleLowerCase();
-      return `${item?.userName}`.toLocaleLowerCase().indexOf(newSearch) > -1 || `${item?.fullName}`.indexOf(newSearch) > -1;
+      return (
+        `${item?.userName}`.toLocaleLowerCase().indexOf(newSearch) > -1 ||
+        `${item?.department}`.toLocaleLowerCase().indexOf(newSearch) > -1 ||
+        `${item?.fullName}`.indexOf(newSearch) > -1
+      );
     });
     setSelectedRow(null);
     setUsers(userNew);
@@ -112,33 +131,45 @@ const AccountPage = () => {
         <Grid item xs={12}>
           <SubCard contentSX={{ padding: '13px !important' }}>
             <Stack direction="row" justifyContent="space-between" spacing={1}>
-              <FormControl size="small" sx={{ maxWidth: '220px' }} variant="outlined">
-                {/* <InputLabel htmlFor="outlined-adornment-password">Search</InputLabel> */}
-                <OutlinedInput
-                  onChange={(e) => {
-                    onSearch(e.target.value);
-                    setSearch(e.target.value);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      onSearch();
+              <Button
+                sx={{ marginRight: '10px' }}
+                onClick={() => {
+                  // setTypeModal('ADD');
+                  setOpenModalRole(true);
+                }}
+                size="small"
+                startIcon={<IconLockCog />}
+                variant="custom"
+              >
+                Role
+              </Button>
+              <Stack spacing={2} direction={'row'}>
+                <FormControl size="small" sx={{ maxWidth: '220px' }} variant="outlined">
+                  {/* <InputLabel htmlFor="outlined-adornment-password">Search</InputLabel> */}
+                  <OutlinedInput
+                    onChange={(e) => {
+                      onSearch(e.target.value);
+                      setSearch(e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        onSearch();
+                      }
+                    }}
+                    value={search}
+                    placeholder="Search..."
+                    id="outlined-adornment-password"
+                    type={'text'}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton color="primary" aria-label="search" onClick={onSearch} onMouseDown={onSearch} edge="end">
+                          <IconSearch />
+                        </IconButton>
+                      </InputAdornment>
                     }
-                  }}
-                  value={search}
-                  placeholder="Search..."
-                  id="outlined-adornment-password"
-                  type={'text'}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton color="primary" aria-label="search" onClick={onSearch} onMouseDown={onSearch} edge="end">
-                        <IconSearch />
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  // label="Search"
-                />
-              </FormControl>
-              <div>
+                    // label="Search"
+                  />
+                </FormControl>
                 <Button
                   sx={{ marginRight: '10px' }}
                   onClick={() => {
@@ -164,19 +195,20 @@ const AccountPage = () => {
                 >
                   Edit
                 </Button>
-              </div>
+              </Stack>
             </Stack>
           </SubCard>
         </Grid>
         <Grid item xs={12}>
           <MainCard contentSX={{ padding: '10px' }}>
-            <TableContainer sx={{ marginTop: '15px', ...cssScrollbar, maxHeight: `calc(100vh - 225px)` }} component={Paper}>
+            <TableContainer sx={{ marginTop: '15px', ...cssScrollbar, height: `calc(100vh - 240px)`, width: '100%' }} component={Paper}>
               <Table stickyHeader sx={{ minWidth: 700, ...cssScrollbar }} aria-label="customized table">
                 <TableHead>
                   <TableRow>
                     <StyledTableCell align="center">#</StyledTableCell>
                     <StyledTableCell align="left">Full Name</StyledTableCell>
                     <StyledTableCell align="left">User Name</StyledTableCell>
+                    <StyledTableCell align="center">Deparment</StyledTableCell>
                     <StyledTableCell align="center">Role</StyledTableCell>
                     <StyledTableCell align="right">Korean(ACC)</StyledTableCell>
                     <StyledTableCell align="right">Admin</StyledTableCell>
@@ -190,12 +222,18 @@ const AccountPage = () => {
                 >
                   {users?.length > 0 ? (
                     users?.map((row, index) => (
-                      <StyledTableRow sx={{cursor:'pointer'}}  selected={selectedRow?.userId === row?.userId} onClick={() => setSelectedRow(row)} key={index}>
+                      <StyledTableRow
+                        sx={{ cursor: 'pointer' }}
+                        selected={selectedRow?.userId === row?.userId}
+                        onClick={() => setSelectedRow(row)}
+                        key={index}
+                      >
                         <StyledTableCell align="center">{index + 1}</StyledTableCell>
                         <StyledTableCell align="left" component="th" scope="row">
                           {row?.fullName}
                         </StyledTableCell>
                         <StyledTableCell align="left">{row?.userName}</StyledTableCell>
+                        <StyledTableCell align="center">{row?.department}</StyledTableCell>
                         <StyledTableCell align="center">{row?.role?.roleName}</StyledTableCell>
                         <StyledTableCell align="right">{row?.isKorean && <IconCheck />}</StyledTableCell>
                         <StyledTableCell align="right">{row?.isRoot && <IconCheck />}</StyledTableCell>
@@ -215,7 +253,16 @@ const AccountPage = () => {
           </MainCard>
         </Grid>
       </Grid>
+      <ModalRole
+        roles={roles}
+        open={openModalRole}
+        onClose={() => {
+          setOpenModalRole(false);
+        }}
+        afterSave={afterSaveRole}
+      />
       <ModalAccount
+        roles={roles}
         typeModal={typeModal}
         selected={selectedRow}
         afterSave={() => {

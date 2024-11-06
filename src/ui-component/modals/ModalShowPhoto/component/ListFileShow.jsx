@@ -19,7 +19,7 @@ import { getIcon, showNameFile } from 'ui-component/modals/ModalConcept/modal_co
 import 'file-icons-js/css/style.css';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
-import { addDownload, downloadSuccessful } from 'store/downloadSlice';
+import { addDownload, downloadSuccessful, removeDownload } from 'store/downloadSlice';
 import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 function generate(element) {
@@ -60,10 +60,10 @@ const ListFileShow = ({ listFile }) => {
       // link.click();
       // document.body.removeChild(link);
     } else {
+      dispatch(removeDownload({ id: fileId }));
       alert('Download file fail!');
     }
   };
-  console.log('listFile',listFile);
   
   return (
     <>

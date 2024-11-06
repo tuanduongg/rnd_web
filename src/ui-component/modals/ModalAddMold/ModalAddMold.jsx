@@ -19,7 +19,9 @@ import {
   OutlinedInput,
   InputAdornment,
   FormLabel,
-  Typography
+  Typography,
+  Menu,
+  ListItemIcon
 } from '@mui/material';
 
 import CloseIcon from '@mui/icons-material/Close';
@@ -29,7 +31,7 @@ import { useState } from 'react';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import { useForm, Controller } from 'react-hook-form';
-import { IconDeviceFloppy, IconSearch } from '@tabler/icons-react';
+import { IconCaretDown, IconDeviceFloppy, IconFileDownload, IconSearch, IconUpload } from '@tabler/icons-react';
 import { IconListSearch } from '@tabler/icons-react';
 import { DatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
@@ -38,6 +40,7 @@ import { useRef } from 'react';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { ShowConfirm } from 'ui-component/ShowDialog';
+import { IconFileArrowLeft } from '@tabler/icons-react';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -64,7 +67,16 @@ const initialCompanyOBJ = {
 
 const currentDate = dayjs();
 export default function ModalAddMold({ open, onClose, categories, onOpenModalSetting, setFormValues, typeModal, selected, afterSave }) {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openMenu = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
   const buttonSubmitRef = useRef();
+  const inputRef = useRef();
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
   const {
     watch,
     handleSubmit,
@@ -93,6 +105,7 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
       receivingCompleted: null,
       wearingPlan: null,
       tryNo: '',
+      developDate: null,
       historyEdit: ''
     }
   });
@@ -114,6 +127,7 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
         massCompany,
         modificationCompany,
         wearingPlan,
+        developDate,
         model: {
           modelID,
           projectName,
@@ -144,6 +158,7 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
       setValue('shipDate', dayjs(shipDate));
       setValue('manufacturer', manufacturer);
       setValue('shipArea', shipArea);
+      setValue('developDate', developDate ? dayjs(developDate) : null);
       setValue('massCompany', massCompany);
     }
   }, [open]);
@@ -151,6 +166,7 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
   useEffect(() => {
     if (setFormValues) {
       const { prop, value } = setFormValues;
+
       if (prop === 'model') {
         const {
           modelID,
@@ -174,7 +190,21 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
       }
     }
   }, [setFormValues]);
-
+  const onDownloadSampleFile = async () => {
+    handleCloseMenu();
+    const response = await restApi.get(RouterApi.outputJigSampleFile, {
+      responseType: 'arraybuffer'
+    });
+    // setLoading(false);
+    if (response?.status === 200) {
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      saveAs(blob, `Sample_file.xlsx`);
+    } else {
+      toast.error('Download file fail!');
+    }
+  };
   const onSaveData = (data) => {
     ShowConfirm({
       title: typeModal === 'EDIT' ? 'Update' : 'Create new',
@@ -197,6 +227,35 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
         }
       }
     });
+  };
+  const handleUploadExcelFile = async (file) => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await restApi.post(RouterApi.outputJigImportExcelFile, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    if (response?.status === 200) {
+      toast.success('Import successful!');
+      handleClose();
+      afterSave();
+    } else {
+      toast.error(res?.data?.message || 'Error while import file!');
+    }
+  };
+  const onChangeInputImportExcel = (event) => {
+    const file = event?.target?.files[0];
+    event.target.value = null;
+    event.target.files = null;
+    if (file?.type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      handleUploadExcelFile(file);
+    } else {
+      toast.error('Please choose a Excel file!');
+    }
   };
   const handleClose = (event, reason) => {
     if (reason && (reason == 'backdropClick' || reason === 'escapeKeyDown')) return;
@@ -226,7 +285,7 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
         <DialogContent>
           <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit((data) => onSaveData(data))}>
             <Stack direction={'row'} spacing={2} justifyContent={'space-between'}>
-              <Stack p={2} sx={{ border: '1px dashed  #aaae' }} width={'100%'} spacing={2}>
+              <Stack p={2} sx={{ border: '1px dashed  #aaae' }} width={'100%'} spacing={3}>
                 <Typography variant="h6" color={'primary'}>
                   발송처 등록(Nơi gửi hàng)
                 </Typography>
@@ -474,9 +533,9 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
                   )}
                 />
               </Stack>
-              <Stack width={'100%'} spacing={2}>
-                <Stack p={2} sx={{ border: '1px dashed  #aaae' }} width={'100%'} spacing={2}>
-                  <Typography variant="h6" color={'primary'}>
+              <Stack width={'100%'} spacing={0}>
+                <Stack p={2} sx={{ border: '1px dashed  #aaae', borderBottom: 0 }} width={'100%'} spacing={3}>
+                  <Typography mt={4} variant="h6" color={'primary'}>
                     구매등록(Mua hàng)
                   </Typography>
                   <Controller
@@ -512,8 +571,37 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
                       //  <TextField fullWidth  size="small" {...field} label="Model" variant="outlined" error={!!errors.model} />
                     )}
                   />
-                  
                 </Stack>
+                <Stack p={2} sx={{ border: '1px dashed  #aaae', borderBottom: 0 }} width={'100%'} spacing={1}>
+                  <Typography variant="h6" color={'primary'}>
+                    개발등록 (RnD)
+                  </Typography>
+                  <Controller
+                    name="developDate"
+                    control={control}
+                    rules={{}}
+                    render={({ field }) => (
+                      <DatePicker
+                        {...field}
+                        // label="개발등록 (RnD)"
+                        value={field.value ? dayjs(field.value) : null}
+                        onChange={(newValue) => {
+                          setValue('developDate', newValue);
+                        }}
+                        format="YYYY/MM/DD"
+                        views={['year', 'month', 'day']}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            size: 'small',
+                            error: !!errors.developDate
+                          }
+                        }}
+                      />
+                    )}
+                  />
+                </Stack>
+
                 <Stack p={2} sx={{ border: '1px dashed  #aaae' }} width={'100%'} spacing={2}>
                   <Typography variant="h6" color={'primary'}>
                     제조기술 등록(Sản xuất)
@@ -661,7 +749,7 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
                       }
                     }}
                     render={({ field }) => (
-                      <FormControl  error={!!errors.tryNo} fullWidth>
+                      <FormControl error={!!errors.tryNo} fullWidth>
                         <InputLabel htmlFor="outlined-adornment-amount">Try No.</InputLabel>
                         <OutlinedInput
                           size="small"
@@ -702,21 +790,62 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button variant="custom" onClick={handleClose}>
-            Close
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<IconDeviceFloppy />}
-            autoFocus
-            onClick={() => {
-              buttonSubmitRef?.current?.click();
-            }}
-          >
-            Save changes
-          </Button>
+          <Stack sx={{ width: '100%' }} direction={'row'} justifyContent={typeModal === 'ADD' ? 'space-between' : 'flex-end'}>
+            {typeModal === 'ADD' && (
+              <Button variant="custom" startIcon={<IconFileArrowLeft />} onClick={handleClick} endIcon={<IconCaretDown />}>
+                Import Excel
+              </Button>
+            )}
+            <Stack direction={'row'} spacing={2}>
+              <Button variant="custom" onClick={handleClose}>
+                Close
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<IconDeviceFloppy />}
+                autoFocus
+                onClick={() => {
+                  buttonSubmitRef?.current?.click();
+                }}
+              >
+                Save changes
+              </Button>
+            </Stack>
+          </Stack>
+          <input ref={inputRef} type="file" hidden accept=".xlsx, .xls" onChange={onChangeInputImportExcel} />
         </DialogActions>
       </BootstrapDialog>
+      <Menu
+        anchorEl={anchorEl}
+        open={openMenu}
+        onClose={handleCloseMenu}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left'
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            handleCloseMenu();
+            inputRef?.current?.click();
+          }}
+        >
+          <ListItemIcon>
+            <IconUpload />
+          </ListItemIcon>
+          Upload file
+        </MenuItem>
+        <MenuItem onClick={onDownloadSampleFile}>
+          <ListItemIcon>
+            <IconFileDownload />
+          </ListItemIcon>
+          Sample file
+        </MenuItem>
+      </Menu>
     </>
   );
 }

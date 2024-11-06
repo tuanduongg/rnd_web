@@ -54,14 +54,16 @@ function isValidUsername(username) {
 }
 
 const initvalidate = { error: false, msg: '' };
-export default function ModalAccount({ open, onClose, afterSave, selected, typeModal }) {
+export default function ModalAccount({ open, onClose, afterSave, selected, typeModal,roles }) {
   const theme = useTheme();
   const [personName, setPersonName] = useState([]);
   const [fullName, setFullName] = useState('');
-  const [roles, setRoles] = useState([]);
+  
   const [userName, setUsername] = useState('');
   const [role, setRole] = useState('');
+  const [department, setDepartment] = useState('');
   const [password, setPassword] = useState('');
+  const [validateDepartment, setValidateDepartment] = useState(initvalidate);
   const [validateFullName, setValidateFullName] = useState(initvalidate);
   const [validateUserName, setValidateUserName] = useState(initvalidate);
   const [validatePassword, setValidatePassword] = useState(initvalidate);
@@ -73,25 +75,20 @@ export default function ModalAccount({ open, onClose, afterSave, selected, typeM
   const handleClose = (event, reason) => {
     if (reason && (reason == 'backdropClick' || reason === 'escapeKeyDown')) return;
     setFullName('');
+    setDepartment('');
     setUsername('');
     setPassword('');
     setIsRoot(false);
     setIsKorean(false);
     setValidateFullName(initvalidate);
     setValidateUserName(initvalidate);
+    setValidateDepartment(initvalidate);
     setValidatePassword(initvalidate);
     setValidateRole(initvalidate);
     setRole('');
     onClose();
   };
-  const getAllRole = async () => {
-    setLoading(true);
-    const response = await restApi.get(RouterApi.roleAll);
-    setLoading(false);
-    if (response?.status === 200) {
-      setRoles(response?.data);
-    }
-  };
+  
   const findUser = async () => {
     setLoading(true);
     const response = await restApi.post(RouterApi.findUser, { userId: selected?.userId });
@@ -99,15 +96,14 @@ export default function ModalAccount({ open, onClose, afterSave, selected, typeM
     if (response?.status === 200) {
       const data = response?.data;
       setFullName(data?.fullName);
+      setDepartment(data?.department);
       setUsername(data?.userName);
       setIsKorean(data?.isKorean);
       setIsRoot(data?.isRoot);
       setRole(data?.role?.roleId);
     }
   };
-  useEffect(() => {
-    getAllRole();
-  }, []);
+
   useEffect(() => {
     if (open && typeModal === 'EDIT' && selected) {
       findUser();
@@ -122,6 +118,12 @@ export default function ModalAccount({ open, onClose, afterSave, selected, typeM
           setValidateFullName(initvalidate);
         }
         setFullName(value);
+        break;
+      case 'department':
+        if (validateDepartment.error) {
+          setValidateDepartment(initvalidate);
+        }
+        setDepartment(value);
         break;
       case 'userName':
         if (validateUserName.error) {
@@ -179,6 +181,7 @@ export default function ModalAccount({ open, onClose, afterSave, selected, typeM
         onOK: async () => {
           const res = await restApi.post(urlAPI, {
             userId: selected?.userId,
+            department,
             fullName,
             userName,
             role,
@@ -255,6 +258,20 @@ export default function ModalAccount({ open, onClose, afterSave, selected, typeM
                   value={password}
                   name="password"
                   label="Password"
+                  size="small"
+                  variant="outlined"
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth size="small">
+                <TextField
+                  helperText={validateDepartment.msg}
+                  error={validateDepartment.error}
+                  onChange={onChangeInput}
+                  name="department"
+                  value={department}
+                  label="Department"
                   size="small"
                   variant="outlined"
                 />

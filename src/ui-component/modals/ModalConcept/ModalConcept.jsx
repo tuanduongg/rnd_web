@@ -619,7 +619,7 @@ export default function ModalConcept({ open, onClose, categories, afterSave, typ
                                             {formatBytes(file?.size ? file?.size : file?.fileSize ? file?.fileSize : '')}
                                           </span>
                                           <span>
-                                            <Tooltip arrow title="Upload at">
+                                            <Tooltip arrow title= {typeModal === 'ADD' ? 'Date modified' :"Upload at"}>
                                               {file?.lastModifiedDate
                                                 ? formatDateFromDB(file?.lastModifiedDate)
                                                 : formatDateFromDB(file?.uploadAt)}

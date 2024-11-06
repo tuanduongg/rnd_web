@@ -25,7 +25,7 @@ import { RouterApi } from 'utils/router-api';
 import 'file-icons-js/css/style.css';
 import './listfile.css';
 import { useDispatch } from 'react-redux';
-import { updateDownloadProgress, addDownload, toggleMenu, downloadSuccessful } from 'store/downloadSlice';
+import { updateDownloadProgress, addDownload, removeDownload, downloadSuccessful } from 'store/downloadSlice';
 import toast from 'react-hot-toast';
 
 const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) => {
@@ -91,18 +91,17 @@ const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) 
       RouterApi.conceptDownload,
       { fileId: fileId },
       {
-        responseType: 'blob',// important for handling binary data,
+        responseType: 'blob' // important for handling binary data,
       }
     );
     const listLoading = loadingID.filter((item) => item?.fileId !== fileId);
     setLoadingID(listLoading);
     setLoading(false);
     if (response?.status === 200) {
-
       const blob = response.data;
       const url = window.URL.createObjectURL(new Blob([blob]));
       dispatch(downloadSuccessful({ id: fileId, progress: false, link: url }));
-      toast.success('Downloaded successfully!')
+      toast.success('Downloaded successfully!');
       // const link = document.createElement('a');
       // link.href = url;
       // link.setAttribute('download', `${fileName}${fileExtenstion ? '.' + fileExtenstion : ''}`);
@@ -110,6 +109,8 @@ const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) 
       // link.click();
       // document.body.removeChild(link);
     } else {
+      dispatch(removeDownload({ id: fileId }));
+
       alert('Download file fail!');
     }
   };

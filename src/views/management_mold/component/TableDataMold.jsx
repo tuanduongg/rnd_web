@@ -238,7 +238,6 @@ const TableDataMold = ({ categories, setLoading, role }) => {
           aria-haspopup="true"
           aria-expanded={openMenuStatus ? 'true' : undefined}
           onClick={handleOpenMenuStatus}
-
           variant={'filled'}
           label={
             <>
@@ -671,16 +670,16 @@ const TableDataMold = ({ categories, setLoading, role }) => {
           <Grid item xs={8}>
             {arrChipFilter?.length > 0
               ? arrChipFilter.map((chip, index) => (
-                <Chip
-                  key={index}
-                  sx={{ marginRight: '5px', marginTop: '5px' }}
-                  variant="outlined"
-                  label={chip?.label}
-                  onDelete={() => {
-                    onDeleteChip(chip?.onDelete);
-                  }}
-                />
-              ))
+                  <Chip
+                    key={index}
+                    sx={{ marginRight: '5px', marginTop: '5px' }}
+                    variant="outlined"
+                    label={chip?.label}
+                    onDelete={() => {
+                      onDeleteChip(chip?.onDelete);
+                    }}
+                  />
+                ))
               : null}
           </Grid>
           <Grid item sx={{ textAlign: 'right' }} xs={4}>
@@ -789,7 +788,12 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                               e.stopPropagation();
                               onSelectedItem(e, item);
                             }}
-                            sx={{ alignContent: 'center', flex: 1, maxWidth: maxWidthCell[`#`] || 100, minWidth: -1.2 + maxWidthCell[`#`] || 100 }}
+                            sx={{
+                              alignContent: 'center',
+                              flex: 1,
+                              maxWidth: maxWidthCell[`#`] || 100,
+                              minWidth: -1.2 + maxWidthCell[`#`] || 100
+                            }}
                             align="center"
                           >
                             {index + 1}
@@ -810,7 +814,7 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                             className={!hightLightIndex?.includes(index) ? 'no-hight-linght' : ''}
                             align="center"
                           >
-                            {item?.model.category?.categoryName}
+                            {item?.model?.category?.categoryName}
                           </StyledTableCell>
                         )}
                         {currentShowCol?.includes('project') && (
@@ -837,7 +841,12 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                               e.stopPropagation();
                               onSelectedItem(e, item);
                             }}
-                            sx={{ alignContent: 'center', flex: 1, maxWidth: maxWidthCell[`type`], minWidth: -1 + maxWidthCell[`type`] || 100 }}
+                            sx={{
+                              alignContent: 'center',
+                              flex: 1,
+                              maxWidth: maxWidthCell[`type`],
+                              minWidth: -1 + maxWidthCell[`type`] || 100
+                            }}
                             className={!hightLightIndex?.includes(index) ? 'no-hight-linght' : ''}
                             align="center"
                           >
@@ -859,10 +868,12 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                             className={!hightLightIndex?.includes(index) ? 'no-hight-linght' : ''}
                             align="center"
                           >
-                            {item?.model?.model}
+                            <Tooltip placement="right" title={item?.model?.description}>
+                              {item?.model?.model}
+                            </Tooltip>
                           </StyledTableCell>
                         )}
-                        {currentShowCol?.includes('description') && (
+                        {/* {currentShowCol?.includes('description') && (
                           <StyledTableCell
                             onClick={(e) => {
                               e.stopPropagation();
@@ -876,9 +887,15 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                             }}
                             align="center"
                           >
-                            {item?.model?.description ? limitCharacter(item?.model?.description,24,true) : ''}
+                            {item?.model?.description ? (
+                              <Tooltip placement="right" title={item?.model?.description}>
+                                {limitCharacter(item?.model?.description, 18, true)}
+                              </Tooltip>
+                            ) : (
+                              ''
+                            )}
                           </StyledTableCell>
-                        )}
+                        )} */}
                         {currentShowCol?.includes('moldNo') && (
                           <StyledTableCell
                             onClick={(e) => {
@@ -910,7 +927,9 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                             }}
                             align="center"
                           >
-                            <Tooltip title={item?.manufacturer?.companyName}>{item?.manufacturer?.companyCode}</Tooltip>
+                            <Tooltip placement="right" title={item?.manufacturer?.companyName}>
+                              {item?.manufacturer?.companyCode}
+                            </Tooltip>
                           </StyledTableCell>
                         )}
                         {currentShowCol?.includes('shipArea') && (
@@ -927,7 +946,9 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                             }}
                             align="center"
                           >
-                            <Tooltip title={item?.shipArea?.companyName}>{item?.shipArea?.companyCode}</Tooltip>
+                            <Tooltip placement="right" title={item?.shipArea?.companyName}>
+                              {item?.shipArea?.companyCode}
+                            </Tooltip>
                           </StyledTableCell>
                         )}
                         {currentShowCol?.includes('shipDate') && (
@@ -962,10 +983,29 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                             align="center"
                           >
                             {item?.massCompany ? (
-                              <Tooltip title={item?.massCompany?.companyName}>{item?.massCompany?.companyCode}</Tooltip>
+                              <Tooltip placement="right" title={item?.massCompany?.companyName}>
+                                {item?.massCompany?.companyCode}
+                              </Tooltip>
                             ) : (
                               ''
                             )}
+                          </StyledTableCell>
+                        )}
+                        {currentShowCol?.includes('developDate') && (
+                          <StyledTableCell
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectedItem(e, item);
+                            }}
+                            sx={{
+                              alignContent: 'center',
+                              flex: 1,
+                              maxWidth: maxWidthCell[`developDate`],
+                              minWidth: -1 + maxWidthCell[`developDate`] || 100
+                            }}
+                            align="center"
+                          >
+                            {formatDateFromDB(item?.developDate, false)}
                           </StyledTableCell>
                         )}
                         {currentShowCol?.includes('shipMassCompany') && (
@@ -1000,7 +1040,7 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                             align="center"
                           >
                             {item?.historyTryNo[0] ? (
-                              <Tooltip title={item?.historyTryNo[0]?.modificationCompany?.companyName}>
+                              <Tooltip placement="right" title={item?.historyTryNo[0]?.modificationCompany?.companyName}>
                                 {item?.historyTryNo[0]?.modificationCompany?.companyCode}
                               </Tooltip>
                             ) : (
@@ -1091,7 +1131,13 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                             }}
                             align="center"
                           >
-                            {item?.historyTryNo[0] ? limitCharacter(item?.historyTryNo[0]?.remark, 18, true) : ''}
+                            {item?.historyTryNo[0] ? (
+                              <Tooltip placement="right" title={item?.historyTryNo[0]?.remark}>
+                                {limitCharacter(item?.historyTryNo[0]?.remark, 18, true)}
+                              </Tooltip>
+                            ) : (
+                              ''
+                            )}
                           </StyledTableCell>
                         )}
                         {currentShowCol?.includes('productionStatus') && (
