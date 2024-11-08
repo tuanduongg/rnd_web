@@ -23,10 +23,10 @@ import {
   IconButton,
   Chip
 } from '@mui/material';
-import { limitCharacter, LIST_COL_MOLD, LIST_STATUS } from '../management_mold.service';
+import { LIST_COL_MOLD, LIST_STATUS } from '../management_mold.service';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import IMAGE_EMPTYDATA from 'assets/images/backgrounds/empty-box.png';
-import { cssScrollbar, formatDateFromDB, getDataUserFromLocal } from 'utils/helper';
+import { cssScrollbar, formatDateFromDB, getDataUserFromLocal, limitCharacter } from 'utils/helper';
 import config from 'config';
 import { Stack } from '@mui/system';
 import {
@@ -64,11 +64,11 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.common.white,
-    padding: '12px'
+    padding: '7px'
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
-    padding: '10px'
+    padding: '7px'
   }
 }));
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -670,16 +670,16 @@ const TableDataMold = ({ categories, setLoading, role }) => {
           <Grid item xs={8}>
             {arrChipFilter?.length > 0
               ? arrChipFilter.map((chip, index) => (
-                  <Chip
-                    key={index}
-                    sx={{ marginRight: '5px', marginTop: '5px' }}
-                    variant="outlined"
-                    label={chip?.label}
-                    onDelete={() => {
-                      onDeleteChip(chip?.onDelete);
-                    }}
-                  />
-                ))
+                <Chip
+                  key={index}
+                  sx={{ marginRight: '5px', marginTop: '5px' }}
+                  variant="outlined"
+                  label={chip?.label}
+                  onDelete={() => {
+                    onDeleteChip(chip?.onDelete);
+                  }}
+                />
+              ))
               : null}
           </Grid>
           <Grid item sx={{ textAlign: 'right' }} xs={4}>
@@ -1132,8 +1132,13 @@ const TableDataMold = ({ categories, setLoading, role }) => {
                             align="center"
                           >
                             {item?.historyTryNo[0] ? (
-                              <Tooltip placement="right" title={item?.historyTryNo[0]?.remark}>
-                                {limitCharacter(item?.historyTryNo[0]?.remark, 18, true)}
+                              <Tooltip placement="left" title={item?.historyTryNo[0]?.remark}>
+                                {
+                                  <span className='limit-text'>
+                                    {item?.historyTryNo[0]?.remark}
+                                    {/* limitCharacter(item?.historyTryNo[0]?.remark, 18, true) */}
+                                  </span>
+                                }
                               </Tooltip>
                             ) : (
                               ''
@@ -1368,8 +1373,9 @@ const TableDataMold = ({ categories, setLoading, role }) => {
           })}
         </Box>
       </Menu>
-      <ModalDetailMold setLoading={setLoading} selected={selectedRow} open={openModalDetail} onClose={onCloseModalDetail} />
+      <ModalDetailMold role={role} setLoading={setLoading} selected={selectedRow} open={openModalDetail} onClose={onCloseModalDetail} />
       <ModalAddMold
+      role={role}
         afterSave={afterSaveDataModalAdd}
         typeModal={typeModalAdd}
         selected={selectedRow}

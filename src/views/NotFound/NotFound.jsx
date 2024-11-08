@@ -9,7 +9,7 @@ export default function NotFound() {
     const navigate = useNavigate();
 
     const onClickBackToHome = () => {
-        navigate(ConfigRouter.aprrovalPage);
+        navigate(ConfigRouter.aprrovalPage.url);
     }
     return (
         <Box

@@ -61,11 +61,11 @@ const AuthLogin = ({ ...others }) => {
       setCookie('AUTH', token, 1);
       dispatch({ type: SET_DATA_USER, dataUser: user });
       if (user?.isKorean) {
-        location.href = ConfigRouter.managementMold;
+        location.href = ConfigRouter.managementMold.url;
       } else {
-        location.href = ConfigRouter.aprrovalPage;
+        location.href = ConfigRouter.aprrovalPage.url;
       }
-      // navigate(ConfigRouter.homePage);
+      // navigate(ConfigRouter.homePage.url);
     } else {
       setSnackBar({ open: true, message: response?.data?.message || 'Check your Username or Password!' });
     }

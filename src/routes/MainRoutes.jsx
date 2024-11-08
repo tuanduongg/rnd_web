@@ -22,30 +22,30 @@ const MainRoutes = {
     children: [
         {
             path: '', // Handles the empty path
-            element: <Navigate to={ConfigRouter.aprrovalPage} replace /> // Redirect to /app
+            element: <Navigate to={ConfigRouter.aprrovalPage.url} replace /> // Redirect to /app
         },
         {
             path: '/', // Handles the root path
-            element: <Navigate to={ConfigRouter.aprrovalPage} replace /> // Redirect to /app
+            element: <Navigate to={ConfigRouter.aprrovalPage.url} replace /> // Redirect to /app
         },
         {
-            path: ConfigRouter.aprrovalPage,
+            path: ConfigRouter.aprrovalPage.url,
             element: <HomePage />
         },
         {
-            path: ConfigRouter.accPage,
+            path: ConfigRouter.accPage.url,
             element: <AccountPage />
         },
         {
-            path: ConfigRouter.managementMold,
+            path: ConfigRouter.managementMold.url,
             element: <ManagementMold />
         },
         // {
-        //     path: ConfigRouter.settingMold,
+        //     path: ConfigRouter.settingMold.url,
         //     element: <SettingMold />
         // },
         {
-            path: ConfigRouter.qc,
+            path: ConfigRouter.qc.url,
             element: <CounterTacticsPage />
         }
     ]

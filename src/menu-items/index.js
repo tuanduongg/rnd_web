@@ -15,10 +15,10 @@ export const menuItems = {
       type: 'group',
       children: [
         {
-          id: ConfigRouter.qc,
+          id: ConfigRouter.qc.url,
           title: '대책서',
           type: 'item',
-          url: ConfigRouter.qc,
+          url: ConfigRouter.qc.url,
           icon: IconLicense,
           breadcrumbs: false
         }

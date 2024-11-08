@@ -31,22 +31,3 @@ export const LIST_STATUS = [
   { id: 'STOP', name: '사용중지(Ngừng sử dụng)', value: 'STOP' }
 ];
 
-export const limitCharacter = (text, count, insertDots) => {
-  if (text) {
-    let result = '';
-    for (let i = 0; i < text.length; i++) {
-      if (i <= count) {
-        let char = text.charAt(i);        
-        result += char;
-      }
-    }
-    console.log("result?.length",result?.length);
-    
-    if(result?.length === count+1){
-      return result + (insertDots ? '...' : '');
-    }
-    return result;
-    // return text.slice(0, count) + (text.length > count && insertDots ? '...' : '');
-  }
-  return '';
-};

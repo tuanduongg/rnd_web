@@ -13,10 +13,10 @@ const home = {
     type: 'group',
     children: [
         {
-            id: ConfigRouter.aprrovalPage,
+            id: ConfigRouter.aprrovalPage.url,
             title: 'Approval',
             type: 'item',
-            url: ConfigRouter.aprrovalPage,
+            url: ConfigRouter.aprrovalPage.url,
             icon: icons.IconChecklist,
             breadcrumbs: false
         },

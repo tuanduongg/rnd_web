@@ -76,7 +76,7 @@ const MainLayout = () => {
   useEffect(() => {
     const token = getCookie('AUTH');
     if (!token) {
-      navigate(ConfigRouter.login);
+      navigate(ConfigRouter.login.url);
     }
   }, []);
 

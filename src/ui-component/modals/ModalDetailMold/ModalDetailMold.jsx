@@ -96,7 +96,7 @@ const getChip = (text, color) => {
 export const DETAIL_TAB = 'DETAIL_TAB';
 export const LIST_TAB = 'LIST_TAB';
 
-export default function ModalDetailMold({ open, onClose, selected, setLoading }) {
+export default function ModalDetailMold({ role, open, onClose, selected, setLoading }) {
   const [openModalHis, setOpenModalHis] = useState(false);
   const [valueTab, setValueTab] = useState(DETAIL_TAB);
   const [dataHistoryTryNo, setDataHistoryTryNo] = useState([]);
@@ -142,7 +142,7 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
           outputJigID: selected?.outputJigID
         };
         break;
-        case LIST_TAB:
+      case LIST_TAB:
         url = RouterApi.outputJigExportExcelDetailList;
         break;
 
@@ -219,9 +219,9 @@ export default function ModalDetailMold({ open, onClose, selected, setLoading })
         <DialogActions>
           <Stack width={'100%'} direction={'row'} justifyContent={'space-between'}>
             <Stack direction={'row'} spacing={2}>
-              <Button onClick={onClickExportExcelReport} startIcon={<IconFileSpreadsheet />} size="small" variant="outlined">
+              {role?.export && (<Button onClick={onClickExportExcelReport} startIcon={<IconFileSpreadsheet />} size="small" variant="outlined">
                 Excel
-              </Button>
+              </Button>)}
               <Button
                 variant="outlined"
                 startIcon={<IconHistory />}

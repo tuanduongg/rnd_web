@@ -13,10 +13,10 @@ const account = {
     type: 'group',
     children: [
         {
-            id: ConfigRouter.accPage,
+            id: ConfigRouter.accPage.url,
             title: 'Account',
             type: 'item',
-            url: ConfigRouter.accPage,
+            url: ConfigRouter.accPage.url,
             icon: icons.IconUser,
             breadcrumbs: false
         }

@@ -31,11 +31,11 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.common.white,
-    padding: '12px'
+    padding: '7px'
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
-    padding: '10px'
+    padding: '7px'
   }
 }));
 const StyledTableRow = styled(TableRow)(({ theme }) => ({

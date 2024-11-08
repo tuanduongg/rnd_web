@@ -9,6 +9,7 @@ import { styled } from '@mui/material/styles';
 import toast from 'react-hot-toast';
 import Loading from 'ui-component/Loading';
 import TableDataMold from './component/TableDataMold';
+import UnauthorizedPage from 'ui-component/UnauthorizedPage';
 
 // ==============================|| SAMPLE PAGE ||==============================
 const ManagementMold = () => {
@@ -39,6 +40,10 @@ const ManagementMold = () => {
     checkRole();
     getCategories();
   }, []);
+
+  if(!role?.read) {
+    return <UnauthorizedPage/>
+  }
   return (
     <>
       <Grid container spacing={1}>

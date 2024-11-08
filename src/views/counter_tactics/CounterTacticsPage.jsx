@@ -8,6 +8,7 @@ import { RouterApi } from 'utils/router-api';
 import Loading from 'ui-component/Loading';
 import { getPercentage } from './counter_tactis.service';
 import { END_OF_CURRENT_MONTH, START_OF_CURRENT_MONTH } from 'utils/helper';
+import UnauthorizedPage from 'ui-component/UnauthorizedPage';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 
@@ -133,6 +134,9 @@ const CounterTacticsPage = () => {
     checkRole();
     getListProcess();
   }, []);
+  if(!role?.read) {
+    return <UnauthorizedPage/>
+  }
   return (
     <>
       <Grid container spacing={1}>

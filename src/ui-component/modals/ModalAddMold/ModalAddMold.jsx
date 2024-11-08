@@ -66,7 +66,7 @@ const initialCompanyOBJ = {
 };
 
 const currentDate = dayjs();
-export default function ModalAddMold({ open, onClose, categories, onOpenModalSetting, setFormValues, typeModal, selected, afterSave }) {
+export default function ModalAddMold({ open,role, onClose, categories, onOpenModalSetting, setFormValues, typeModal, selected, afterSave }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -243,9 +243,9 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
       toast.success('Import successful!');
       handleClose();
       afterSave();
-    } else {
-      toast.error(res?.data?.message || 'Error while import file!');
+      return;
     }
+    toast.error(response?.data?.message || 'Error while import file!');
   };
   const onChangeInputImportExcel = (event) => {
     const file = event?.target?.files[0];
@@ -790,8 +790,8 @@ export default function ModalAddMold({ open, onClose, categories, onOpenModalSet
           </Box>
         </DialogContent>
         <DialogActions>
-          <Stack sx={{ width: '100%' }} direction={'row'} justifyContent={typeModal === 'ADD' ? 'space-between' : 'flex-end'}>
-            {typeModal === 'ADD' && (
+          <Stack sx={{ width: '100%' }} direction={'row'} justifyContent={(typeModal === 'ADD' && role?.import) ? 'space-between' : 'flex-end'}>
+            {typeModal === 'ADD' && role?.import && (
               <Button variant="custom" startIcon={<IconFileArrowLeft />} onClick={handleClick} endIcon={<IconCaretDown />}>
                 Import Excel
               </Button>

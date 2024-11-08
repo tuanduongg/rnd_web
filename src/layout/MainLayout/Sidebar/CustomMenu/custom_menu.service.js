@@ -65,14 +65,14 @@ export const setTitleTab = (id) => {
 
 export const menu = [
   {
-    id: ConfigRouter.aprrovalPage,
+    id: ConfigRouter.aprrovalPage.url,
     icon: icons.FactCheckIcon,
     title: 'Approval Status',
     items: []
   },
   {
     icon: icons.ReceiptIcon,
-    id: ConfigRouter.qc,
+    id: ConfigRouter.qc.url,
     title: '대책서(QPN)',
     items: [
 
@@ -80,17 +80,17 @@ export const menu = [
   },
   {
     icon: icons.SpaceDashboardIcon,
-    id: ConfigRouter.managementMold,
+    id: ConfigRouter.managementMold.url,
     title: 'Mold',
     items: [
       // {
-      //   id: ConfigRouter.managementMold,
+      //   id: ConfigRouter.managementMold.url,
       //   title: 'List',
       //   items: [
       //   ]
       // },
       // {
-      //   id: ConfigRouter.settingMold,
+      //   id: ConfigRouter.settingMold.url,
       //   title: 'Settings',
       //   items: [
       //   ]
@@ -98,7 +98,7 @@ export const menu = [
     ]
   },
   {
-    id: ConfigRouter.accPage,
+    id: ConfigRouter.accPage.url,
     icon: icons.ManageAccountsIcon,
     title: 'Account & Role'
   }

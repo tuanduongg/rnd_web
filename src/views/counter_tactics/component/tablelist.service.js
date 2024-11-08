@@ -21,70 +21,11 @@ export const LIST_COL = [
   // { canHide: false, align: 'center', name: '첨부자료<br/>(File)', id: 'file', width: 100 },
   { canHide: false, align: 'center', name: '회신 일자<br/>(Reply Date)', id: 'replyDate', width: 150 },
   { canHide: true, align: 'center', name: '등록자<br/>(Người đăng ký)', id: 'author', width: 150 },
-  { canHide: true, align: 'center', name: '조치사항<br/>(Hành động đã thực hiện)', id: 'remark', width: 200 }
+  { canHide: true, align: 'center', name: '조치사항<br/>(Đã thực hiện)', id: 'remark', width: 200 }
 ];
 
 export const ITEM_HEIGHT = 48;
-export const itemData = [
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/a.PNG',
-    title: 'Breakfast',
-    rows: 2,
-    cols: 2
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/b.PNG',
-    title: 'Burger'
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/c.PNG',
-    title: 'Camera'
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/a.PNG',
-    title: 'Coffee',
-    cols: 2
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/a.PNG',
-    title: 'Hats',
-    cols: 2
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/a.PNG',
-    title: 'Honey',
-    author: '@arwinneil',
-    rows: 2,
-    cols: 2
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/a.PNG',
-    title: 'Basketball'
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/a.PNG',
-    title: 'Fern'
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/a.PNG',
-    title: 'Mushrooms',
-    rows: 2,
-    cols: 2
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/a.PNG',
-    title: 'Tomato basil'
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/a.PNG',
-    title: 'Sea star'
-  },
-  {
-    img: 'http://10.0.4.20:5005/uploads/qc/a.PNG',
-    title: 'Bike',
-    cols: 2
-  }
-];
+
 export function srcset(image, size, rows = 1, cols = 1) {
   return {
     src: `${image}?w=${size * cols}&h=${size * rows}&fit=crop&auto=format`,

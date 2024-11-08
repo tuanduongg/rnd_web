@@ -16,14 +16,14 @@ export default function CustomMenu() {
   const { pathname } = useLocation();
   // active menu item on page load
   useEffect(() => {
-    const find = Object.values(ConfigRouter).find((item) => item === pathname);
+    const find = Object.values(ConfigRouter).find((item) => item.url === pathname);
     if (find) {
-      setTitleTab(find)
+      setTitleTab(find?.url)
 
-      dispatch({ type: MENU_OPEN, id: find });
-      const finds = findParentIds(menu, find);
+      dispatch({ type: MENU_OPEN, id: find?.url });
+      const finds = findParentIds(menu, find?.url);
       if (finds?.length > 0) {
-        dispatch({ type: MENU_OPEN_ARR, id: [...finds, find] });
+        dispatch({ type: MENU_OPEN_ARR, id: [...finds, find?.url] });
       }
     }
     // eslint-disable-next-line
@@ -49,7 +49,7 @@ const SingleLevel = ({ item, onClick }) => {
   const itemIcon = item?.icon ? <Icon stroke={1.5} size="1.3rem" /> : <LinkIcon />;
   const selected = customization.isOpen.findIndex((id) => id === item?.id) > -1;
   return (
-    <ListItemButton onClick={onClick} sx={{ borderRadius: `${customization.borderRadius}px` }} selected={selected}>
+    <ListItemButton onClick={onClick} sx={{ borderRadius: `${customization.borderRadius}px`, marginBottom: '5px' }} selected={selected}>
       <ListItemIcon>{itemIcon}</ListItemIcon>
       <ListItemText sx={{ '.MuiListItemText-primary': { color: selected ? '#005595' : '', fontWeight: selected ? '600' : '' } }} primary={item.title} />
     </ListItemButton>
@@ -75,7 +75,8 @@ const MultiLevel = ({ item, onClick }) => {
   return (
     <React.Fragment>
       <ListItemButton
-        sx={{ borderRadius: `${customization.borderRadius}px` }}
+
+        sx={{ borderRadius: `${customization.borderRadius}px`, marginBottom: '5px' }}
         // selected={customization.isOpen.findIndex((id) => id === item.id) > -1}
         onClick={handleClick}
       >

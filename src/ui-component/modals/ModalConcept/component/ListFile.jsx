@@ -110,8 +110,7 @@ const ListFile = ({ checked, setChecked, listFileProp, typeModal, setLoading }) 
       // document.body.removeChild(link);
     } else {
       dispatch(removeDownload({ id: fileId }));
-
-      alert('Download file fail!');
+      toast.error('Fail while download file!');
     }
   };
   function saveAs(uri, filename) {

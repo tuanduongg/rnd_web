@@ -51,6 +51,7 @@ import { padding } from '@mui/system';
 import { cssScrollbar } from 'utils/helper';
 import { IconLockCog } from '@tabler/icons-react';
 import ModalRole from 'ui-component/modals/ModalRole/ModalRole';
+import UnauthorizedPage from 'ui-component/UnauthorizedPage';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 
@@ -59,6 +60,7 @@ const AccountPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [openModal, setOpenModal] = useState(false);
+  const [isRoot, setIsRoot] = useState(false);
   const [users, setUsers] = useState([]);
   const [listUser, setListUser] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -71,6 +73,7 @@ const AccountPage = () => {
   const getUsers = async () => {
     const res = await restApi.post(RouterApi.userAll, { search: '' });
     if (res?.status === 200) {
+      setIsRoot(true)
       setListUser(res?.data);
     }
   };
@@ -81,6 +84,7 @@ const AccountPage = () => {
   const getAllRole = async () => {
     const response = await restApi.get(RouterApi.roleAll);
     if (response?.status === 200) {
+      setIsRoot(true);
       setRoles(response?.data);
     }
   };
@@ -99,7 +103,7 @@ const AccountPage = () => {
     },
     [`&.${tableCellClasses.body}`]: {
       fontSize: 14,
-      padding: '10px'
+      padding: '7px'
     }
   }));
 
@@ -125,6 +129,9 @@ const AccountPage = () => {
       border: 0
     }
   }));
+  if(!isRoot) {
+    return <UnauthorizedPage/>
+  }
   return (
     <>
       <Grid container spacing={1}>

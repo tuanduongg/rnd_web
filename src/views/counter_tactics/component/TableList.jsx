@@ -20,16 +20,17 @@ import {
   MenuItem,
   Menu,
   Box,
-  Chip
+  Chip,
+  Tooltip
 } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 import { IconPlus, IconSearch, IconEdit, IconTrash, IconEye, IconFileSpreadsheet, IconAdjustmentsAlt, IconColumns } from '@tabler/icons-react';
 import { useState } from 'react';
-import { getShift, itemData, LIST_COL } from './tablelist.service';
+import { getShift, LIST_COL } from './tablelist.service';
 import ModalShowPhoto from 'ui-component/modals/ModalShowPhoto/ModalShowPhoto';
 import IMAGE_EMPTYDATA from 'assets/images/backgrounds/empty-box.png';
 import config from 'config';
-import { cssScrollbar, END_OF_CURRENT_MONTH, formatDateFromDB, formatNumberWithCommas, START_OF_CURRENT_MONTH } from 'utils/helper';
+import { cssScrollbar, END_OF_CURRENT_MONTH, formatDateFromDB, formatNumberWithCommas, limitCharacter, START_OF_CURRENT_MONTH } from 'utils/helper';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
 import toast from 'react-hot-toast';
@@ -42,7 +43,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.common.white,
-    padding: '12px'
+    padding: '7px'
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
@@ -501,7 +502,11 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
                     {currentShowCol?.includes('code') && <StyledTableCell align="center">{item?.code}</StyledTableCell>}
                     {currentShowCol?.includes('item') && <StyledTableCell sx={{ wordBreak: 'break-all' }}>{item?.item}</StyledTableCell>}
                     {currentShowCol.includes('PL_name') && <StyledTableCell align="center">{item?.plName}</StyledTableCell>}
-                    {currentShowCol?.includes('NG_name') && <StyledTableCell align="center">{item?.nameNG}</StyledTableCell>}
+                    {currentShowCol?.includes('NG_name') && <StyledTableCell align="center">{
+                      <span className='limit-text'>
+                        {item?.nameNG}
+                      </span>
+                    }</StyledTableCell>}
                     {currentShowCol?.includes('percentage') && (
                       <StyledTableCell align="center">{item?.percentageNG ? item?.percentageNG + '%' : ''}</StyledTableCell>
                     )}
@@ -529,9 +534,27 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
                       ))}
                     </ImageList>
                     </StyledTableCell> */}
-                    {currentShowCol?.includes('tech_NG') && <StyledTableCell align="center">{item?.techNG}</StyledTableCell>}
+                    {currentShowCol?.includes('tech_NG') && <StyledTableCell align="center">
+                      <Tooltip title={item?.techNG}>
+                        {
+
+                          <span className='limit-text'>
+                            {item?.techNG}
+                          </span>
+                        }
+                      </Tooltip>
+                    </StyledTableCell>}
                     {/* request date */}
-                    {currentShowCol?.includes('tempSolution') && <StyledTableCell align="center">{item?.tempSolution}</StyledTableCell>}
+                    {currentShowCol?.includes('tempSolution') && <StyledTableCell align="center">
+                      <Tooltip title={item?.tempSolution}>
+                        {
+
+                          <span className='limit-text'>
+                            {item?.tempSolution}
+                          </span>
+                        }
+                      </Tooltip>
+                    </StyledTableCell>}
                     {currentShowCol?.includes('SW_Stock') && (
                       <StyledTableCell align="center">{item?.seowonStock ? formatNumberWithCommas(item?.seowonStock) : ''}</StyledTableCell>
                     )}
@@ -563,7 +586,16 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
                       </StyledTableCell>
                     )}
                     {currentShowCol?.includes('author') && <StyledTableCell align="center">{item?.author}</StyledTableCell>}
-                    {currentShowCol?.includes('remark') && <StyledTableCell align="center">{item?.remark}</StyledTableCell>}
+                    {currentShowCol?.includes('remark') && <StyledTableCell align="center">
+                      <Tooltip title={item?.remark}>
+                        {
+                          <span className='limit-text'>
+
+                            {item?.remark}
+                          </span>
+                        }
+                      </Tooltip>
+                    </StyledTableCell>}
                   </StyledTableRow>
                 ))
               )}
@@ -668,7 +700,6 @@ const TableList = ({ setLoading, listProcess, statistic, role }) => {
         typeModal={typeModalPhoto}
         selected={selectedRow}
         valueTabProp={valueTabPhoto}
-        images={itemData}
         open={openModalPhoto}
         onClose={() => {
           setTypeModalPhoto('');

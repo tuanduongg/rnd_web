@@ -18,7 +18,10 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Tooltip
+  Box,
+  Tooltip,
+  Tabs,
+  Tab
 } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import { useEffect, useRef, useState } from 'react';
@@ -46,13 +49,16 @@ import { IconSearch } from '@tabler/icons-react';
 import { IconAdjustmentsAlt } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
 import AdvanceSearch from './component/AdvanceSearch';
+import { IconLock } from '@tabler/icons-react';
+import UnauthorizedPage from 'ui-component/UnauthorizedPage';
+import { IconList } from '@tabler/icons-react';
 
 // ==============================|| SAMPLE PAGE ||============================== //
 const initFilter = {
   personName: [],
   categoryFilter: [],
-  startDate: START_OF_CURRENT_MONTH,
-  endDate: END_OF_CURRENT_MONTH,
+  startDate: null,
+  endDate: null,
   codeFilter: '',
   plNameFilter: '',
   modelFilter: '',
@@ -63,11 +69,11 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.common.white,
-    padding: '12px'
+    padding: '7px'
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
-    padding: '10px'
+    padding: '7px'
   }
 }));
 
@@ -83,7 +89,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 const HomePage = () => {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const [anchorEl, setAnchorEl] = useState(null);
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [arrChipFilter, setArrChipFilter] = useState([]);
@@ -104,6 +110,12 @@ const HomePage = () => {
   const [users, setUsers] = useState([]);
   const [openModalConcept, setOpenModalConcept] = useState(false);
   const inputSearchRef = useRef('');
+  const [valueTab, setValueTab] = useState('ALL');
+
+  const handleChangeTab = (newValue) => {
+    setSelectedRow(null)
+    setValueTab(newValue);
+  };
 
   const checkRole = async () => {
     setLoading(true);
@@ -112,19 +124,17 @@ const HomePage = () => {
     if (res?.status === 200) {
       setRole(res?.data);
       const is_create = res?.data?.create;
-      const is_update = res?.data?.update;
-      const is_delete = res?.data?.delete;
-      const is_import = res?.data?.import;
-      const is_export = res?.data?.export;
-      const is_accept = res?.data?.accept;
-      if (
-        (is_create && is_update && !is_delete && !is_import && !is_export && !is_accept) ||
-        (is_create && is_update && is_delete && !is_import && !is_export && !is_accept)
-      ) {
-        const currentUser = auth?.dataUser?.userId;
-        setCurrentFilter({ ...initFilter, personName: [currentUser] });
-        // setPersonName([currentUser]);
+      if (is_create && !res?.data?.accept) {
+        setValueTab('YOUR')
       }
+      // if (
+      //   (is_create && is_update && !is_delete && !is_import && !is_export && !is_accept) ||
+      //   (is_create && is_update && is_delete && !is_import && !is_export && !is_accept)
+      // ) {
+      //   const currentUser = auth?.dataUser?.userId;
+      //   setCurrentFilter({ ...initFilter, personName: [currentUser] });
+      //   // setPersonName([currentUser]);
+      // }
     }
   };
   const getCategories = async () => {
@@ -166,6 +176,9 @@ const HomePage = () => {
         break;
       case 'plNameFilter':
         setCurrentFilter((pre) => ({ ...pre, plNameFilter: '' }));
+
+      case 'regisDate':
+        setCurrentFilter((pre) => ({ ...pre, startDate: null, endDate: null }));
         break;
       case 'modelFilter':
         setCurrentFilter((pre) => ({ ...pre, modelFilter: '' }));
@@ -209,7 +222,7 @@ const HomePage = () => {
       if (currentFilter?.startDate?.isValid() && currentFilter?.endDate?.isValid()) {
         arrChip.push({
           label: `Registration Date: ${currentFilter?.startDate.format('YYYY/MM/DD')} ~ ${currentFilter?.endDate.format('YYYY/MM/DD')}`,
-          onDelete: ''
+          onDelete: 'regisDate'
         });
       }
     }
@@ -234,10 +247,19 @@ const HomePage = () => {
     });
 
     if (labelUser?.length > 0) {
-      arrChip.push({
-        label: `등록자: ${labelUser.join(', ')}`,
-        onDelete: 'personName'
-      });
+      if (valueTab !== 'ALL') {
+        arrChip.push({
+          label: `등록자: ${labelUser.join(', ')}`,
+          onDelete: ''
+        });
+
+      } else {
+        arrChip.push({
+          label: `등록자: ${labelUser.join(', ')}`,
+          onDelete: 'personName'
+        });
+
+      }
     }
     if (currentFilter?.codeFilter) {
       arrChip.push({
@@ -279,6 +301,21 @@ const HomePage = () => {
     checkRole();
   }, []);
 
+  useEffect(() => {
+    switch (valueTab) {
+      case 'ALL':
+        setCurrentFilter((pre) => ({ ...pre, personName: [] }));
+        break;
+      case 'YOUR':
+        const userIDFind = auth?.dataUser?.userId;
+        setCurrentFilter((pre) => ({ ...pre, personName: [userIDFind] }));
+        break;
+
+      default:
+        break;
+    }
+  }, [valueTab]);
+
   const open = Boolean(anchorEl);
   const handleOpenMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -312,7 +349,7 @@ const HomePage = () => {
   const onClickAccept = async () => {
     ShowConfirm({
       title: 'Accept',
-      message: 'Do you want to accept it?',
+      message: 'Do you want to accept approval?',
       onOK: () => {
         handleAccept();
       }
@@ -332,7 +369,7 @@ const HomePage = () => {
   const onClickDelete = () => {
     ShowConfirm({
       title: 'Delete',
-      message: 'Do you want to delete it ?',
+      message: 'Do you want to delete approval ?',
       onOK: () => {
         onDelete();
       }
@@ -359,64 +396,75 @@ const HomePage = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  if (!role?.read) {
+    return <UnauthorizedPage />
+  }
+
   return (
     <>
       <Grid container spacing={1}>
         {(role?.create || role?.accept || role?.update) && (
           <Grid item xs={12}>
-            <SubCard contentSX={{ padding: '13px !important' }}>
-              <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                {role?.create && (
-                  <Button
-                    onClick={() => {
-                      setTypeModal('ADD');
-                      setOpenModalConcept(true);
-                    }}
-                    size="small"
-                    startIcon={<IconPlus />}
-                    variant="contained"
-                  >
-                    New
-                  </Button>
-                )}
-                {role?.accept && (
-                  <Button
-                    size="small"
-                    disabled={!selectedRow || selectedRow?.approval || selectedRow?.isMe}
-                    onClick={onClickAccept}
-                    startIcon={<IconCheck />}
-                    variant="outlined"
-                  >
-                    Accept
-                  </Button>
-                )}
-                {role?.update && (
-                  <Button
-                    onClick={() => {
-                      setTypeModal('EDIT');
-                      setOpenModalConcept(true);
-                    }}
-                    disabled={!selectedRow?.isMe}
-                    size="small"
-                    startIcon={<IconEdit />}
-                    variant="outlined"
-                  >
-                    Edit
-                  </Button>
-                )}
+            <SubCard contentSX={{ padding: '10px !important' }}>
+              <Stack direction="row" justifyContent="space-between">
+                <Box >
+                  <Button startIcon={<IconList />} className={valueTab === 'ALL' ? 'custom_tab custom_tab_active' : 'custom_tab'} onClick={() => { handleChangeTab('ALL') }} size='small' variant={valueTab === 'ALL' ? 'text' : 'text'}>All</Button>
+                  <Button startIcon={<IconUser />} className={valueTab === 'YOUR' ? 'custom_tab custom_tab_active' : 'custom_tab'} onClick={() => { handleChangeTab('YOUR') }} variant={valueTab === 'YOUR' ? 'text' : 'text'} sx={{ marginLeft: 1 }} size='small'>Your</Button>
+                </Box>
+                <Stack direction="row" justifyContent="flex-end" spacing={1}>
+                  {role?.create && (
+                    <Button
+                      onClick={() => {
+                        setTypeModal('ADD');
+                        setOpenModalConcept(true);
+                      }}
+                      size="small"
+                      startIcon={<IconPlus />}
+                      variant="contained"
+                    >
+                      New
+                    </Button>
+                  )}
+                  {role?.accept && (
+                    <Button
+                      size="small"
+                      disabled={!selectedRow || selectedRow?.approval || selectedRow?.isMe}
+                      onClick={onClickAccept}
+                      startIcon={<IconCheck />}
+                      variant="outlined"
+                    >
+                      Accept
+                    </Button>
+                  )}
+                  {role?.update && (
+                    <Button
+                      onClick={() => {
+                        setTypeModal('EDIT');
+                        setOpenModalConcept(true);
+                      }}
+                      disabled={!selectedRow?.isMe}
+                      size="small"
+                      startIcon={<IconEdit />}
+                      variant="outlined"
+                    >
+                      Edit
+                    </Button>
+                  )}
 
-                {role?.delete && (
-                  <Button
-                    onClick={onClickDelete}
-                    disabled={!selectedRow}
-                    size="small"
-                    startIcon={<IconTrash />}
-                    variant="outlined"
-                    color="error"
-                  >
-                    Delete
-                  </Button>
-                )}
+                  {role?.delete && (
+                    <Button
+                      onClick={onClickDelete}
+                      disabled={!selectedRow?.isMe}
+                      size="small"
+                      startIcon={<IconTrash />}
+                      variant="outlined"
+                      color="error"
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </Stack>
               </Stack>
               {/* </Stack> */}
             </SubCard>
@@ -428,15 +476,22 @@ const HomePage = () => {
               <Grid item xs={8}>
                 {arrChipFilter?.length > 0
                   ? arrChipFilter.map((chip, index) => (
-                    <Chip
+                    chip?.onDelete ? (
+                      <Chip
+                        key={index}
+                        sx={{ marginLeft: '10px', marginRight: '5px', marginTop: '5px' }}
+                        variant="outlined"
+                        label={chip?.label}
+                        onDelete={() => {
+                          onDeleteChip(chip?.onDelete);
+                        }}
+                      />
+                    ) : (<Chip
                       key={index}
-                      sx={{ marginLeft: '10px',marginRight: '5px', marginTop: '5px' }}
+                      sx={{ marginLeft: '10px', marginRight: '5px', marginTop: '5px' }}
                       variant="outlined"
                       label={chip?.label}
-                      onDelete={() => {
-                        onDeleteChip(chip?.onDelete);
-                      }}
-                    />
+                    />)
                   ))
                   : null}
               </Grid>
@@ -480,7 +535,7 @@ const HomePage = () => {
             <TableContainer
               sx={{
                 marginTop: '15px',
-                maxHeight:
+                height:
                   !role || (!role?.create && !role?.update && !role?.accept && !role?.delete)
                     ? `calc(100vh - 250px)`
                     : `calc(100vh - 320px)`,
@@ -488,7 +543,9 @@ const HomePage = () => {
               }}
               component={Paper}
             >
-              <Table stickyHeader sx={{ minWidth: 700 }} aria-label="customized table">
+              <Table stickyHeader sx={{
+                minWidth: 700,
+              }} aria-label="customized table">
                 <TableHead>
                   <TableRow>
                     <StyledTableCell align="center">#</StyledTableCell>
@@ -496,18 +553,14 @@ const HomePage = () => {
                       <p className="name-colum">카테고리</p>
                       <p className="name-colum">(Category)</p>
                     </StyledTableCell>
-                    <StyledTableCell sx={{ minWidth: '100px' }}>
-                      <p className="name-colum">모델명</p>
-                      <p className="name-colum">(Model)</p>
+                    <StyledTableCell align='center' sx={{ minWidth: '100px' }}>Model
                     </StyledTableCell>
                     <StyledTableCell align="center">P/L NAME</StyledTableCell>
                     <StyledTableCell sx={{ minWidth: '150px' }}>
                       <p className="name-colum">코드</p>
                       <p className="name-colum">(Code)</p>
                     </StyledTableCell>
-                    <StyledTableCell>
-                      <p className="name-colum">품명</p>
-                      <p className="name-colum">(Product Name)</p>
+                    <StyledTableCell align='center'>Product Name
                     </StyledTableCell>
                     <StyledTableCell align="center">
                       <p className="name-colum">등록일자</p>
@@ -527,7 +580,8 @@ const HomePage = () => {
                 <TableBody
                   sx={{
                     '.MuiTableRow-root.Mui-selected': { backgroundColor: config.colorSelected },
-                    '.MuiTableRow-root.Mui-selected:hover': { backgroundColor: config.colorSelected }
+                    '.MuiTableRow-root.Mui-selected:hover': { backgroundColor: config.colorSelected },
+
                   }}
                 >
                   {concepts?.length > 0 ? (
@@ -539,13 +593,13 @@ const HomePage = () => {
                         key={row.conceptId}
                       >
                         <StyledTableCell align="center">{page * rowsPerPage + index + 1}</StyledTableCell>
-                        <StyledTableCell align="center" component="th" scope="row">
+                        <StyledTableCell align="center">
                           {row?.category?.categoryName}
                         </StyledTableCell>
                         <StyledTableCell align="center">{row?.modelName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.plName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.code}</StyledTableCell>
-                        <StyledTableCell sx={{ wordBreak: 'break-all' }}>{row?.productName}</StyledTableCell>
+                        <StyledTableCell align="left" sx={{ wordBreak: 'break-all' }}>{row?.productName}</StyledTableCell>
                         <StyledTableCell align="center">{row?.regisDate ? formatDateFromDB(row?.regisDate, false) : null}</StyledTableCell>
                         <StyledTableCell align="center">
                           <Tooltip arrow title={row?.user?.fullName}>
@@ -615,6 +669,7 @@ const HomePage = () => {
         </Grid>
       </Grid>
       <AdvanceSearch
+        valueTab={valueTab}
         currentFilter={currentFilter}
         anchorEl={anchorEl}
         open={open}

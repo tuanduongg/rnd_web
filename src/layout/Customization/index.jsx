@@ -30,7 +30,7 @@ import LinearProgressWithLabel from './component/LinearWithLabel';
 import { Box, Stack } from '@mui/material';
 import restApi from 'utils/restAPI';
 import { RouterApi } from 'utils/router-api';
-import { formatBytes } from 'utils/helper';
+import { formatBytes, getPercentageStorage } from 'utils/helper';
 import Loading from 'ui-component/Loading';
 import { IconListCheck } from '@tabler/icons-react';
 import toast from 'react-hot-toast';
@@ -270,7 +270,7 @@ const Customization = () => {
                                 </Grid>
                                 <Grid item xs={12} container spacing={2} alignItems="center" >
                                     <Grid item xs>
-                                        <LinearProgressWithLabel sx={{ height: '20px', borderRadius: `${customization.borderRadius}px` }} color={parseFloat(size / oneTB) * 100 >= 90 ? 'error' : 'primary'} value={parseFloat(size / oneTB) * 100} />
+                                        <LinearProgressWithLabel sx={{ height: '20px', borderRadius: `${customization.borderRadius}px` }} color={getPercentageStorage(size ,oneTB)  >= 90 ? 'error' : 'primary'} value={getPercentageStorage(size ,oneTB) } />
                                     </Grid>
                                 </Grid>
                             </SubCard>

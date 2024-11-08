@@ -46,7 +46,7 @@ export function stringAvatar(name) {
     return {
       sx: {
         bgcolor: '#fafafa',
-        color:'#005595'
+        color: '#005595'
       },
       children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`
     };
@@ -54,7 +54,7 @@ export function stringAvatar(name) {
   return {
     sx: {
       bgcolor: '#fafafa',
-      color:'#005595'
+      color: '#005595'
     },
     children: `${name.at(0)}`
   };
@@ -86,8 +86,8 @@ export function logout() {
   setCookie('AUTH', '', 1);
   delete_cookie('AUTH');
   sessionStorage.removeItem('AUTH');
-  if (location.pathname !== ConfigRouter.login) {
-    window.location.replace(ConfigRouter.login);
+  if (location.pathname !== ConfigRouter.login.url) {
+    window.location.replace(ConfigRouter.login.url);
     // location.href = ConfigRouter.login;
   }
 }
@@ -102,19 +102,21 @@ export function formatBytes(bytes, decimals = 2) {
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
-
+export const getPercentageStorage = (size, total) => {
+  return (parseFloat(size / total) * 100).toFixed(2);
+}
 export function getDepartmentEditMold(num) {
   let text = '';
   switch (num) { //phat trien
     case 1:
       text = '개발수정';
-      
+
       break;
-      case 2: // san xuat
-      
+    case 2: // san xuat
+
       text = '양산수정';
       break;
-  
+
     default:
       break;
   }
@@ -240,3 +242,33 @@ export const cssScrollbar = {
   //   backgroundColor: '#818181'
   // }
 };
+export const limitCharacter = (text, count, insertDots) => {
+  if (text) {
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+      if (i <= count) {
+        let char = text.charAt(i);
+        result += char;
+      }
+    }
+
+    if (result?.length === count + 1) {
+      return result + (insertDots ? '...' : '');
+    }
+    return result;
+    // return text.slice(0, count) + (text.length > count && insertDots ? '...' : '');
+  }
+  return '';
+};
+
+export const getCurrentScreen = () => {
+  const path = window.location.pathname;
+  const route = Object.values(ConfigRouter).find((item) => {
+    return path.includes(item.url)
+  });
+  if (route) {
+    return route.screen;
+  }
+
+  return ""
+}

@@ -37,7 +37,7 @@ const firstDayOfLastMonth = firstDayOfCurrentMonth.subtract(1, 'month');
 
 // Lấy ngày đầu tiên của tháng sau
 const firstDayOfNextMonth = firstDayOfCurrentMonth.add(1, 'month');
-const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleClickApplyFiler, users, currentFilter }) => {
+const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleClickApplyFiler, users, currentFilter,valueTab }) => {
 
     const [personName, setPersonName] = useState([]);
 
@@ -50,8 +50,8 @@ const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleCl
     const onClickResetAll = () => {
         setPersonName([]);
         setCategoryFiler([]);
-        setStartDate(START_OF_CURRENT_MONTH);
-        setEndDate(END_OF_CURRENT_MONTH);
+        setStartDate(null);
+        setEndDate(null);
     };
 
     const onClose = () => {
@@ -183,7 +183,7 @@ const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleCl
                 variant="outlined"
               />
             </FormControl> */}
-                        <FormControl style={{ margin: '10px  0px' }} fullWidth size="small">
+                        <FormControl disabled={valueTab !== 'ALL'} style={{ margin: '10px  0px' }} fullWidth size="small">
                             <InputLabel id="demo-simple-select-label">등록자(Registrant)</InputLabel>
                             <Select
                                 MenuProps={{
@@ -221,7 +221,7 @@ const AdvanceSearch = ({ anchorEl, open, onCloseMenuFilter, categories, handleCl
                                 {users?.map((item) => (
                                     <MenuItem key={item?.userId} value={item?.userId}>
                                         <Checkbox checked={personName.indexOf(item?.userId) > -1} />
-                                        <ListItemText primary={item?.userName} />
+                                        <ListItemText primary={`${item?.userName}(${item?.fullName})`} />
                                     </MenuItem>
                                 ))}
                             </Select>

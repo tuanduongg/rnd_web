@@ -1,7 +1,7 @@
 // import axios from 'axios';
 // import { ASSET_TOKEN } from './constant';
 import axios from 'axios';
-import { getCookie, getDataUserFromLocal, logout } from './helper';
+import { getCookie, getCurrentScreen, getDataUserFromLocal, logout } from './helper';
 import { ShowMessage } from 'ui-component/ShowDialog';
 import { ConfigRouter } from 'routes/ConfigRouter';
 
@@ -18,7 +18,8 @@ restApi.interceptors.request.use(
   async (confi) => {
     confi.headers = {
       Authorization: `Bearer ${token}`,
-      Accept: 'application/json'
+      Accept: 'application/json',
+      Screen: getCurrentScreen()
     };
     return confi;
   },
@@ -36,18 +37,18 @@ restApi.interceptors.response.use(
       logout();
     }
     if (error?.response?.status === 403) {
-      ShowMessage({
-        title: '403',
-        message: 'Unauthorized',
-        labelYes: 'Close',
-        onOK: () => {
-          if (dataUserObj?.isKorean) {
-            location.href = ConfigRouter.managementMold;
-          } else {
-            location.href = ConfigRouter.aprrovalPage;
-          }
-        }
-      });
+      // ShowMessage({
+      //   title: '403',
+      //   message: 'Unauthorized',
+      //   labelYes: 'Close',
+      //   onOK: () => {
+      //     if (dataUserObj?.isKorean) {
+      //       location.href = ConfigRouter.managementMold.url;
+      //     } else {
+      //       location.href = ConfigRouter.aprrovalPage.url;
+      //     }
+      //   }
+      // });
     }
     return error.response;
   }
