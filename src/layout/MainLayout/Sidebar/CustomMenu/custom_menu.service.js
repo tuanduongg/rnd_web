@@ -58,7 +58,7 @@ export const setTitleTab = (id) => {
     const find = menu.find((item) => item?.id === id);
     if (find) {
 
-      window.document.title = 'HANOI SEWONINTECH' + ' - ' + find?.title;
+      window.document.title = 'HANOI SEOWONINTECH' + ' - ' + find?.title;
     }
   }
 }

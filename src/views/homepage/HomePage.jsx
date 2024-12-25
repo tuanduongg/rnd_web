@@ -429,7 +429,7 @@ const HomePage = () => {
                   {role?.accept && (
                     <Button
                       size="small"
-                      disabled={!selectedRow || selectedRow?.approval || selectedRow?.isMe}
+                      disabled={!selectedRow || selectedRow?.approval}
                       onClick={onClickAccept}
                       startIcon={<IconCheck />}
                       variant="outlined"
@@ -443,7 +443,7 @@ const HomePage = () => {
                         setTypeModal('EDIT');
                         setOpenModalConcept(true);
                       }}
-                      disabled={!selectedRow?.isMe}
+                      disabled={!selectedRow }
                       size="small"
                       startIcon={<IconEdit />}
                       variant="outlined"
@@ -455,7 +455,7 @@ const HomePage = () => {
                   {role?.delete && (
                     <Button
                       onClick={onClickDelete}
-                      disabled={!selectedRow?.isMe}
+                      disabled={!selectedRow }
                       size="small"
                       startIcon={<IconTrash />}
                       variant="outlined"
