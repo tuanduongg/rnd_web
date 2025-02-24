@@ -5,7 +5,7 @@ import { getCookie, getCurrentScreen, getDataUserFromLocal, logout } from './hel
 import { ShowMessage } from 'ui-component/ShowDialog';
 import { ConfigRouter } from 'routes/ConfigRouter';
 
-const urlAPI = import.meta.env.VITE_APP_API_URL || 'http://113.160.154.39:5005/api';
+const urlAPI = import.meta.env.VITE_APP_API_URL || 'http://hnseowonintech.io.vn:5005/api';
 let token = getCookie('AUTH');
 let dataUserObj = getDataUserFromLocal();
 const restApi = axios.create({

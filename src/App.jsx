@@ -24,7 +24,7 @@ const App = () => {
 
   // Disable React Developer Tools in production
   useEffect(() => {
-    if (import.meta.env.PROD) {
+    if (import.meta.env.VITE_APP_PRO) {
       if (typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined') {
         window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function () {};
       }
